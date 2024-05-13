@@ -45,15 +45,10 @@ while(True):
                             cv.drawContours(im, [cnt], -1, (0, 255, 0), 3);
 
 
-    cv.imshow('thres', threshoog)
-    cv.imshow('contourVision', imgray)
-    cv.imshow('ComputerVision',im)
+    cv.imwrite('thres.jpg', im)
 
-
-
-    if cv.waitKey(1) & 0xFF == ord('q'):
-        cap.release()
-        cv.destroyAllWindows()
-        break
+    cap.release()
+    cv.destroyAllWindows()
+    break
 
 
