@@ -4,7 +4,7 @@ import numpy as np
 import cv2 as cv
 import math
 
-cap = cv.VideoCapture(1)
+cap = cv.VideoCapture(0)
 
 while(True):
     ret,img = cap.read()
