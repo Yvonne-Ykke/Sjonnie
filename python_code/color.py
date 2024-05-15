@@ -20,7 +20,11 @@ def masks(frame):
         mask = np.zeros_like(frame)
         for hsv_range in color.hsv_range:
             mask += cv.inRange(hsv, np.array(hsv_range[0]), np.array(hsv_range[1]))
-                if hsv_range != null
-                    
+            if hsv_range[2] is not None:
+                mask2 += cv.inRange(hsv, np.array(hsv_range[0]), np.array(hsv_range[1]))
+                mask = mask | mask2
+                                       
         color_masks.append((color.name.capitalize(), mask))
+
+        print(color_masks)
     return color_masks
