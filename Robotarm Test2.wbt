@@ -1,0 +1,86 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/Floor.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/Parquetry.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/epson/scara_t6/protos/ScaraT6.proto"
+
+WorldInfo {
+}
+Viewpoint {
+  orientation 0.168206552159624 0.41149232347425807 -0.8957570114335295 0.7304046211886833
+  position -3.5412628884131 2.0324646401013506 2.540685840127749
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+Floor {
+  size 5 5
+  tileSize 1 1
+  appearance Parquetry {
+    type "chequered"
+    colorOverride 0 1 0
+    textureTransform TextureTransform {
+    }
+  }
+}
+Robot {
+  translation 4.45707e-24 -3.95075e-24 0.05
+  rotation 0 0.7071067811865475 0.7071067811865475 3.141592653589793
+  children [
+    ScaraT6 {
+      translation -0.64428 0.99 -1.26722
+      rotation 0.7745965212991105 0.44721372362178063 0.44721372362178063 -1.823475307179586
+      controller "scara_food_industry"
+      window "generic_window"
+      staticBase TRUE
+      handSlot [
+        Solid {
+          translation 0 0 -0.01
+          rotation 1 0 0 1.5707996938995747
+          children [
+            CadShape {
+              url [
+                "../Sjonnie/scaled_gripper.obj"
+              ]
+            }
+          ]
+          name "Gripper"
+          immersionProperties [
+            ImmersionProperties {
+              fluidName "grip"
+            }
+          ]
+          boundingObject Mesh {
+            url [
+              "../Sjonnie/scaled_gripper.obj"
+            ]
+            materialIndex 1
+          }
+          physics Physics {
+            density 3000
+            mass 0.25
+            centerOfMass [
+              0 0 0
+            ]
+          }
+          locked TRUE
+        }
+      ]
+    }
+    CadShape {
+      url [
+        "../Sjonnie/scaled_table.obj"
+      ]
+    }
+  ]
+  name "Tafel"
+  boundingObject Mesh {
+    url [
+      "../Sjonnie/scaled_table.obj"
+    ]
+    materialIndex 1
+  }
+}
