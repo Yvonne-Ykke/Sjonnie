@@ -1,0 +1,51 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/Floor.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/Parquetry.proto"
+
+WorldInfo {
+}
+Viewpoint {
+  orientation -0.0008499749069890095 -0.0002707367548453801 -0.9999996021220545 2.5281923057365567
+  position 528.0399478414945 398.87097041263127 81.25370079624982
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+Floor {
+  translation 0 0 -30
+  size 3000 3000
+  tileSize 1500 1500
+  appearance Parquetry {
+    type "chequered"
+    colorOverride 0 1 0
+  }
+}
+Robot {
+  translation 0 0 110
+  rotation 0 0.7071067811865475 0.7071067811865475 3.141592653589793
+  children [
+    CadShape {
+      url [
+        "../../../../Downloads/ImageToStl.com_0130+(step)/ImageToStl.com_0130 (step).obj"
+      ]
+    }
+  ]
+  name "Sjon"
+  boundingObject Mesh {
+    url [
+      "../../../../Downloads/ImageToStl.com_0130+(step)/ImageToStl.com_0130 (step).obj"
+    ]
+  }
+  physics Physics {
+    density 3
+    mass 10
+    centerOfMass [
+      0 0 0
+    ]
+  }
+  controller "Gripper"
+}
