@@ -6,12 +6,10 @@ import math
 
 cap = cv.VideoCapture(0)
 
-#variabele = 0
-
 while(True):
     ret,img = cap.read()
     if img is None:
-        break ##laad t plaatje in
+        break##laad t plaatje in
     # werkt met meerdere plaatjes
     hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
     # define range of blue color in HSV
@@ -38,19 +36,17 @@ while(True):
 
     combimaskr = maskr1 | maskr2
     resr = cv.bitwise_and(img,img, mask= combimaskr)
-    
-    #variabele += 1
-    #print(variabele)
-    #cv.imshow('orginele foto',img)
+
+    cv.imshow('orginele foto',img)
     ##blauwe mask en result
     #cv.imshow('mask',maskb)
-    #cv.imshow('Blauw',resb)
+    cv.imshow('Blauw',resb)
     ##rode mask en result
     #cv.imshow('mask2',maskr)
-    #cv.imshow('Rood',resr)
+    cv.imshow('Rood',resr)
     ##groene mask en result
     #cv.imshow('mask3',maskg)
-    #cv.imshow('Groen',resg)
+    cv.imshow('Groen',resg)
     if cv.waitKey(1) & 0xFF == ord('q'):
         cap.release()
         cv.destroyAllWindows()
