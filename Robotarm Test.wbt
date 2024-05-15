@@ -4,12 +4,13 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/Floor.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/Parquetry.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/epson/scara_t6/protos/ScaraT6.proto"
 
 WorldInfo {
 }
 Viewpoint {
-  orientation 0.16711181734089287 0.0004815576174207265 -0.9859378320194865 3.1358934945149124
-  position 4667.488008806862 -438.2016925309006 2392.4890685744977
+  orientation -0.18368963770252844 0.7601996586553746 0.6231810298628849 0.7398046195302056
+  position -4.636814499630147 -2.1406458129906385 -25.562675826336463
 }
 TexturedBackground {
 }
@@ -17,20 +18,25 @@ TexturedBackgroundLight {
 }
 Floor {
   translation 0 0 -30
-  size 5000 5000
-  tileSize 1500 1500
+  tileSize 1 1
   appearance Parquetry {
     type "chequered"
     colorOverride 0 1 0
   }
 }
 Robot {
-  translation 300 -900 1000
   rotation 0 0.7071067811865475 0.7071067811865475 3.141592653589793
   children [
-    CadShape {
-      url [
-        "../Sjonnie/ImageToStl.com_0130 (step).obj"
+    Transform {
+      translation -0.29134 -29.05 -0.66232
+      rotation 0 1 0 -2.6179953071795863
+      scale 0.001 0.001 0.001
+      children [
+        CadShape {
+          url [
+            "../Sjonnie/ImageToStl.com_0130 (step).obj"
+          ]
+        }
       ]
     }
   ]
@@ -50,11 +56,18 @@ Robot {
   controller "Gripper"
 }
 Robot {
+  translation 2.59694e-15 6.6591e-15 -29.99
   rotation 0 0.7071067811865475 0.7071067811865475 3.141592653589793
   children [
-    CadShape {
-      url [
-        "../Sjonnie/ImageToStl.com_opstelling_robotica_2024 (1).obj"
+    Transform {
+      rotation 0 0 1 4.692820414042842e-06
+      scale 0.001 0.001 0.001
+      children [
+        CadShape {
+          url [
+            "../Sjonnie/ImageToStl.com_opstelling_robotica_2024 (1).obj"
+          ]
+        }
       ]
     }
   ]
@@ -63,8 +76,15 @@ Robot {
     url [
       "../Sjonnie/ImageToStl.com_opstelling_robotica_2024 (1).obj"
     ]
+    ccw FALSE
   }
   physics Physics {
     mass 10000
   }
+}
+ScaraT6 {
+  translation 0.60464 -1.2134 -29.2
+  rotation 0 0 1 2.0944
+  controller "scara_food_industry"
+  window "generic_window"
 }
