@@ -9,15 +9,19 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.18368963770252844 0.7601996586553746 0.6231810298628849 0.7398046195302056
-  position -4.636814499630147 -2.1406458129906385 -25.562675826336463
+
+  orientation -0.14917625904213552 0.6568008638082884 0.7391610575773591 0.5962538964434241
+  position -6.848334058259375 -4.4565019113716415 3.3734789975946797
+
 }
 TexturedBackground {
 }
 TexturedBackgroundLight {
 }
 Floor {
-  translation 0 0 -30
+
+  size 5 5
+
   tileSize 1 1
   appearance Parquetry {
     type "chequered"
@@ -25,30 +29,27 @@ Floor {
   }
 }
 Robot {
+
+  translation 0.5 -1 1
   rotation 0 0.7071067811865475 0.7071067811865475 3.141592653589793
   children [
-    Transform {
-      translation -0.29134 -29.05 -0.66232
-      rotation 0 1 0 -2.6179953071795863
-      scale 0.001 0.001 0.001
-      children [
-        CadShape {
-          url [
-            "../Sjonnie/ImageToStl.com_0130 (step).obj"
-          ]
-        }
+    CadShape {
+      url [
+        "../Sjonnie/scaled_gripper.obj"
+
       ]
     }
   ]
-  name "Sjon"
+  name "Gripper"
   boundingObject Mesh {
     url [
-      "../Sjonnie/ImageToStl.com_0130 (step).obj"
+      "../Sjonnie/scaled_gripper.obj"
     ]
+    materialIndex 1
   }
   physics Physics {
     density 3000
-    mass 200
+    mass 0.25
     centerOfMass [
       0 0 0
     ]
@@ -56,30 +57,29 @@ Robot {
   controller "Gripper"
 }
 Robot {
-  translation 2.59694e-15 6.6591e-15 -29.99
+
+  translation 0 0 0.05
   rotation 0 0.7071067811865475 0.7071067811865475 3.141592653589793
   children [
-    Transform {
-      rotation 0 0 1 4.692820414042842e-06
-      scale 0.001 0.001 0.001
-      children [
-        CadShape {
-          url [
-            "../Sjonnie/ImageToStl.com_opstelling_robotica_2024 (1).obj"
-          ]
-        }
+    CadShape {
+      url [
+        "../Sjonnie/scaled_table.obj"
+
       ]
     }
   ]
   name "Tafel"
   boundingObject Mesh {
     url [
-      "../Sjonnie/ImageToStl.com_opstelling_robotica_2024 (1).obj"
+      "../Sjonnie/scaled_table.obj"
     ]
-    ccw FALSE
+
+    materialIndex 1
+
   }
   physics Physics {
-    mass 10000
+    density 3
+    mass 2
   }
 }
 ScaraT6 {
