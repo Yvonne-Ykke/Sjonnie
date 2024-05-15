@@ -8,8 +8,8 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 WorldInfo {
 }
 Viewpoint {
-  orientation 0.11876228374642893 0.04223635425800808 -0.9920239968560866 2.4632325579258825
-  position 928.9310129234331 824.5305281656965 374.7499108730896
+  orientation 0.16711181734089287 0.0004815576174207265 -0.9859378320194865 3.1358934945149124
+  position 4667.488008806862 -438.2016925309006 2392.4890685744977
 }
 TexturedBackground {
 }
@@ -17,7 +17,7 @@ TexturedBackgroundLight {
 }
 Floor {
   translation 0 0 -30
-  size 3000 3000
+  size 5000 5000
   tileSize 1500 1500
   appearance Parquetry {
     type "chequered"
@@ -25,7 +25,7 @@ Floor {
   }
 }
 Robot {
-  translation 0 0 110
+  translation 300 -900 1000
   rotation 0 0.7071067811865475 0.7071067811865475 3.141592653589793
   children [
     CadShape {
@@ -41,11 +41,30 @@ Robot {
     ]
   }
   physics Physics {
-    density 3
-    mass 10
+    density 3000
+    mass 200
     centerOfMass [
       0 0 0
     ]
   }
   controller "Gripper"
+}
+Robot {
+  rotation 0 0.7071067811865475 0.7071067811865475 3.141592653589793
+  children [
+    CadShape {
+      url [
+        "../Sjonnie/ImageToStl.com_opstelling_robotica_2024 (1).obj"
+      ]
+    }
+  ]
+  name "Tafel"
+  boundingObject Mesh {
+    url [
+      "../Sjonnie/ImageToStl.com_opstelling_robotica_2024 (1).obj"
+    ]
+  }
+  physics Physics {
+    mass 10000
+  }
 }
