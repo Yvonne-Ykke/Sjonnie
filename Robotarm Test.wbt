@@ -9,19 +9,15 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 WorldInfo {
 }
 Viewpoint {
-
-  orientation -0.14917625904213552 0.6568008638082884 0.7391610575773591 0.5962538964434241
-  position -6.848334058259375 -4.4565019113716415 3.3734789975946797
-
+  orientation -0.01514878919505004 0.9958782317461742 0.08942629210717166 0.3371628819569151
+  position -8.831955796981887 -0.7115713367848938 2.967409529663592
 }
 TexturedBackground {
 }
 TexturedBackgroundLight {
 }
 Floor {
-
-  size 5 5
-
+  size 7 7
   tileSize 1 1
   appearance Parquetry {
     type "chequered"
@@ -29,14 +25,12 @@ Floor {
   }
 }
 Robot {
-
   translation 0.5 -1 1
   rotation 0 0.7071067811865475 0.7071067811865475 3.141592653589793
   children [
     CadShape {
       url [
         "../Sjonnie/scaled_gripper.obj"
-
       ]
     }
   ]
@@ -48,8 +42,8 @@ Robot {
     materialIndex 1
   }
   physics Physics {
-    density 3000
-    mass 0.25
+    density 3
+    mass 1
     centerOfMass [
       0 0 0
     ]
@@ -57,14 +51,12 @@ Robot {
   controller "Gripper"
 }
 Robot {
-
-  translation 0 0 0.05
+  translation 0 0 0.12
   rotation 0 0.7071067811865475 0.7071067811865475 3.141592653589793
   children [
     CadShape {
       url [
         "../Sjonnie/scaled_table.obj"
-
       ]
     }
   ]
@@ -73,13 +65,13 @@ Robot {
     url [
       "../Sjonnie/scaled_table.obj"
     ]
-
-    materialIndex 1
-
   }
   physics Physics {
     density 3
-    mass 2
+    mass 10
+    centerOfMass [
+      0 1 0
+    ]
   }
 }
 ScaraT6 {
@@ -87,4 +79,13 @@ ScaraT6 {
   rotation 0 0 1 2.0944
   controller "scara_food_industry"
   window "generic_window"
+}
+Solid {
+  translation 0 0 0.05
+  boundingObject Plane {
+    size 7 7
+  }
+  physics Physics {
+  }
+  locked TRUE
 }
