@@ -9,8 +9,8 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 WorldInfo {
 }
 Viewpoint {
-  orientation 0.168206552159624 0.41149232347425807 -0.8957570114335295 0.7304046211886833
-  position -3.5412628884131 2.0324646401013506 2.540685840127749
+  orientation -0.052366636538131735 0.2242500835184315 0.9731236485769216 0.7060682732452729
+  position -7.495683580373983 -8.079376233026112 2.8095280907912863
 }
 TexturedBackground {
 }
@@ -43,7 +43,7 @@ Robot {
           children [
             CadShape {
               url [
-                "../Sjonnie/scaled_gripper.obj"
+                "../3d objects/scaled_gripper.obj"
               ]
             }
           ]
@@ -72,14 +72,14 @@ Robot {
     }
     CadShape {
       url [
-        "../Sjonnie/scaled_table.obj"
+        "../3d objects/scaled_table.obj"
       ]
     }
   ]
   name "Tafel"
   boundingObject Mesh {
     url [
-      "../Sjonnie/scaled_table.obj"
+      "../3d objects/scaled_table.obj"
     ]
     materialIndex 1
   }
