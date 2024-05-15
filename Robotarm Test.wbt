@@ -8,8 +8,8 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.0008499749069890095 -0.0002707367548453801 -0.9999996021220545 2.5281923057365567
-  position 528.0399478414945 398.87097041263127 81.25370079624982
+  orientation 0.11876228374642893 0.04223635425800808 -0.9920239968560866 2.4632325579258825
+  position 928.9310129234331 824.5305281656965 374.7499108730896
 }
 TexturedBackground {
 }
@@ -30,14 +30,14 @@ Robot {
   children [
     CadShape {
       url [
-        "../../../../Downloads/ImageToStl.com_0130+(step)/ImageToStl.com_0130 (step).obj"
+        "../Sjonnie/ImageToStl.com_0130 (step).obj"
       ]
     }
   ]
   name "Sjon"
   boundingObject Mesh {
     url [
-      "../../../../Downloads/ImageToStl.com_0130+(step)/ImageToStl.com_0130 (step).obj"
+      "../Sjonnie/ImageToStl.com_0130 (step).obj"
     ]
   }
   physics Physics {
