@@ -10,7 +10,7 @@ colors = [
     Color("blue", [[90, 45, 45], [135, 255, 255]]),
     Color("red", [[0, 80, 80], [15, 255, 255], [165, 80, 80], [179, 255, 255]]),
     Color("green", [[37, 30, 30], [90, 255, 255]]),
-    # Add more colors
+    # TODO: Add more colors
 ]
 
 def masks(frame):
@@ -21,7 +21,7 @@ def masks(frame):
         for hsv_range in color.hsv_range:
             mask += cv.inRange(hsv, np.array(hsv_range[0]), np.array(hsv_range[1]))
             if hsv_range[2] is not None:
-                mask2 += cv.inRange(hsv, np.array(hsv_range[0]), np.array(hsv_range[1]))
+                mask2 += cv.inRange(hsv, np.array(hsv_range[2]), np.array(hsv_range[3]))
                 mask = mask | mask2
                                        
         color_masks.append((color.name.capitalize(), mask))
