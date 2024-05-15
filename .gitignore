@@ -1,3 +1,5 @@
 *.lock
 key
 key.pub
+*.jpg
+*.jpeg
