@@ -1,9 +1,13 @@
-
 import numpy as np
 import cv2 as cv
 import math
 
-cap = cv.VideoCapture(0)
+developing = False
+
+if developing:
+    cap = cv.VideoCapture(0)
+else:
+    cap = cv.VideoCapture(1)
 
 while(True):
     ret,im = cap.read()
@@ -15,11 +19,10 @@ while(True):
 
     ret, threshoog = cv.threshold(blur, 110, 200, cv.THRESH_BINARY)
 
-    #algemene vormen van de objecten
+    #general object shape
     contours, hierarchy = cv.findContours(threshoog, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
     hierarchy = hierarchy[0]
-
 
     for cnr in range(len(contours)):
         cnt = contours [cnr]
@@ -44,11 +47,19 @@ while(True):
                         elif factor > 0.8:
                             cv.drawContours(im, [cnt], -1, (0, 255, 0), 3);
 
+    if developing:
+        cv.imshow('thres', threshoog)
+        cv.imshow('contour_vision', imgray)
+        cv.imshow('computer_vision',im)
 
-    cv.imwrite('thres.jpg', im)
+        if cv.waitKey(1) & 0xFF == ord('q'):
+            cap.release()
+            cv.destroyAllWindows()
+            break
 
-    cap.release()
-    cv.destroyAllWindows()
-    break
+    else:
+        cv.imwrite('thres.jpg', im)
 
-
+        cap.release()
+        cv.destroyAllWindows()
+        break
