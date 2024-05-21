@@ -1,6 +1,7 @@
 *.lock
 key
 key.pub
+*.png
 *.jpg
 *.jpeg
 *.pyc
