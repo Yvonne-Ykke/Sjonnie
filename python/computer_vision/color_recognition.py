@@ -16,7 +16,7 @@ colors = [
     Color("red", [0, 80, 80], [15, 255, 255]),
     Color("green", [37, 30, 30], [90, 255, 255]),
     Color("pink", [165, 50, 50], [180, 255, 255]),
-    Color("silver", [0,10,150], [180,100,255])
+    Color("silver", [0,0,0], [180,100,150])
     # TODO: Add more colors
 ]
 
