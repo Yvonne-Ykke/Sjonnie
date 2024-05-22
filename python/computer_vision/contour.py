@@ -2,6 +2,7 @@ import numpy as np
 import cv2 as cv
 import math
 import color_recognition
+import time
 
 
 def contouring(developing):
@@ -44,7 +45,7 @@ def contouring(developing):
                 if area < 3000:
                     if area > 550:
                         if holes < 150:
-                            if factor < 0.8:
+                            if factor < 0.99:
                                 cv.drawContours(im, [cnt], -1, (0, 0, 255), 3);
                             elif factor > 0.8:
                                 cv.drawContours(im, [cnt], -1, (0, 255, 0), 3);
@@ -85,7 +86,10 @@ def color_contouring(developing):
             break
         
         color_masks = color_recognition.masks(img)
-
+        gcount = 0
+        rcount = 0
+        bcount = 0
+        ycount = 0
         results = []
         for color_name, mask in color_masks:
             res = cv.bitwise_and(img,img, mask= mask)
@@ -93,14 +97,15 @@ def color_contouring(developing):
             cv.imshow(color_name, res)
 
             imgray = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
+            blur = cv.GaussianBlur(imgray,(5,5),0)
 
-            ret, threshoog = cv.threshold(imgray, 5, 200, cv.THRESH_BINARY_INV)
+            ret, threshoog = cv.threshold(blur, 45, 255, cv.THRESH_BINARY_INV)
 
             #find contours of colored picture
             contours, hierarchy = cv.findContours(threshoog, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
             hierarchy = hierarchy[0]
-
+            
             for cnr in range(len(contours)):
                 cnt = contours [cnr]
                 area = cv.contourArea(cnt)
@@ -112,19 +117,24 @@ def color_contouring(developing):
                     while child >= 0:
                         holes += cv.contourArea(contours[child])
                         child = hierarchy[child][0]
-                    print (area, factor, holes)
+                    #print (area, factor, holes)
 
-                    if area > 200:
-                        if factor > 0.35:
+                    if area > 200 and area < 100000:
+                        if factor > 0.01:
                             if color_name == "Blue":
                                 cv.drawContours(img, [cnt], -1, (255, 0, 0), 3);
-                                
+                                bcount += 1
                             if color_name == "Green":
                                 cv.drawContours(img, [cnt], -1, (0, 255, 0), 3);
+                                gcount += 1
                             if color_name == "Red":
                                 cv.drawContours(img, [cnt], -1, (0, 0, 255), 3);
+                                rcount += 1
                             if color_name == "Yellow":
                                 cv.drawContours(img, [cnt], -1, (0, 255, 255), 3);
+                                ycount += 1
+        print("Groen: " + str(gcount) + " Blauw: " + str(bcount) + " Rood: " + str(rcount) + " Geel: " + str(ycount))
+        time.sleep(0.1)
         cv.imshow("image", img)
         if developing:
             cv.imshow('thres', threshoog)
