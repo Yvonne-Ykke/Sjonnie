@@ -38,14 +38,14 @@ def countouring(developing):
                 print (area, factor, holes)
 
                 if area > 0:
-                    cv.drawContours(im, [cnt], -1, (255, 0, 0), 3);
+                    cv.drawContours(im, [cnt], -1, (255, 0, 0), 3)
                 if area < 3000:
                     if area > 550:
                         if holes < 150:
                             if factor < 0.8:
-                                cv.drawContours(im, [cnt], -1, (0, 0, 255), 3);
+                                cv.drawContours(im, [cnt], -1, (0, 0, 255), 3)
                             elif factor > 0.8:
-                                cv.drawContours(im, [cnt], -1, (0, 255, 0), 3);
+                                cv.drawContours(im, [cnt], -1, (0, 255, 0), 3)
 
         if developing:
             cv.imshow('thres', threshoog)
