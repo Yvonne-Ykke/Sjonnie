@@ -3,6 +3,8 @@ import cv2 as cv
 import math
 import color_recognition
 import time
+import os
+import pathlib
 
 
 def contouring(developing):
@@ -71,17 +73,21 @@ def contouring(developing):
 
 def color_contouring(developing):
     #Get color image per mask
+    enkele_foto = False
     if developing == 1:
         cap = cv.VideoCapture(0)
-    elif developing == 2:
-        cap = cv.imread(cv.samples.findFile("1.jpg"))
-    else:
+    elif developing == None:
         cap = cv.VideoCapture(1)
 
     while(True):
-        #img = color_recognition.detect(developing)
 
-        ret,img = cap.read()
+        if developing == 2:
+            foto = "3.jpg"
+            img = cv.imread("../../Github/Sjonnie/Testfotos/" + foto)
+            enkele_foto = True
+        #img = color_recognition.detect(developing)
+        if developing == 1 or developing == None:
+            ret,img = cap.read()
         if img is None:
             break
         
@@ -140,6 +146,8 @@ def color_contouring(developing):
             cv.imshow('thres', threshoog)
             
             #cv.imshow('contour_vision', threshoog)
+
+         
 
         if cv.waitKey(1) & 0xFF == ord('q'):
             img.release()
