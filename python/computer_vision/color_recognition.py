@@ -45,11 +45,18 @@ def detect(developing):
             break
         cv.imshow("image", img)
         color_masks = masks(img)
+        results = []
         for color_name, mask in color_masks:
             res = cv.bitwise_and(img,img, mask= mask)
+            results.append(res)
             cv.imshow(color_name, res)
         
         if cv.waitKey(1) & 0xFF == ord('q'):
             cap.release()
             cv.destroyAllWindows()
             break
+        
+
+if __name__ == "__main__":
+    detect()
+
