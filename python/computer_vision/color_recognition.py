@@ -12,10 +12,12 @@ class Color:
         self.high_hsv2 = high_hsv2
 
 colors = [
-    Color("blue", [80, 60, 0], [140, 255, 255]),
-    Color("red", [0, 70, 0], [15, 255, 255], [165, 70, 60], [179, 255, 255]),
-    Color("green", [40, 41, 74], [86, 255, 255]),
+    Color("blue", [90, 45, 45], [135, 255, 255]),
+    Color("red", [0, 80, 80], [15, 255, 255]),
+    Color("green", [37, 30, 30], [90, 255, 255]),
+    Color("pink", [165, 50, 50], [180, 255, 255]),
     Color("yellow", [16, 80, 0], [36, 255, 255]),
+    Color("silver", [0,30,25], [180,100,180])
     # TODO: Add more colors
 ]
 
@@ -58,5 +60,5 @@ def detect(developing):
         
 
 if __name__ == "__main__":
-    detect()
+    detect(True)
 
