@@ -1,5 +1,5 @@
 import time
-import wiringpi
+import RPi.GPIO as GPIO
 import serial
 
 # Configuratie van de GPIO-pins
@@ -12,13 +12,11 @@ BaudRate = 1000000
 S1_ID = 3
 S2_ID = 61
 
-# Initialiseer wiringPi en seriële communicatie
-wiringpi.wiringPiSetupGpio()
-
-# Zet de pinmodes
-wiringpi.pinMode(TX_Pin, wiringpi.OUTPUT)
-wiringpi.pinMode(RX_Pin, wiringpi.INPUT)
-wiringpi.pinMode(TR_Pin, wiringpi.OUTPUT)
+# Initialiseer RPi.GPIO en seriële communicatie
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(TX_Pin, GPIO.OUT)
+GPIO.setup(RX_Pin, GPIO.IN)
+GPIO.setup(TR_Pin, GPIO.OUT)
 
 # Open de seriële poort
 ser = serial.Serial('/dev/serial0', BaudRate, timeout=1)  # Pas aan naar de juiste seriële poort
@@ -79,3 +77,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# Zorg ervoor dat GPIO's netjes worden afgesloten
+GPIO.cleanup()
