@@ -5,7 +5,7 @@ import serial
 # Configuratie van de GPIO-pins
 TX_Pin = 8
 RX_Pin = 10
-TR_Pin = 5
+TR_Pin = 12
 BaudRate = 1000000
 
 # Definieer IDs van de servos
