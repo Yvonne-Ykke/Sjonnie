@@ -16,7 +16,7 @@ colors = [
     Color("red", [0, 80, 80], [15, 255, 255]),
     Color("green", [37, 30, 30], [90, 255, 255]),
     Color("pink", [165, 50, 50], [180, 255, 255]),
-    Color("silver", [0,0,0], [180,100,150])
+    Color("silver", [0,30,25], [180,100,180])
     # TODO: Add more colors
 ]
 
@@ -59,5 +59,5 @@ def detect(developing):
         
 
 if __name__ == "__main__":
-    detect()
+    detect(True)
 

@@ -142,4 +142,4 @@ def color_contouring(developing):
 
 
 if __name__ == "__main__":
-    contouring()
+    contouring(True)
