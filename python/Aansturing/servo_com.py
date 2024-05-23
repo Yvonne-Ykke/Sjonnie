@@ -17,9 +17,14 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(TX_Pin, GPIO.OUT)
 GPIO.setup(RX_Pin, GPIO.IN)
 GPIO.setup(TR_Pin, GPIO.OUT)
-
+print("setup succesvol")
 # Open de seriële poort
 ser = serial.Serial('/dev/serial0', BaudRate, timeout=1)  # Pas aan naar de juiste seriële poort
+print("setup succesvol")
+
+def switchCom(dirPin, mode):
+    GPIO.setup(dirPin, mode)
+
 
 def send_command(command):
     ser.write((command + '\n').encode())
@@ -34,7 +39,11 @@ def read_position(servo_id):
     return position
 
 def move_speed(servo_id, position, speed):
+    print(f"M{servo_id},{position},{speed}")
+    switchCom({servo_id}, 1)
     send_command(f"M{servo_id},{position},{speed}")
+    switchCom({servo_id}, 0)
+
 
 def led_status(servo_id, status):
     send_command(f"L{servo_id},{status}")
