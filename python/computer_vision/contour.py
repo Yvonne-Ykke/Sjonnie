@@ -42,15 +42,9 @@ def contouring(developing):
                     child = hierarchy[child][0]
                 print (area, factor, holes)
 
-                if area > 0:
+                if area > 100:
                     cv.drawContours(im, [cnt], -1, (255, 0, 0), 3);
-                if area < 3000:
-                    if area > 550:
-                        if holes < 150:
-                            if factor < 0.99:
-                                cv.drawContours(im, [cnt], -1, (0, 0, 255), 3);
-                            elif factor > 0.8:
-                                cv.drawContours(im, [cnt], -1, (0, 255, 0), 3);
+                
 
         if developing:
             cv.imshow('thres', threshoog)
@@ -96,6 +90,7 @@ def color_contouring(developing):
         rcount = 0
         bcount = 0
         ycount = 0
+        pcount = 0
         results = []
         for color_name, mask in color_masks:
             res = cv.bitwise_and(img,img, mask= mask)
@@ -124,40 +119,42 @@ def color_contouring(developing):
                         holes += cv.contourArea(contours[child])
                         child = hierarchy[child][0]
                     #print (area, factor, holes)
+                    print (child)
 
-                    if area > 200 and area < 100000:
-                        if factor > 0.01:
-                            if color_name == "Blue":
-                                cv.drawContours(img, [cnt], -1, (255, 0, 0), 3);
-                                bcount += 1
-                            if color_name == "Green":
-                                cv.drawContours(img, [cnt], -1, (0, 255, 0), 3);
-                                gcount += 1
-                            if color_name == "Red":
-                                cv.drawContours(img, [cnt], -1, (0, 0, 255), 3);
-                                rcount += 1
-                            if color_name == "Yellow":
-                                cv.drawContours(img, [cnt], -1, (0, 255, 255), 3);
-                                ycount += 1
-        print("Groen: " + str(gcount) + " Blauw: " + str(bcount) + " Rood: " + str(rcount) + " Geel: " + str(ycount))
+                    if area > 200 and area < 100000 and factor > 0.01:
+                        if color_name == "Blue":
+                            cv.drawContours(img, [cnt], -1, (255, 0, 0), 1);
+                            bcount += 1
+                        if color_name == "Green":
+                            cv.drawContours(img, [cnt], -1, (0, 255, 0), 1);
+                            gcount += 1
+                        if color_name == "Red":
+                            cv.drawContours(img, [cnt], -1, (0, 0, 255), 1);
+                            rcount += 1
+                        if color_name == "Yellow":
+                            cv.drawContours(img, [cnt], -1, (0, 255, 255), 1);
+                            ycount += 1
+                        if color_name == "Pink":
+                            cv.drawContours(img, [cnt], -1, (255, 0, 255), 1);
+                            pcount += 1
+                        M = cv.moments(cnt)
+                        if child <= 0:
+                            if M['m00'] != 0:
+                                cx = int(M['m10'] / M['m00'])
+                                cy = int(M['m01'] / M['m00'])
+                                cv.circle(img, (cx, cy), 5, (0, 255, 255), -1)
+        print("Groen: " + str(gcount) + " Blauw: " + str(bcount) + " Rood: " + str(rcount) + " Geel: " + str(ycount) + " Pink: " + str(pcount))
         time.sleep(0.1)
         cv.imshow("image", img)
         if developing:
             cv.imshow('thres', threshoog)
             
-            #cv.imshow('contour_vision', threshoog)
-
-         
-
         if cv.waitKey(1) & 0xFF == ord('q'):
             img.release()
             cv.destroyAllWindows()
             break
 
         
-
-
-
 
 if __name__ == "__main__":
     contouring()

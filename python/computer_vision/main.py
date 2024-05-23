@@ -6,13 +6,17 @@ import os
 #1 = je ingebouwde laptop webcam
 #2 = een testfoto
 
-developing = 2
+developing = None
 
 def main():
     #color_recognition.detect(developing)
     #contour.contouring(developing)
     
-    contour.color_contouring(developing)
+    info = contour.color_contouring(developing)
+    
+    #Send infromatie naar esp32
+    #info = contour.color_contouring(developing)
+    #comm.send(info)
 
 
     
