@@ -3,8 +3,8 @@ import RPi.GPIO as GPIO
 import serial
 
 # Configuratie van de GPIO-pins
-TX_Pin = 41
-RX_Pin = 40
+TX_Pin = 8
+RX_Pin = 10
 TR_Pin = 5
 BaudRate = 1000000
 
