@@ -4,20 +4,20 @@ import cv2 as cv
 developing = True
 
 class Color:
-    def __init__(self, name, low_hsv, high_hsv, low_hsv2 = None, high_hsv2 = None):
+    def __init__(self, name, low_hsv, high_hsv, low_hsv2 = None, high_hsv2 = None, bgr = None):
         self.name = name
         self.low_hsv = low_hsv
         self.high_hsv = high_hsv
         self.low_hsv2 = low_hsv2
         self.high_hsv2 = high_hsv2
+        self.bgr = bgr
 
 colors = [
-    Color("blue", [90, 45, 45], [135, 255, 255]),
-    Color("red", [0, 80, 80], [15, 255, 255]),
-    Color("green", [37, 30, 30], [90, 255, 255]),
-    Color("pink", [165, 50, 50], [180, 255, 255]),
-    Color("yellow", [16, 80, 0], [36, 255, 255]),
-    Color("silver", [0,30,25], [180,100,180])
+    Color("blue", [80, 60, 0], [140, 255, 255], [255, 0, 0]),
+    Color("red", [0, 70, 0], [15, 255, 255], [175, 70, 60], [179, 255, 255], [0, 0, 255]),
+    Color("green", [40, 41, 74], [86, 255, 255], [0, 255, 0]),
+    Color("yellow", [16, 80, 0], [36, 255, 255], [0, 255, 255]),
+    Color("pink", [167, 63, 100], [176, 255, 255], [0, 50, 255] ),
     # TODO: Add more colors
 ]
 
@@ -60,5 +60,5 @@ def detect(developing):
         
 
 if __name__ == "__main__":
-    detect(True)
+    detect()
 
