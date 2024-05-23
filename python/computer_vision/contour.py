@@ -52,11 +52,6 @@ def contouring(developing):
                                 cv.drawContours(im, [cnt], -1, (0, 255, 0), 3)
                 
                 # Calculate and draw the centroid
-                M = cv.moments(cnt)
-                if M['m00'] != 0:
-                    cx = int(M['m10'] / M['m00'])
-                    cy = int(M['m01'] / M['m00'])
-                    cv.circle(im, (cx, cy), 3, (0, 255, 255), -1)
 
         if developing:
             cv.imshow('thres', threshoog)
