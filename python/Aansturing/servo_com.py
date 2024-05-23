@@ -1,5 +1,5 @@
 import time
-import pigpio
+import wiringpi
 import serial
 
 # Configuratie van de GPIO-pins
@@ -12,14 +12,16 @@ BaudRate = 1000000
 S1_ID = 3
 S2_ID = 61
 
-# Initialiseer pigpio en seriële communicatie
-pi = pigpio.pi()
-ser = serial.Serial('/dev/serial0', BaudRate, timeout=1)  # Pas aan naar de juiste seriële poort
+# Initialiseer wiringPi en seriële communicatie
+wiringpi.wiringPiSetupGpio()
 
-# Configuratie van de GPIO-pins
-pi.set_mode(TX_Pin, pigpio.OUTPUT)
-pi.set_mode(RX_Pin, pigpio.INPUT)
-pi.set_mode(TR_Pin, pigpio.OUTPUT)
+# Zet de pinmodes
+wiringpi.pinMode(TX_Pin, wiringpi.OUTPUT)
+wiringpi.pinMode(RX_Pin, wiringpi.INPUT)
+wiringpi.pinMode(TR_Pin, wiringpi.OUTPUT)
+
+# Open de seriële poort
+ser = serial.Serial('/dev/serial0', BaudRate, timeout=1)  # Pas aan naar de juiste seriële poort
 
 def send_command(command):
     ser.write((command + '\n').encode())
