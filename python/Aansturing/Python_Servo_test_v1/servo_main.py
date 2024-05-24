@@ -34,32 +34,16 @@ GPIO.setup(TX_Pin, GPIO.OUT)
 GPIO.setup(RX_Pin, GPIO.IN)
 GPIO.setup(TR_Pin, GPIO.OUT)
 
+ser = serial.Serial('/dev/serial0', BaudRate, timeout=1)
+
 
 
 def main():
     
     present_position(p_d, dC_AX_12p, S1_ID)
+    set_position(p_d, dC_AX_12p, S1_ID, 40)
+    control_servo(30, 10)
 
-    
-    
-def set_position(p_d, dC_AX_12p, dyn_id, goal_pos):
-  # initialization packet
-  packet_command = [p_d.AX_12p_GOAL_POSITION_L, goal_pos] # AREA {RAM}
-
-  dC_AX_12p.init_packet_param_AX_12p(packet_command)
-
-  if dC_AX_12p.err == None:
-    # write
-    dC_AX_12p.command_to_AX_12p(p_d.AX_12p_WRITE_DATA) # INSTRUCTION SET
-
-    # release of variables
-    dC_AX_12p.release_packet_param_AX_12p()
-  else:
-    print('Error!')      
-
-
-
-    
         
 def present_position(p_d, dC_AX_12p, dyn_id):
   # initialization packet
@@ -154,7 +138,7 @@ def is_motor_moving(p_d, dC_AX_12p, dyn_id):
 
 
 
-port_name = 'COM4'
+port_name = '/dev/ttyS0'
 p_d = parameters.param_dyn(port_name)
 
 # serial port communication
@@ -254,6 +238,48 @@ def control_servo(pos, vel):
   return res
 
 
+# Sinwave Generator
+def SinwaveformGenerator(arg):
+  global values, values1, res_actualForV, pos_forValue
+  global res, res_before, res_beforeN, pos_bR, pos_bL
+
+  #res_actualForV = control_servo(int(scale_hsv.Position), int(scale_hsv.Velocity))
+
+  #print(res_actualForV)
+  res   = present_position(p_d, dC_AX_12p[0], dynamixel_id[0])
+  set_speed(p_d, dC_AX_12p[i_speed], dynamixel_id[i_speed], int(scale_hsv.Velocity))
+  set_position(p_d, dC_AX_12p[0], dynamixel_id[0], int(scale_hsv.Position))
+  
+  if res_before - 5 < res < res_before + 5:
+    pass
+  else:
+    res_before = res
+    #print(res)
+    if int(scale_hsv.Position) == 240:
+      if res_before < pos_bR:
+        res_before = pos_bR
+
+      if res_before > int(scale_hsv.Position):
+        res_before = int(scale_hsv.Position)
+
+      pos_bR = res_before
+    elif int(scale_hsv.Position) == 10:
+      if 0 <= res_before <= 10:
+        res_before = int(scale_hsv.Position)
+
+      if res_before > pos_bL or res_before == 10:
+        res_before = pos_bL
+
+      pos_bL = res_before
+      # 10 - 13
+      # 237 - 240
+
+  print(res, res_before)
+  values.append(int(scale_hsv.Position))
+  values1.append(int(scale_hsv.Velocity))
+
+
+
 def RealtimePloter(arg):
   global values, values1
 
@@ -282,7 +308,6 @@ threading.Thread(target=main_loop_scale, args=(scale_hsv,)).start()
 pylab.show()
 
 # Close port
-s_p.close_serialPort()
 
 
 
@@ -290,3 +315,6 @@ s_p.close_serialPort()
 
 if __name__ == "__main__":
     main()
+
+
+s_p.close_serialPort()
