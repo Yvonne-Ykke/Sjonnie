@@ -45,6 +45,23 @@ def main():
     control_servo(30, 10)
 
         
+
+def init_current_scale(root, hsv_var, label):
+    return Scale(root, from_=0, to=500, length=500, tickinterval=50, orient=HORIZONTAL, label=label, command=lambda v: setattr(scale_hsv, hsv_var, v))
+
+def main_loop_scale(scale):
+    root=Tk()
+    root.title('Dynamixel AX-1A - Manual control')
+    hsv_var = ['Position','Velocity']
+    
+    s   = []
+    hsv = [0, 0]
+    for i in range(0,len(hsv_var)):
+        s = init_current_scale(root, hsv_var[i], hsv_var[i])
+        s.set(hsv[i])
+        s.pack()
+
+    root.mainloop()
 def present_position(p_d, dC_AX_12p, dyn_id):
   # initialization packet
   packet_command = [p_d.AX_12p_PRESENT_POSITION_L, p_d.AX_12p_RETURN_READ] # AREA {RAM} | STATUS RETURNS LEVELS
