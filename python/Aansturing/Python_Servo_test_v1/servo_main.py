@@ -44,6 +44,10 @@ def main():
     set_position(p_d, dC_AX_12p, S1_ID, 40)
     control_servo(30, 10)
 
+class HSV_init_scale:
+    def __init__(self):
+        self.Position = 0
+        self.Velocity = 0
         
 
 def init_current_scale(root, hsv_var, label):
