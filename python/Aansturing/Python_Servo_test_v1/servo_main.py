@@ -157,7 +157,9 @@ def is_motor_moving(p_d, dC_AX_12p, dyn_id):
 
   return int(result)
 
-
+global scale_hsv
+# initialization class for scale
+scale_hsv = HSV_init_scale()
 
 port_name = '/dev/ttyS0'
 p_d = parameters.param_dyn(port_name)
