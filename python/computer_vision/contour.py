@@ -13,14 +13,13 @@ def contouring(developing):
     else:
         cap = cv.VideoCapture(1)
 
-
     while(True):
         ret,im = cap.read()
         if im is None:
             break
         
         imgray = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
-        blur = cv.GaussianBlur(imgray,(5,5),0)
+        blur = cv.GaussianBlur(imgray,(3,3),0)
 
         ret, threshoog = cv.threshold(blur, 110, 200, cv.THRESH_BINARY)
 
@@ -40,25 +39,22 @@ def contouring(developing):
                 while child >= 0:
                     holes += cv.contourArea(contours[child])
                     child = hierarchy[child][0]
-                print (area, factor, holes)
-
-                if area > 100:
-                    cv.drawContours(im, [cnt], -1, (255, 0, 0), 3);
                 
 
-        if developing:
-            cv.imshow('thres', threshoog)
-            cv.imshow('contour_vision', imgray)
-            cv.imshow('computer_vision',im)
+                if 0.07 < factor < 0.1: #scheve schaar
+                     print (area, factor, holes)
+                     cv.drawContours(im, [cnt], -1, (255, 0, 0), 3)
+                elif 0.15 < factor < 0.2: #rechte schaar
+                    print (area, factor, holes)
+                    cv.drawContours(im, [cnt], -1, (0, 255, 255), 3)
 
-            if cv.waitKey(1) & 0xFF == ord('q'):
-                cap.release()
-                cv.destroyAllWindows()
-                break
+                
 
-        else:
-            cv.imwrite('thres.jpg', im)
+        cv.imshow('thres', threshoog)
+        cv.imshow('contour_vision', imgray)
+        cv.imshow('computer_vision',im)
 
+        if cv.waitKey(1) & 0xFF == ord('q'):
             cap.release()
             cv.destroyAllWindows()
             break
@@ -157,4 +153,4 @@ def color_contouring(developing):
         
 
 if __name__ == "__main__":
-    contouring()
+    contouring(0)
