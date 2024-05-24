@@ -13,7 +13,7 @@ import dun_ax_12p as dyn_ax_12p
 import parameters
 import time
 
-from tkinter import *
+
 import time
 import threading
 
@@ -22,21 +22,21 @@ class HSV_init_scale:
         self.Position = 0
         self.Velocity = 0
 
-def init_current_scale(root, hsv_var, label):
-    return Scale(root, from_=0, to=500, length=500, tickinterval=50, orient=HORIZONTAL, label=label, command=lambda v: setattr(scale_hsv, hsv_var, v))
-def main_loop_scale(scale):
-    root=Tk()
-    root.title('Dynamixel AX-1A - Manual control')
-    hsv_var = ['Position','Velocity']
+#def init_current_scale(root, hsv_var, label):
+    #return Scale(root, from_=0, to=500, length=500, tickinterval=50, orient=HORIZONTAL, label=label, command=lambda v: setattr(scale_hsv, hsv_var, v))
+#def main_loop_scale(scale):
+    #root=Tk()
+    #root.title('Dynamixel AX-1A - Manual control')
+    #hsv_var = ['Position','Velocity']
     
-    s   = []
-    hsv = [0, 0]
-    for i in range(0,len(hsv_var)):
-        s = init_current_scale(root, hsv_var[i], hsv_var[i])
-        s.set(hsv[i])
-        s.pack()
+    #s   = []
+    #hsv = [0, 0]
+    #for i in range(0,len(hsv_var)):
+    #    s = init_current_scale(root, hsv_var[i], hsv_var[i])
+    #    s.set(hsv[i])
+    #    s.pack()
 
-    root.mainloop()
+    #root.mainloop()
 
 def present_position(p_d, dC_AX_12p, dyn_id):
   # initialization packet
@@ -293,7 +293,7 @@ timer.start()
 timer2.start()
 
 # threading scale_loop
-threading.Thread(target=main_loop_scale, args=(scale_hsv,)).start()
+#threading.Thread(target=main_loop_scale, args=(scale_hsv,)).start()
 
 # Show actual result
 pylab.show()
