@@ -3,6 +3,9 @@ import math
 # Constants for the lengths of the robot's arm segments
 LEN1 = 30.0
 LEN2 = 30.0
+#Current position of the servo's
+POS1 = 0 
+POS2 = 0
 
 def law_of_cosines(a, b, c):
     """Calculate angle C using the law of cosines."""
@@ -42,6 +45,36 @@ def angles(x, y):
 def deg(rad):
     """Convert radians to degrees."""
     return rad * 180 / math.pi
+
+def choice(a1a, a2a, a1b, a2b, pos1, pos2):
+    A = A
+    B = B
+    angle2a = deg(a2a)
+    angle2b = deg(a2b)
+
+
+    if(angle2a < 15 and angle2b < 15):
+        Exception(print("unreachable object detected"))
+    elif(angle2a < 15):
+        return angle2b
+    elif(angle2b < 15):
+        return angle2a
+    elif(angle2a > 15 and angle2b > 15):
+       difa1 = math.abs(pos1-a1a) 
+       difa2 = (math.abs(pos2-a2a))
+       totDifA = difa1 + difa2
+
+       difb1 = math.abs(pos1-a1b) 
+       difb2 = (math.abs(pos2-a2b))
+       totDifB = difb1 + difb2
+
+       if(totDifA <= totDifB):
+            return A
+       else:
+           return B
+
+
+
 
 def main():
     test_cases = [
