@@ -1,7 +1,7 @@
 import numpy as np
 import cv2 as cv
 
-developing = True
+developing = False
 
 class Color:
     def __init__(self, name, low_hsv, high_hsv, low_hsv2 = None, high_hsv2 = None, bgr = None):
@@ -17,8 +17,8 @@ colors = [
     Color("red", [0, 70, 0], [15, 255, 255], [175, 70, 60], [179, 255, 255], [0, 0, 255]),
     Color("green", [40, 41, 74], [86, 255, 255], [0, 255, 0]),
     Color("yellow", [16, 80, 0], [36, 255, 255], [0, 255, 255]),
-    Color("pink", [167, 63, 100], [176, 255, 255], [0, 50, 255] ),
-    # TODO: Add more colors
+    Color("pink", [167, 63, 100], [176, 255, 255], [0, 50, 255]),
+    Color("silver", [0,30,25], [180,100,180])
 ]
 
 def masks(frame):
@@ -60,5 +60,5 @@ def detect(developing):
         
 
 if __name__ == "__main__":
-    detect()
+    detect(True)
 
