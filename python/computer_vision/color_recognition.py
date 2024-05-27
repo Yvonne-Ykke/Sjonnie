@@ -60,5 +60,5 @@ def detect(developing):
         
 
 if __name__ == "__main__":
-    detect(developing)
+    detect(True)
 

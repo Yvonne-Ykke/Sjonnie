@@ -87,6 +87,7 @@ def color_contouring(developing):
         bcount = 0
         ycount = 0
         pcount = 0
+        scount = 0
         results = []
         for color_name, mask in color_masks:
             res = cv.bitwise_and(img,img, mask= mask)
@@ -115,7 +116,7 @@ def color_contouring(developing):
                         holes += cv.contourArea(contours[child])
                         child = hierarchy[child][0]
                     #print (area, factor, holes)
-                    print (child)
+                    #print (child)
 
                     if area > 200 and area < 100000 and factor > 0.01:
                         if color_name == "Blue":
@@ -133,13 +134,16 @@ def color_contouring(developing):
                         if color_name == "Pink":
                             cv.drawContours(img, [cnt], -1, (255, 0, 255), 1);
                             pcount += 1
+                        if color_name == "Silver":
+                            cv.drawContours(img, [cnt], -1, (255, 150, 255), 1);
+                            scount += 1
                         M = cv.moments(cnt)
                         if child <= 0:
                             if M['m00'] != 0:
                                 cx = int(M['m10'] / M['m00'])
                                 cy = int(M['m01'] / M['m00'])
                                 cv.circle(img, (cx, cy), 5, (0, 255, 255), -1)
-        print("Groen: " + str(gcount) + " Blauw: " + str(bcount) + " Rood: " + str(rcount) + " Geel: " + str(ycount) + " Pink: " + str(pcount))
+        print("Groen: " + str(gcount) + " Blauw: " + str(bcount) + " Rood: " + str(rcount) + " Geel: " + str(ycount) + " Pink: " + str(pcount) + " Silver: " + str(scount))
         time.sleep(0.1)
         cv.imshow("image", img)
         if developing:
