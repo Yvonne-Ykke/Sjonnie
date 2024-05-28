@@ -53,7 +53,7 @@ def choice(a1a, a2a, a1b, a2b, pos1, pos2, x ,y):
     angle2a = deg(a2a) #elleboog hoek a
     angle2b = deg(a2b) #elleboog hoek b
 
-
+#Check of de schouder en elleboog geen hoek hebben die ze niet kunnen maken. Als dat wel zo is dan is het object unreachable
     if(-15 < angle2a < 15 and -15 < angle2b < 15 or -105 < angle1a < -75 and -105 < angle1b < -75):
         Exception(print("unreachable object detected"))
         return angle1a, angle2a
@@ -79,7 +79,7 @@ def choice(a1a, a2a, a1b, a2b, pos1, pos2, x ,y):
             print(f"x={x}, y={y}: Solution 2 -> A1={a1b} ({deg(a1b)}°), A2={a2b} ({deg(a2b)}°)")
             return deg(a1b), deg(a2b)
 
-
+#Geef een coördinaat mee en bereken welke hoeken de servo's (het best) moeten maken.
 def main():
     test_cases = [
         (25, 50)
@@ -92,8 +92,8 @@ def main():
             if(-105 < angle1 < -75 or -15 < angle2 < 15):
                 Exception(print("unreachable object detected"))
             else:
-                print(f"Angle 1 =   {angle1}")
-                print(f"Angle 2 =   {angle2}")
+                print(f"Angle 1 = {angle1}")
+                print(f"Angle 2 = {angle2}")
 
         except ValueError as e:
             print(f"x={x}, y={y}: {e}")
