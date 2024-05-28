@@ -48,16 +48,19 @@ def deg(rad):
 
 #Berekent beste hoek, print deze en geeft hem terug
 def choice(a1a, a2a, a1b, a2b, pos1, pos2, x ,y): 
-    angle2a = deg(a2a)
-    angle2b = deg(a2b)
+    angle1a = deg(a1a) #schouder hoek a
+    angle1b = deg(a1b) #schouder hoek b
+    angle2a = deg(a2a) #elleboog hoek a
+    angle2b = deg(a2b) #elleboog hoek b
 
 
-    if(-15 < angle2a < 15 and -15 < angle2b < 15):
+    if(-15 < angle2a < 15 and -15 < angle2b < 15 or -105 < angle1a < -75 and -105 < angle1b < -75):
         Exception(print("unreachable object detected"))
-    elif(-15 < angle2a < 15):
+        return angle1a, angle2a
+    elif(-15 < angle2a < 15 or -105 < angle1a < -75):
         print(f"x={x}, y={y}: Solution 2 -> A1={a1b} ({deg(a1b)}°), A2={a2b} ({deg(a2b)}°)")
         return deg(a1a), deg(a2a)
-    elif(-15 < angle2b < 15):
+    elif(-15 < angle2b < 15 or -75 and -105 < angle1b < -75):
         print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
         return deg(a1b), deg(a2b)
     elif(angle2a > 15 or angle2a < -15 and angle2b > 15 or angle2b < -15):
@@ -86,8 +89,11 @@ def main():
         try:
             (a1a, a2a), (a1b, a2b) = angles(x, y)
             angle1, angle2 = choice(a1a, a2a, a1b, a2b, POS1, POS2, x , y)
-            print(f"Angle 1 =   {angle1}")
-            print(f"Angle 2 =   {angle2}")
+            if(-105 < angle1 < -75 or -15 < angle2 < 15):
+                Exception(print("unreachable object detected"))
+            else:
+                print(f"Angle 1 =   {angle1}")
+                print(f"Angle 2 =   {angle2}")
 
         except ValueError as e:
             print(f"x={x}, y={y}: {e}")
