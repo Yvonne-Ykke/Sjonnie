@@ -46,7 +46,8 @@ def deg(rad):
     """Convert radians to degrees."""
     return rad * 180 / math.pi
 
-def choice(a1a, a2a, a1b, a2b, pos1, pos2, x ,y):
+#Berekent beste hoek, print deze en geeft hem terug
+def choice(a1a, a2a, a1b, a2b, pos1, pos2, x ,y): 
     angle2a = deg(a2a)
     angle2b = deg(a2b)
 
@@ -55,8 +56,10 @@ def choice(a1a, a2a, a1b, a2b, pos1, pos2, x ,y):
         Exception(print("unreachable object detected"))
     elif(-15 < angle2a < 15):
         print(f"x={x}, y={y}: Solution 2 -> A1={a1b} ({deg(a1b)}°), A2={a2b} ({deg(a2b)}°)")
+        return deg(a1a), deg(a2a)
     elif(-15 < angle2b < 15):
         print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
+        return deg(a1b), deg(a2b)
     elif(angle2a > 15 or angle2a < -15 and angle2b > 15 or angle2b < -15):
        difa1 = abs(pos1-a1a) 
        difa2 = abs(pos2-a2a)
@@ -68,10 +71,10 @@ def choice(a1a, a2a, a1b, a2b, pos1, pos2, x ,y):
 
        if(totDifA <= totDifB):
             print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
+            return deg(a1a), deg(a2a)
        else:
             print(f"x={x}, y={y}: Solution 2 -> A1={a1b} ({deg(a1b)}°), A2={a2b} ({deg(a2b)}°)")
-
-
+            return deg(a1b), deg(a2b)
 
 
 def main():
@@ -82,9 +85,10 @@ def main():
     for x, y in test_cases:
         try:
             (a1a, a2a), (a1b, a2b) = angles(x, y)
-            choice(a1a, a2a, a1b, a2b, POS1, POS2, x , y)
-            # print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
-            # print(f"x={x}, y={y}: Solution 2 -> A1={a1b} ({deg(a1b)}°), A2={a2b} ({deg(a2b)}°)")
+            angle1, angle2 = choice(a1a, a2a, a1b, a2b, POS1, POS2, x , y)
+            print(f"Angle 1 =   {angle1}")
+            print(f"Angle 2 =   {angle2}")
+
         except ValueError as e:
             print(f"x={x}, y={y}: {e}")
             
