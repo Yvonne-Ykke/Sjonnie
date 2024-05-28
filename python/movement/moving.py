@@ -57,14 +57,17 @@ def choice(a1a, a2a, a1b, a2b, pos1, pos2, x ,y):
     if(-15 < angle2a < 15 and -15 < angle2b < 15 or -105 < angle1a < -75 and -105 < angle1b < -75):
         Exception(print("unreachable object detected"))
         return angle1a, angle2a
-    elif(-15 < angle2a < 15 or -105 < angle1a < -75):
+    #check of alleen a een doede hoek heeft en return b
+    elif(-15 < angle2a < 15 or -105 < angle1a < -75): 
         print(f"x={x}, y={y}: Solution 2 -> A1={a1b} ({deg(a1b)}°), A2={a2b} ({deg(a2b)}°)")
-        return deg(a1a), deg(a2a)
-    elif(-15 < angle2b < 15 or -75 and -105 < angle1b < -75):
-        print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
         return deg(a1b), deg(a2b)
-    elif(angle2a > 15 or angle2a < -15 and angle2b > 15 or angle2b < -15):
-       #bereken de verschillen in hoeken en geef de kleinste hoek terug
+    #check of alleen b een doede hoek heeft en return a
+    elif(-15 < angle2b < 15 or -105 < angle1b < -75): 
+        print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
+        return deg(a1a), deg(a2a)
+    #als er geen dode hoeken gevonden zijn
+    else: 
+       #bereken de verschillen in hoeken en geef de kleinste hoek terug als beste keuze
        difa = abs(angle1a) + abs(angle2a) 
        difb = abs(angle1b) + abs(angle2b)
 
