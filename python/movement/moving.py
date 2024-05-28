@@ -3,91 +3,110 @@ import math
 # Constants for the lengths of the robot's arm segments
 LEN1 = 30.0
 LEN2 = 30.0
-#Current position of the servo's
+# Current position of the servos
 POS1 = 0 
 POS2 = 0
 
-def law_of_cosines(a, b, c):
+def law_of_cosines(side1, side2, side3):
     """Calculate angle C using the law of cosines."""
-    # Ensure a and b are not zero to prevent division by zero
-    if a == 0 or b == 0:
+    # Ensure side1 and side2 are not zero to prevent division by zero
+    if side1 == 0 or side2 == 0:
         return 0
     try:
-        return math.acos((a*a + b*b - c*c) / (2 * a * b))
+        return math.acos((side1 * side1 + side2 * side2 - side3 * side3) / (2 * side1 * side2))
     except ValueError:
         # Return NaN if the value inside acos is out of range due to floating-point precision issues
         return float('nan')
 
 def distance(x, y):
     """Calculate the distance from the origin (0,0) to (x,y)."""
-    return math.sqrt(x*x + y*y)
+    return math.sqrt(x * x + y * y)
 
-def angles(x, y):
-    """Calculate the two sets of joint angles for given x and y."""
-    dist = distance(x, y)
+def angles(target_x, target_y):
+    """Calculate the two sets of joint angles for given target_x and target_y."""
+    dist = distance(target_x, target_y)
     
     if dist > (LEN1 + LEN2):
         raise ValueError("Target is out of reach")
     
-    D1 = math.atan2(y, x)
-    D2 = law_of_cosines(dist, LEN1, LEN2)
+    base_angle = math.atan2(target_y, target_x)
+    elbow_angle = law_of_cosines(dist, LEN1, LEN2)
     
     # First set of angles
-    A1a = D1 + D2
-    A2a = law_of_cosines(LEN1, LEN2, dist)
+    shoulder_angle1 = base_angle + elbow_angle
+    elbow_angle1 = law_of_cosines(LEN1, LEN2, dist)
     
     # Second set of angles (other solution)
-    A1b = D1 - D2
-    A2b = -A2a
+    shoulder_angle2 = base_angle - elbow_angle
+    elbow_angle2 = -elbow_angle1
     
-    return (A1a, A2a), (A1b, A2b)
+    return (shoulder_angle1, elbow_angle1), (shoulder_angle2, elbow_angle2)
 
-def deg(rad):
+def deg(radians):
     """Convert radians to degrees."""
-    return rad * 180 / math.pi
+    return radians * 180 / math.pi
 
-def choice(a1a, a2a, a1b, a2b, pos1, pos2, x ,y):
-    angle2a = deg(a2a)
-    angle2b = deg(a2b)
+def blind_spot(shoulder_angle, elbow_angle):
+    angle1a_deg = deg(shoulder_angle) # shoulder angle a
+    angle2a_deg = deg(elbow_angle) # elbow angle a
+    # Check if the shoulder and elbow do not have an angle they cannot make. If so, the object is unreachable
+    if (-15 < angle2a_deg < 15 or -105 < angle1a_deg < -75):
+        Exception()
+        return True
+    else: 
+        return False
 
+# Calculate the best angle, print it, and return it
+def choice(shoulder_angle1, elbow_angle1, shoulder_angle2, elbow_angle2, target_x, target_y): 
+    angle1a_deg = deg(shoulder_angle1) # shoulder angle a
+    angle1b_deg = deg(shoulder_angle2) # shoulder angle b
+    angle2a_deg = deg(elbow_angle1) # elbow angle a
+    angle2b_deg = deg(elbow_angle2) # elbow angle b
 
-    if(-15 < angle2a < 15 and -15 < angle2b < 15):
-        Exception(print("unreachable object detected"))
-    elif(-15 < angle2a < 15):
-        print(f"x={x}, y={y}: Solution 2 -> A1={a1b} ({deg(a1b)}°), A2={a2b} ({deg(a2b)}°)")
-    elif(-15 < angle2b < 15):
-        print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
-    elif(angle2a > 15 or angle2a < -15 and angle2b > 15 or angle2b < -15):
-       difa1 = abs(pos1-a1a) 
-       difa2 = abs(pos2-a2a)
-       totDifA = difa1 + difa2
+    diff_a = abs(angle1a_deg) + abs(angle2a_deg) 
+    diff_b = abs(angle1b_deg) + abs(angle2b_deg)
 
-       difb1 = abs(pos1-a1b) 
-       difb2 = abs(pos2-a2b)
-       totDifB = difb1 + difb2
+    if (diff_a <= diff_b):
+        print(f"x={target_x}, y={target_y}: Solution 1 -> A1={shoulder_angle1} ({deg(shoulder_angle1)}°), A2={elbow_angle1} ({deg(elbow_angle1)}°)")
+        return deg(shoulder_angle1), deg(elbow_angle1)
+    else:
+        print(f"x={target_x}, y={target_y}: Solution 2 -> A1={shoulder_angle2} ({deg(shoulder_angle2)}°), A2={elbow_angle2} ({deg(elbow_angle2)}°)")
+        return deg(shoulder_angle2), deg(elbow_angle2)
 
-       if(totDifA <= totDifB):
-            print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
-       else:
-            print(f"x={x}, y={y}: Solution 2 -> A1={a1b} ({deg(a1b)}°), A2={a2b} ({deg(a2b)}°)")
-
-
-
-
+# Provide a coordinate and calculate which angles the servos should (ideally) make.
 def main():
     test_cases = [
         (25, 50)
     ]
 
-    for x, y in test_cases:
+    for target_x, target_y in test_cases:
         try:
-            (a1a, a2a), (a1b, a2b) = angles(x, y)
-            choice(a1a, a2a, a1b, a2b, POS1, POS2, x , y)
-            # print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
-            # print(f"x={x}, y={y}: Solution 2 -> A1={a1b} ({deg(a1b)}°), A2={a2b} ({deg(a2b)}°)")
+            (shoulder_angle1, elbow_angle1), (shoulder_angle2, elbow_angle2) = angles(target_x, target_y)
+            angle1 = None
+            angle2 = None
+            blindSpot1 = blind_spot(shoulder_angle1, elbow_angle1)
+            blindSpot2 = blind_spot( shoulder_angle2, elbow_angle2)
+            if blindSpot1 == False and blindSpot2 == False:
+                angle1, angle2 = choice(shoulder_angle1, elbow_angle1, shoulder_angle2, elbow_angle2, target_x, target_y)
+                print(f"Angle 1 = {angle1}")
+                print(f"Angle 2 = {angle2}")
+            elif blindSpot1 == False and blindSpot2 == True:
+                print(f"x={target_x}, y={target_y}: Solution 1 -> A1={shoulder_angle1} ({deg(shoulder_angle1)}°), A2={elbow_angle1} ({deg(elbow_angle1)}°)")
+                angle1 = deg(shoulder_angle1)
+                angle2 = deg(elbow_angle1)
+                print(f"Angle 1 = {angle1}")
+                print(f"Angle 2 = {angle2}")
+            elif blindSpot1 == True and blindSpot2 == False:
+                print(f"x={target_x}, y={target_y}: Solution 2 -> A1={shoulder_angle2} ({deg(shoulder_angle2)}°), A2={elbow_angle2} ({deg(elbow_angle2)}°)")
+                angle1 = deg(shoulder_angle2)
+                angle2 = deg(elbow_angle2)
+                print(f"Angle 1 = {angle1}")
+                print(f"Angle 2 = {angle2}")
+            else:
+                print("Blind spot detected")
+
         except ValueError as e:
-            print(f"x={x}, y={y}: {e}")
-            
+            print(f"x={target_x}, y={target_y}: {e}")
 
 if __name__ == "__main__":
     main()
