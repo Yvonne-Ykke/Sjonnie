@@ -46,54 +46,48 @@ def deg(rad):
     """Convert radians to degrees."""
     return rad * 180 / math.pi
 
-def choice(a1a, a2a, a1b, a2b, pos1, pos2):
-    A = A
-    B = B
+def choice(a1a, a2a, a1b, a2b, pos1, pos2, x ,y):
     angle2a = deg(a2a)
     angle2b = deg(a2b)
 
 
-    if(angle2a < 15 and angle2b < 15):
+    if(-15 < angle2a < 15 and -15 < angle2b < 15):
         Exception(print("unreachable object detected"))
-    elif(angle2a < 15):
-        return angle2b
-    elif(angle2b < 15):
-        return angle2a
-    elif(angle2a > 15 and angle2b > 15):
-       difa1 = math.abs(pos1-a1a) 
-       difa2 = (math.abs(pos2-a2a))
+    elif(-15 < angle2a < 15):
+        print(f"x={x}, y={y}: Solution 2 -> A1={a1b} ({deg(a1b)}°), A2={a2b} ({deg(a2b)}°)")
+    elif(-15 < angle2b < 15):
+        print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
+    elif(angle2a > 15 or angle2a < -15 and angle2b > 15 or angle2b < -15):
+       difa1 = abs(pos1-a1a) 
+       difa2 = abs(pos2-a2a)
        totDifA = difa1 + difa2
 
-       difb1 = math.abs(pos1-a1b) 
-       difb2 = (math.abs(pos2-a2b))
+       difb1 = abs(pos1-a1b) 
+       difb2 = abs(pos2-a2b)
        totDifB = difb1 + difb2
 
        if(totDifA <= totDifB):
-            return A
+            print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
        else:
-           return B
+            print(f"x={x}, y={y}: Solution 2 -> A1={a1b} ({deg(a1b)}°), A2={a2b} ({deg(a2b)}°)")
 
 
 
 
 def main():
     test_cases = [
-        (40, 30),
-        # (math.sqrt(LEN1*LEN1 + LEN2*LEN2), 0),
-        # (1, 19),
-        # (20, 0),
-        # (0, 20),
-        # (0, 0),
-        # (20, 20)
+        (25, 50)
     ]
 
     for x, y in test_cases:
         try:
             (a1a, a2a), (a1b, a2b) = angles(x, y)
-            print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
-            print(f"x={x}, y={y}: Solution 2 -> A1={a1b} ({deg(a1b)}°), A2={a2b} ({deg(a2b)}°)")
+            choice(a1a, a2a, a1b, a2b, POS1, POS2, x , y)
+            # print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
+            # print(f"x={x}, y={y}: Solution 2 -> A1={a1b} ({deg(a1b)}°), A2={a2b} ({deg(a2b)}°)")
         except ValueError as e:
             print(f"x={x}, y={y}: {e}")
+            
 
 if __name__ == "__main__":
     main()
