@@ -6,7 +6,7 @@ import os
 #1 = je ingebouwde laptop webcam
 #2 = een testfoto
 
-developing = None
+developing = 1
 
 def main():
     #color_recognition.detect(developing)
