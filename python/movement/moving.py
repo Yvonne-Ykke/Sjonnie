@@ -47,7 +47,7 @@ def deg(radians):
     return radians * 180 / math.pi
 
 # Calculate the best angle, print it, and return it
-def choice(shoulder_angle1, elbow_angle1, shoulder_angle2, elbow_angle2, current_pos1, current_pos2, target_x, target_y): 
+def choice(shoulder_angle1, elbow_angle1, shoulder_angle2, elbow_angle2, target_x, target_y): 
     angle1a_deg = deg(shoulder_angle1) # shoulder angle a
     angle1b_deg = deg(shoulder_angle2) # shoulder angle b
     angle2a_deg = deg(elbow_angle1) # elbow angle a
@@ -87,7 +87,7 @@ def main():
     for target_x, target_y in test_cases:
         try:
             (shoulder_angle1, elbow_angle1), (shoulder_angle2, elbow_angle2) = angles(target_x, target_y)
-            angle1, angle2 = choice(shoulder_angle1, elbow_angle1, shoulder_angle2, elbow_angle2, POS1, POS2, target_x, target_y)
+            angle1, angle2 = choice(shoulder_angle1, elbow_angle1, shoulder_angle2, elbow_angle2, target_x, target_y)
             if (-105 < angle1 < -75 or -15 < angle2 < 15):
                 Exception(print("unreachable object detected"))
             else:
