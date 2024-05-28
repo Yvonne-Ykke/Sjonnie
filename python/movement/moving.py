@@ -64,15 +64,11 @@ def choice(a1a, a2a, a1b, a2b, pos1, pos2, x ,y):
         print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
         return deg(a1b), deg(a2b)
     elif(angle2a > 15 or angle2a < -15 and angle2b > 15 or angle2b < -15):
-       difa1 = abs(pos1-a1a) 
-       difa2 = abs(pos2-a2a)
-       totDifA = difa1 + difa2
+       #bereken de verschillen in hoeken en geef de kleinste hoek terug
+       difa = abs(angle1a) + abs(angle2a) 
+       difb = abs(angle1b) + abs(angle2b)
 
-       difb1 = abs(pos1-a1b) 
-       difb2 = abs(pos2-a2b)
-       totDifB = difb1 + difb2
-
-       if(totDifA <= totDifB):
+       if(difa <= difb):
             print(f"x={x}, y={y}: Solution 1 -> A1={a1a} ({deg(a1a)}°), A2={a2a} ({deg(a2a)}°)")
             return deg(a1a), deg(a2a)
        else:
