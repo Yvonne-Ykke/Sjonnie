@@ -1,5 +1,4 @@
 import math
-from Aansturing.Python_Servo_test_v1 import servo_main
 
 # Constants for the lengths of the robot's arm segments
 LEN1 = 30.0
@@ -101,10 +100,8 @@ def main():
                 print("Blind spot detected")
             if(angle1 != None and angle2 != None):
                 print(f"Angle 1 = {angle1} \nAngle 2 = {angle2}")
-                servo_main.control_servo((angle1,angle2), 30)
         except ValueError as e:
             print(f"x={target_x}, y={target_y}: {e}")
-
 
 if __name__ == "__main__":
     main()
