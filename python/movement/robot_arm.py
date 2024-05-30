@@ -16,9 +16,9 @@ def move_to_position(x, y):
 def start_tcp_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind(('0.0.0.0', 65432))
+    server_socket.bind(('0.0.0.0', 66000))
     server_socket.listen(5)
-    print("Server luistert op poort 65432...")
+    print("Server luistert op poort 66000...")
 
     while True:
         client_socket, addr = server_socket.accept()
