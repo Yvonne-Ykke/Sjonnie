@@ -88,14 +88,17 @@ def main(x,y):
             blindSpot2 = blind_spot( shoulder_angle2, elbow_angle2)
             if blindSpot1 == False and blindSpot2 == False:
                 angle1, angle2 = choice(shoulder_angle1, elbow_angle1, shoulder_angle2, elbow_angle2, target_x, target_y)
+                return angle1, angle2
             elif blindSpot1 == False and blindSpot2 == True:
                 print(f"x={target_x}, y={target_y}: Solution 1 -> A1={shoulder_angle1} ({deg(shoulder_angle1)}°), A2={elbow_angle1} ({deg(elbow_angle1)}°)")
                 angle1 = deg(shoulder_angle1)
                 angle2 = deg(elbow_angle1)
+                return angle1, angle2
             elif blindSpot1 == True and blindSpot2 == False:
                 print(f"x={target_x}, y={target_y}: Solution 2 -> A1={shoulder_angle2} ({deg(shoulder_angle2)}°), A2={elbow_angle2} ({deg(elbow_angle2)}°)")
                 angle1 = deg(shoulder_angle2)
                 angle2 = deg(elbow_angle2)
+                return angle1, angle2
             else:
                 print("Blind spot detected")
             if(angle1 != None and angle2 != None):
