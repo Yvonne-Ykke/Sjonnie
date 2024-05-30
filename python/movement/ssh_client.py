@@ -2,7 +2,7 @@ import socket
 
 def stuur_coordinaten(x, y):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect(('141.252.29.47', 65432))  # Pas het IP-adres aan
+    client_socket.connect(('141.252.29.47', 65000))  # Pas het IP-adres aan
 
     try:
         commando = f"{x},{y}"
