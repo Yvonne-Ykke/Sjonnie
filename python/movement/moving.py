@@ -57,18 +57,16 @@ def blind_spot(shoulder_angle, elbow_angle):
         return False
 
 # Calculate the best angle, print it, and return it
-# Calculate the best angle, print it, and return it
-def choice(shoulder_angle1, elbow_angle1, shoulder_angle2, elbow_angle2, target_x, target_y, current_pos1, current_pos2): 
+def choice(shoulder_angle1, elbow_angle1, shoulder_angle2, elbow_angle2, target_x, target_y): 
     angle1a_deg = deg(shoulder_angle1) # shoulder angle a
     angle1b_deg = deg(shoulder_angle2) # shoulder angle b
     angle2a_deg = deg(elbow_angle1) # elbow angle a
     angle2b_deg = deg(elbow_angle2) # elbow angle b
 
-    # Bereken de hoekafstand tussen de huidige positie en de doelpositie voor beide oplossingen
-    diff_a = abs(current_pos1 - angle1a_deg) + abs(current_pos2 - angle2a_deg)
-    diff_b = abs(current_pos1 - angle1b_deg) + abs(current_pos2 - angle2b_deg)
+    diff_a = abs(angle1a_deg) + abs(angle2a_deg) 
+    diff_b = abs(angle1b_deg) + abs(angle2b_deg)
 
-    if diff_a <= diff_b:
+    if (diff_a <= diff_b):
         print(f"x={target_x}, y={target_y}: Solution 1 -> A1={shoulder_angle1} ({deg(shoulder_angle1)}°), A2={elbow_angle1} ({deg(elbow_angle1)}°)")
         return deg(shoulder_angle1), deg(elbow_angle1)
     else:
@@ -89,7 +87,7 @@ def main(x,y):
             blindSpot1 = blind_spot(shoulder_angle1, elbow_angle1)
             blindSpot2 = blind_spot( shoulder_angle2, elbow_angle2)
             if blindSpot1 == False and blindSpot2 == False:
-                angle1, angle2 = choice(shoulder_angle1, elbow_angle1, shoulder_angle2, elbow_angle2, target_x, target_y, POS1, POS2)
+                angle1, angle2 = choice(shoulder_angle1, elbow_angle1, shoulder_angle2, elbow_angle2, target_x, target_y)
                 return angle1, angle2
             elif blindSpot1 == False and blindSpot2 == True:
                 print(f"x={target_x}, y={target_y}: Solution 1 -> A1={shoulder_angle1} ({deg(shoulder_angle1)}°), A2={elbow_angle1} ({deg(elbow_angle1)}°)")
@@ -110,4 +108,3 @@ def main(x,y):
 
 if __name__ == "__main__":
     main()
-
