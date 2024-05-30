@@ -1,6 +1,8 @@
 import socket
 from pyax12.connection import Connection
 import moving
+import signal
+import sys
 
 serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
 
@@ -19,6 +21,13 @@ def start_tcp_server():
     server_socket.bind(('141.252.29.47', 65000))
     server_socket.listen(5)
     print("Server luistert op poort 65000...")
+
+    def signal_handler(sig, frame):
+        print('You pressed Ctrl+C!')
+        server_socket.close()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
 
     while True:
         client_socket, addr = server_socket.accept()
