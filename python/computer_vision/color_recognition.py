@@ -18,7 +18,7 @@ colors = [
     Color("green", [40, 41, 74], [86, 255, 255], [0, 255, 0]),
     Color("yellow", [16, 80, 0], [36, 255, 255], [0, 255, 255]),
     Color("pink", [167, 63, 100], [176, 255, 255], [0, 50, 255]),
-    Color("silver", [0,30,25], [180,100,180])
+    Color("silver", [10, 10, 100], [160, 255, 255])
 ]
 
 def masks(frame):
@@ -60,5 +60,5 @@ def detect(developing):
         
 
 if __name__ == "__main__":
-    detect(True)
+    detect(False)
 
