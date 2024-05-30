@@ -21,7 +21,7 @@ def contouring(developing):
         imgray = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
         blur = cv.GaussianBlur(imgray,(3,3),0)
 
-        ret, threshoog = cv.threshold(blur, 110, 200, cv.THRESH_BINARY)
+        ret, threshoog = cv.threshold(blur, 120, 200, cv.THRESH_BINARY)
 
         #general object shape
         contours, hierarchy = cv.findContours(threshoog, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
@@ -41,10 +41,10 @@ def contouring(developing):
                     child = hierarchy[child][0]
                 
 
-                if 0.07 < factor < 0.1: #scheve schaar
+                if 0.05 < factor < 0.12: #scheve schaar
                      print (area, factor, holes)
                      cv.drawContours(im, [cnt], -1, (255, 0, 0), 3)
-                elif 0.15 < factor < 0.2: #rechte schaar
+                elif 0.12 < factor < 0.2: #rechte schaar
                     print (area, factor, holes)
                     cv.drawContours(im, [cnt], -1, (0, 255, 255), 3)
 
