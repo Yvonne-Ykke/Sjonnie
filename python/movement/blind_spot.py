@@ -4,6 +4,7 @@ import moving
 import robot_arm
 from pyax12.connection import Connection
 import time
+import ssh_client
 
 serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
 
@@ -59,7 +60,9 @@ def check_reachability(x, y):
             print(f"Blindspot gevonden: x={x}, y={y}")
         else:
             print(f"Geen blindspot gevonden: x={x}, y={y}")
-            robot_arm.move_to_position(x,y)
+            
+            ssh_client.stuur_coordinaten(x, y)
+            # robot_arm.move_to_position(x,y)
 
 # Event handler voor muisklikken
 def on_click(event):
