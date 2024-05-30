@@ -2,25 +2,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Parameters
-L1 = 300  # Lengte eerste as
-L2 = 300  # Lengte tweede as
+ARM_1_LENGHT = 300  # Lengte eerste as
+ARM_2_LENGHT = 300  # Lengte tweede as
 
 # Hoeken van -150 tot 150 graden voor beide assen
-theta1 = np.radians(np.linspace(-150, 150, 300))
-theta2 = np.radians(np.linspace(-150, 150, 300))
+shoulder_angles = np.radians(np.linspace(-150, 150, 300))
+elbow_angles = np.radians(np.linspace(-150, 150, 300))
 
-# Bereken de bereikbare coördinaten
-y_reach = []
-x_reach = []
+reachable_coordinates = []
 
-for t1 in theta1:
-    for t2 in theta2:
-        x = L1 * np.cos(t1) + L2 * np.cos(t1 + t2)
-        y = L1 * np.sin(t1) + L2 * np.sin(t1 + t2)
+for shoulder_angle in shoulder_angles:
+    for elbow_angle in elbow_angles:
+        x = ARM_1_LENGHT * np.cos(shoulder_angle) + ARM_2_LENGHT * np.cos(shoulder_angle + elbow_angle)
+        y = ARM_1_LENGHT * np.sin(shoulder_angle) + ARM_2_LENGHT * np.sin(shoulder_angle + elbow_angle)
+        
         # Voeg alleen bereikbare coördinaten toe (vermijd de dode hoeken)
-        if -150 <= np.degrees(t1) <= 150 and -150 <= np.degrees(t2) <= 150:
-            x_reach.append(x)
-            y_reach.append(y)
+        if -150 <= np.degrees(shoulder_angle) <= 150 and -150 <= np.degrees(elbow_angle) <= 150:
+            reachable_coordinates.append((x, y))
+
+# Haal de x- en y-coördinaten uit de lijst van tuples
+x_reach, y_reach = zip(*reachable_coordinates)
 
 # Plot bereikbare coördinaten met omgekeerde assen
 def plot():
@@ -50,29 +51,23 @@ def checkBlindSpot():
             dist = np.sqrt(x * x + y * y)
 
             # Bereken de twee sets van gewrichtshoeken voor gegeven target_x en target_y
-            if dist > (L1 + L2):
+            if dist > (ARM_1_LENGHT + ARM_2_LENGHT):
                 print("Doel is onbereikbaar" + " x: " + str(x) + ", y: " + str(y))
             else:
-                basis_hoek = np.arctan2(y, x)
-                elleboog_hoek = np.arccos((x**2 + y**2 - L1**2 - L2**2) / (2 * L1 * L2))
+                base_angle = np.arctan2(y, x)
+                elbow_angle = np.arccos((x**2 + y**2 - ARM_1_LENGHT**2 - ARM_2_LENGHT**2) / (2 * ARM_1_LENGHT * ARM_2_LENGHT))
 
                 # Eerste set hoeken
-                schouder_hoek1 = basis_hoek + elleboog_hoek
-                elleboog_hoek1 = np.arccos((L1**2 + L2**2 - x**2 - y**2) / (2 * L1 * L2))
-
-                # Tweede set hoeken (andere oplossing)
-                schouder_hoek2 = basis_hoek - elleboog_hoek
-                elleboog_hoek2 = -elleboog_hoek1
+                shoulder_angle = base_angle + elbow_angle
+                elbow_angle = np.arccos((ARM_1_LENGHT**2 + ARM_2_LENGHT**2 - x**2 - y**2) / (2 * ARM_1_LENGHT * ARM_2_LENGHT))
 
                 # Converteer radialen naar graden
-                schouder_hoek1_deg = np.degrees(schouder_hoek1)
-                elleboog_hoek1_deg = np.degrees(elleboog_hoek1)
-                schouder_hoek2_deg = np.degrees(schouder_hoek2)
-                elleboog_hoek2_deg = np.degrees(elleboog_hoek2)
+                shoulder_angle_in_deg = np.degrees(shoulder_angle)
+                elbow_angle_in_deg = np.degrees(elbow_angle)
 
     # Controleer of de schouder en elleboog geen hoek hebben die ze niet kunnen maken. Zo ja, is het object onbereikbaar
     
-                if (-30 < elleboog_hoek1_deg < 30 or -120 < schouder_hoek1_deg < -60):
+                if (-30 < elbow_angle_in_deg < 30 or -120 < shoulder_angle_in_deg < -60):
                     print("Blindspot gevonden" + " x: " + str(x) + ", y: " + str(y))   
                 else:
                     print("geen blindspot gevonden" + " x: " + str(x) + ", y: " + str(y))
