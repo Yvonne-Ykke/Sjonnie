@@ -50,7 +50,7 @@ def blind_spot(shoulder_angle, elbow_angle):
     angle1a_deg = deg(shoulder_angle) # shoulder angle a
     angle2a_deg = deg(elbow_angle) # elbow angle a
     # Check if the shoulder and elbow do not have an angle they cannot make. If so, the object is unreachable
-    if (-15 < angle2a_deg < 15 or -105 < angle1a_deg < -75):
+    if (-30 < angle2a_deg < 30 or -120 < angle1a_deg < -60):
         Exception()
         return True
     else: 
