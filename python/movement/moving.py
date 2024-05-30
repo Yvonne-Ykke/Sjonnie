@@ -1,8 +1,8 @@
 import math
 
 # Constants for the lengths of the robot's arm segments
-LEN1 = 30.0
-LEN2 = 30.0
+LEN1 = 300.0
+LEN2 = 300.0
 # Current position of the servos
 POS1 = 0 
 POS2 = 0
@@ -74,9 +74,9 @@ def choice(shoulder_angle1, elbow_angle1, shoulder_angle2, elbow_angle2, target_
         return deg(shoulder_angle2), deg(elbow_angle2)
 
 # Provide a coordinate and calculate which angles the servos should (ideally) make.
-def main():
+def main(x,y):
     test_cases = [
-        (25, 50)
+        (x, y)
     ]
 
     for target_x, target_y in test_cases:

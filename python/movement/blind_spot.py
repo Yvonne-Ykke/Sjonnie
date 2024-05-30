@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import moving
 
 # Parameters
 ARM_1_LENGTH = 300  # Lengte van de eerste armsegment
@@ -47,10 +48,10 @@ def check_reachability(x, y):
         # Controleer of de schouder en elleboog geen hoek hebben die ze niet kunnen maken. Zo ja, is het object onbereikbaar
         if (-30 < elbow_angle_in_deg < 30 or -120 < shoulder_angle_in_deg < -60):
             print(f"Blindspot gevonden: x={x}, y={y}")
-            return False
+            moving.main(x, y)
         else:
             print(f"Geen blindspot gevonden: x={x}, y={y}")
-            return True
+            moving.main(x, y)
 
 # Event handler voor muisklikken
 def on_click(event):
