@@ -1,6 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import moving
+import robot_arm
+from pyax12.connection import Connection
+import time
+
+serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
+
+dynamixel_id1 = 61
+dynamixel_id2 = 3
+dynamixel_id3 = 10
 
 # Parameters
 ARM_1_LENGTH = 300  # Lengte van de eerste armsegment
@@ -48,10 +57,9 @@ def check_reachability(x, y):
         # Controleer of de schouder en elleboog geen hoek hebben die ze niet kunnen maken. Zo ja, is het object onbereikbaar
         if (-30 < elbow_angle_in_deg < 30 or -120 < shoulder_angle_in_deg < -60):
             print(f"Blindspot gevonden: x={x}, y={y}")
-            moving.main(x, y)
         else:
             print(f"Geen blindspot gevonden: x={x}, y={y}")
-            moving.main(x, y)
+            robot_arm.move_to_position(x,y)
 
 # Event handler voor muisklikken
 def on_click(event):
