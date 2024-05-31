@@ -112,5 +112,5 @@ def main(x, y):
         except ValueError as e:
             print(f"x={target_x}, y={target_y}: {e}")
 
-if __name__ == "__main__":
-    main(300, 300)
+#if __name__ == "__main__":
+    #main()
