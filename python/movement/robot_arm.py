@@ -12,7 +12,6 @@ def move_to_position(shoulder_angle, elbow_angle):
     serial_connection.goto_position(servo_1, shoulder_angle, 100)
     serial_connection.goto_position(servo_2, elbow_angle, 100)
     print(f"Bewegen naar positie: Schouder hoek: {shoulder_angle}, Elleboog hoek: {elbow_angle}")
-    serial_connection.close()
 
 def start_tcp_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -24,6 +23,7 @@ def start_tcp_server():
     def signal_handler(sig, frame):
         print('You pressed Ctrl+C!')
         server_socket.close()
+        serial_connection.close()
         sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
@@ -43,6 +43,7 @@ def start_tcp_server():
         finally:
             client_socket.close()
     server_socket.close()
+    serial_connection.close()
 
 if __name__ == "__main__":
     start_tcp_server()
