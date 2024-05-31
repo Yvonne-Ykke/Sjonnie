@@ -35,7 +35,7 @@ def check_reachability(x, y):
         print(f"Doel is onbereikbaar: x={x}, y={y}")
         return False
     else:
-        base_angle = np.arctan2(y, x)
+        shoulder_angle = np.arctan2(y, x)
         elbow_angle = np.arccos((x**2 + y**2 - ARM_1_LENGTH**2 - ARM_2_LENGTH**2) / (2 * ARM_1_LENGTH * ARM_2_LENGTH))
 
         # Converteer radialen naar graden
