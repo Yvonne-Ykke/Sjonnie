@@ -94,11 +94,6 @@ def main(x,y):
                 angle1 = deg(shoulder_angle1)
                 angle2 = deg(elbow_angle1)
                 return angle1, angle2
-            elif blindSpot1 == True and blindSpot2 == False:
-                print(f"x={target_x}, y={target_y}: Solution 2 -> A1={shoulder_angle2} ({deg(shoulder_angle2)}°), A2={elbow_angle2} ({deg(elbow_angle2)}°)")
-                angle1 = deg(shoulder_angle2)
-                angle2 = deg(elbow_angle2)
-                return angle1, angle2
             else:
                 print("Blind spot detected")
             if(angle1 != None and angle2 != None):

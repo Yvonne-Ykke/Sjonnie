@@ -1,19 +1,17 @@
 import socket
 from pyax12.connection import Connection
-import moving
-import signal
 import sys
+import signal
 
 serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
 
 servo_1 = 61
 servo_2 = 3
 
-def move_to_position(x, y):
-    shoulder_angle, elbow_angle = moving.main(x, y)
+def move_to_position(shoulder_angle, elbow_angle):
     serial_connection.goto_position(servo_1, shoulder_angle, 100)
     serial_connection.goto_position(servo_2, elbow_angle, 100)
-    print(f"Bewegen naar positie ({x}, {y}): Schouder hoek: {shoulder_angle}, Elleboog hoek: {elbow_angle}")
+    print(f"Bewegen naar positie: Schouder hoek: {shoulder_angle}, Elleboog hoek: {elbow_angle}")
 
 def start_tcp_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -36,8 +34,8 @@ def start_tcp_server():
             command = client_socket.recv(1024).decode('utf-8')
             if command.lower() == "quit":
                 break
-            x, y = map(float, command.split(","))
-            move_to_position(x, y)
+            shoulder_angle, elbow_angle = map(float, command.split(","))
+            move_to_position(shoulder_angle, elbow_angle)
             client_socket.sendall("Positie ingesteld.\n".encode('utf-8'))
         except Exception as e:
             client_socket.sendall(f"Fout: {str(e)}\n".encode('utf-8'))

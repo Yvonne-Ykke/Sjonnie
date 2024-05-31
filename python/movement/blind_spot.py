@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import ssh_client
+import controller
+import moving
 
 # Parameters
 ARM_1_LENGTH = 300  # Lengte van de eerste armsegment
@@ -37,10 +38,6 @@ def check_reachability(x, y):
         base_angle = np.arctan2(y, x)
         elbow_angle = np.arccos((x**2 + y**2 - ARM_1_LENGTH**2 - ARM_2_LENGTH**2) / (2 * ARM_1_LENGTH * ARM_2_LENGTH))
 
-        # Eerste set hoeken
-        shoulder_angle = base_angle + elbow_angle
-        elbow_angle = np.arccos((ARM_1_LENGTH**2 + ARM_2_LENGTH**2 - x**2 - y**2) / (2 * ARM_1_LENGTH * ARM_2_LENGTH))
-
         # Converteer radialen naar graden
         shoulder_angle_in_deg = np.degrees(shoulder_angle)
         elbow_angle_in_deg = np.degrees(elbow_angle)
@@ -50,9 +47,8 @@ def check_reachability(x, y):
             print(f"Blindspot gevonden: x={x}, y={y}")
         else:
             print(f"Geen blindspot gevonden: x={x}, y={y}")
-            
-            ssh_client.stuur_coordinaten(x, y)
-            # robot_arm.move_to_position(x,y)
+            shoulder_angle, elbow_angle = moving.main(x, y)
+            controller.move_servos(shoulder_angle, elbow_angle)
 
 # Event handler voor muisklikken
 def on_click(event):
