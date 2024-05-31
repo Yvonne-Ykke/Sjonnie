@@ -19,5 +19,3 @@ def move_servos(shoulder_angle, elbow_angle):
         client_socket.close()
         print("Verbinding gesloten.")
 
-# Voorbeeldgebruik:
-move_servos(45, 90)

@@ -9,8 +9,8 @@ servo_1 = 61
 servo_2 = 3
 
 def move_to_position(shoulder_angle, elbow_angle):
-    serial_connection.goto(servo_1, shoulder_angle, 100)
-    serial_connection.goto(servo_2, elbow_angle, 100)
+    serial_connection.goto(servo_1, shoulder_angle, speed = 100, degrees = True)
+    serial_connection.goto(servo_2, elbow_angle, speed = 100, degrees = True)
     print(f"Bewegen naar positie: Schouder hoek: {shoulder_angle}, Elleboog hoek: {elbow_angle}")
 
 def start_tcp_server():
