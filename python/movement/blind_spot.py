@@ -21,40 +21,47 @@ reachable_coordinates = [(ARM_SEGMENT_LENGTH * np.cos(shoulder_angle) + ARM_SEGM
 
 x_reach, y_reach = zip(*reachable_coordinates)
 
-def calculate_angle_from_coordinates(x, y):
-    return np.arctan2(y, x)
-
-def law_of_cosines(a, b, c):
-    try:
-        cos_C = (a**2 + b**2 - c**2) / (2 * a * b)
-        return np.arccos(np.clip(cos_C, -1.0, 1.0))
-    except ValueError:
-        return float('nan')
-
 def distance(x, y):
     return np.sqrt(x**2 + y**2)
 
-def calculate_arm_angles(target_x, target_y):
-    dist = np.sqrt(target_x ** 2 + target_y ** 2)
-    if dist > 2 * ARM_SEGMENT_LENGTH:
-        return None, None
-
-    cos_elbow_angle = (2 * ARM_SEGMENT_LENGTH ** 2 - dist ** 2) / (2 * ARM_SEGMENT_LENGTH ** 2)
-    cos_elbow_angle = np.clip(cos_elbow_angle, -1, 1)
-    elbow_angle = np.arccos(cos_elbow_angle)
-
-    shoulder_angle = np.arctan2(target_y, target_x) - np.arctan2(ARM_SEGMENT_LENGTH * np.sin(elbow_angle), ARM_SEGMENT_LENGTH + ARM_SEGMENT_LENGTH * np.cos(elbow_angle))
-
-    if target_x < 0:
-        if target_y >= 0:
-            shoulder_angle = np.pi - shoulder_angle  # Second quadrant
-        else:
-            shoulder_angle = -(np.pi - abs(shoulder_angle))  # Third quadrant
-
-    if -150 <= np.degrees(shoulder_angle) <= 150 and -150 <= np.degrees(elbow_angle) <= 150:
-        return np.degrees(shoulder_angle), np.degrees(elbow_angle)
-    else:
-        return None, None
+def inverse_kinematics(target_x, target_y, arm_length1, arm_length2):
+    """
+    Bereken de inverse kinematica voor een 2D twee-gewricht arm.
+    
+    Parameters:
+    target_x (float): x-coördinaat van het doelpunt
+    target_y (float): y-coördinaat van het doelpunt
+    arm_length1 (float): lengte van het eerste segment van de arm
+    arm_length2 (float): lengte van het tweede segment van de arm
+    
+    Returns:
+    tuple: hoeken theta1 en theta2 in graden
+    """
+    
+    # Bereken de afstand van de basis naar het doelpunt
+    distance_to_target = math.sqrt(target_x**2 + target_y**2)
+    
+    # Controleer of het punt bereikbaar is
+    if distance_to_target > (arm_length1 + arm_length2):
+        raise ValueError("Het punt is niet bereikbaar.")
+    
+    # Bereken de hoek voor het tweede gewricht (theta2)
+    cos_angle_joint2 = (target_x**2 + target_y**2 - arm_length1**2 - arm_length2**2) / (2 * arm_length1 * arm_length2)
+    sin_angle_joint2 = math.sqrt(1 - cos_angle_joint2**2)  # Alleen de positieve oplossing overwegen
+    angle_joint2 = math.atan2(sin_angle_joint2, cos_angle_joint2)
+    
+    # Bereken de hoek voor het eerste gewricht (theta1)
+    intermediate_x = arm_length1 + arm_length2 * cos_angle_joint2
+    intermediate_y = arm_length2 * sin_angle_joint2
+    angle_joint1 = math.atan2(target_y, target_x) - math.atan2(intermediate_y, intermediate_x)
+    
+    # Converteer radialen naar graden
+    angle_joint1_degrees = math.degrees(angle_joint1) 
+    angle_joint2_degrees = math.degrees(angle_joint2) 
+    
+    # Pas de hoek van het eerste gewricht aan, zodat 90 graden = 0 graden
+    
+    return angle_joint1_degrees, angle_joint2_degrees
 
 def radians_to_degrees(radians):
     return radians * 180 / np.pi
@@ -88,12 +95,13 @@ def process_target(x, y):
     if is_forbidden_area(x, y):
         return TargetStatus(x, y, None, None, Status.FORBIDDEN_AREA)
     
-    shoulder_angle, elbow_angle = calculate_arm_angles(x, y)
-    if shoulder_angle is None or elbow_angle is None:
+    try:
+        shoulder_angle, elbow_angle = inverse_kinematics(x, y, ARM_SEGMENT_LENGTH, ARM_SEGMENT_LENGTH)
+    except ValueError:
         return TargetStatus(x, y, None, None, Status.OUT_OF_REACH)
     
     if not is_blind_spot(shoulder_angle, elbow_angle):
-        servo_angle_1, servo_angle_2 = convert_angle_for_servo(radians_to_degrees(shoulder_angle)), convert_angle_for_servo(radians_to_degrees(elbow_angle))
+        servo_angle_1, servo_angle_2 = convert_angle_for_servo(shoulder_angle), convert_angle_for_servo(elbow_angle)
         return TargetStatus(x, y, servo_angle_1, servo_angle_2, Status.REACHABLE)
     else:
         return TargetStatus(x, y, None, None, Status.BLIND_SPOT)
@@ -122,7 +130,25 @@ def on_click(event):
         if target_status.status == Status.REACHABLE:
             print(f"Servo Angle 1: {target_status.servo_angle_1}, Servo Angle 2: {target_status.servo_angle_2}")
 
+        # Update arm positions based on calculated angles
+        if target_status.status == Status.REACHABLE:
+            shoulder_angle_rad = np.radians(target_status.servo_angle_1)
+            elbow_angle_rad = np.radians(target_status.servo_angle_2)
+
+            # Calculate coordinates of the arm segments
+            arm1_end_x = ARM_SEGMENT_LENGTH * np.cos(shoulder_angle_rad)
+            arm1_end_y = ARM_SEGMENT_LENGTH * np.sin(shoulder_angle_rad)
+
+            arm2_end_x = arm1_end_x + ARM_SEGMENT_LENGTH * np.cos(shoulder_angle_rad + elbow_angle_rad)
+            arm2_end_y = arm1_end_y + ARM_SEGMENT_LENGTH * np.sin(shoulder_angle_rad + elbow_angle_rad)
+
+            # Update the plot with new arm positions
+            arm1_line.set_data([0, arm1_end_x], [0, arm1_end_y])
+            arm2_line.set_data([arm1_end_x, arm2_end_x], [arm1_end_y, arm2_end_y])
+            fig.canvas.draw_idle()
+
 def plot():
+    global fig, ax, arm1_line, arm2_line, annot
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.plot(y_reach, x_reach, 'b.', markersize=1, label="Reachable Coordinates")
     ax.set_xlabel("y (mm)")
@@ -134,48 +160,18 @@ def plot():
     ax.legend()
     ax.axis('equal')
 
-    # Calculate coordinates for arms
-    arm1_end_x = ARM_SEGMENT_LENGTH * np.cos(np.radians(AX12_MIN_ANGLE))
-    arm1_end_y = ARM_SEGMENT_LENGTH * np.sin(np.radians(AX12_MIN_ANGLE))
-
-    arm2_start_x = arm1_end_x
-    arm2_start_y = arm1_end_y
-
-    arm2_end_x = arm2_start_x + ARM_SEGMENT_LENGTH * np.cos(np.radians(AX12_MAX_ANGLE))
-    arm2_end_y = arm2_start_y + ARM_SEGMENT_LENGTH * np.sin(np.radians(AX12_MAX_ANGLE))
-
-      # Plot the two arms
-    ax.plot([0, arm1_end_x], [0, arm1_end_y], 'r-', linewidth=2, label='Arm 1')
-    ax.plot([arm2_start_x, arm2_end_x], [arm2_start_y, arm2_end_y], 'r-', linewidth=2, label='Arm 2')
+    # Initialize arm lines
+    arm1_line, = ax.plot([0, 0], [0, 0], 'r-', linewidth=2, label='Arm 1')
+    arm2_line, = ax.plot([0, 0], [0, 0], 'r-', linewidth=2, label='Arm 2')
 
     cid_click = fig.canvas.mpl_connect('button_press_event', on_click)
     cid_hover = fig.canvas.mpl_connect('motion_notify_event', on_hover)
 
-    global annot
-    annot = ax.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
+    annot = ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
                         bbox=dict(boxstyle="round", fc="w"),
                         arrowprops=dict(arrowstyle="->"))
     annot.set_visible(False)
 
-    def hover(event):
-        if event.inaxes:
-            x, y = event.xdata, event.ydata
-            target_status = process_target(x, y)
-            update_annot(x, y, target_status.status)
-            annot.set_visible(True)
-            fig.canvas.draw_idle()
-        else:
-            annot.set_visible(False)
-        fig.canvas.draw()
-
-    def update_annot(x, y, status):
-        annot.xy = (x, y)
-        text = f"x={x:.1f}, y={y:.1f} ({status.value})"
-        annot.set_text(text)
-        annot.get_bbox_patch().set_facecolor("white" if status == Status.REACHABLE else "red")
-        annot.get_bbox_patch().set_alpha(0.8)
-
-    fig.canvas.mpl_connect("motion_notify_event", hover)
     plt.show()
 
     fig.canvas.mpl_disconnect(cid_hover)
