@@ -14,7 +14,7 @@ DOTS_PRECISION = 200
 shoulder_angles = np.radians(np.linspace(AX12_MIN_ANGLE, AX12_MAX_ANGLE, DOTS_PRECISION))  # Fine discretization
 elbow_angles = np.radians(np.linspace(AX12_MIN_ANGLE, AX12_MAX_ANGLE, DOTS_PRECISION))     # Fine discretization
 
-reachable_coordinates = [(ARM_SEGMENT_LENGTH * np.cos(shoulder_angle) + ARM_SEGMENT_LENGTH * np.cos(shoulder_angle + elbow_angle),
+reachable_coordinates =[(ARM_SEGMENT_LENGTH * np.cos(shoulder_angle) + ARM_SEGMENT_LENGTH * np.cos(shoulder_angle + elbow_angle),
                           ARM_SEGMENT_LENGTH * np.sin(shoulder_angle) + ARM_SEGMENT_LENGTH * np.sin(shoulder_angle + elbow_angle))
                          for shoulder_angle in shoulder_angles
                          for elbow_angle in elbow_angles]
@@ -114,13 +114,13 @@ def on_hover(event):
         x, y = event.xdata, event.ydata
         target_status = process_target(x, y)
         tooltip_text = f"x={x:.1f}, y={y:.1f} ({target_status.status.value})"
-        annot.xy = (x, y)
-        annot.set_text(tooltip_text)
-        annot.get_bbox_patch().set_facecolor("lightgray" if target_status.status == Status.REACHABLE else "red")
-        annot.get_bbox_patch().set_alpha(0.8)
-        annot.set_visible(True)
+        annot1.xy = (x, y)
+        annot1.set_text(tooltip_text)
+        annot1.get_bbox_patch().set_facecolor("lightgray" if target_status.status == Status.REACHABLE else "red")
+        annot1.get_bbox_patch().set_alpha(0.8)
+        annot1.set_visible(True)
     else:
-        annot.set_visible(False)
+        annot1.set_visible(False)
 
 def on_click(event):
     if event.inaxes:
@@ -146,9 +146,10 @@ def on_click(event):
             arm1_line.set_data([0, arm1_end_x], [0, arm1_end_y])
             arm2_line.set_data([arm1_end_x, arm2_end_x], [arm1_end_y, arm2_end_y])
             fig.canvas.draw_idle()
+            
 
 def plot():
-    global fig, ax, arm1_line, arm2_line, annot
+    global fig, ax, arm1_line, arm2_line, annot1, annot2
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.plot(y_reach, x_reach, 'b.', markersize=1, label="Reachable Coordinates")
     ax.set_xlabel("y (mm)")
@@ -167,14 +168,33 @@ def plot():
     cid_click = fig.canvas.mpl_connect('button_press_event', on_click)
     cid_hover = fig.canvas.mpl_connect('motion_notify_event', on_hover)
 
-    annot = ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
+    annot1 = ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
                         bbox=dict(boxstyle="round", fc="w"),
                         arrowprops=dict(arrowstyle="->"))
-    annot.set_visible(False)
+    annot1.set_visible(False)
+    
+    annot2 = ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
+                        bbox=dict(boxstyle="round", fc="lightblue", alpha=0.5),
+                        arrowprops=dict(arrowstyle="->"))
+    annot2.set_visible(False)
 
     plt.show()
 
     fig.canvas.mpl_disconnect(cid_hover)
     fig.canvas.mpl_disconnect(cid_click)
+
+def on_hover(event):
+    if event.inaxes:
+        x, y = event.xdata, event.ydata
+        target_status = process_target(x, y)
+        tooltip_text = f"x={x:.1f}, y={y:.1f} ({target_status.status.value})"
+        annot1.xy = (x, y)
+        annot1.set_text(tooltip_text)
+        annot1.get_bbox_patch().set_facecolor("lightgray" if target_status.status == Status.REACHABLE else "red")
+        annot1.get_bbox_patch().set_alpha(0.8)
+        annot1.set_visible(True)
+    else:
+        annot1.set_visible(False)
+        annot2.set_visible(False)
 
 plot()
