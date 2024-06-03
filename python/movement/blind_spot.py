@@ -45,11 +45,11 @@ def inverse_kinematics(target_x, target_y, arm_segment_length):
     angle_joint2_degrees = math.degrees(angle_joint2)
 
     # Check if the arm can come to rest on the right side
-    if target_x > 0:
+    if target_x < 0:
         # Calculate the angle for the second joint (theta2) for the other possible position
         cos_angle_joint2_other = (target_x**2 + target_y**2 - arm_segment_length**2 - arm_segment_length**2) / (2 * arm_segment_length * arm_segment_length)
         sin_angle_joint2_other = math.sqrt(1 - cos_angle_joint2_other**2)
-        if target_x > 0 and target_y > 0:  # Passende oplossing selecteren
+        if target_x < 0 and target_y > 0:  # Passende oplossing selecteren
             sin_angle_joint2_other = -sin_angle_joint2_other
         angle_joint2_other = math.atan2(sin_angle_joint2_other, cos_angle_joint2_other)
 
@@ -61,6 +61,23 @@ def inverse_kinematics(target_x, target_y, arm_segment_length):
         angle_joint2_other_degrees = math.degrees(angle_joint2_other)
 
         # Return the closest solution
+        if distance_to_target > 2 * arm_segment_length:
+            return angle_joint1_degrees, angle_joint2_degrees
+        else:
+            return angle_joint1_other_degrees, angle_joint2_other_degrees
+    elif target_x > 0 and target_y < 0:
+        cos_angle_joint2_other = (target_x**2 + target_y**2 - arm_segment_length**2 - arm_segment_length**2) / (2 * arm_segment_length * arm_segment_length)
+        sin_angle_joint2_other = math.sqrt(1 - cos_angle_joint2_other**2)
+        sin_angle_joint2_other = -sin_angle_joint2_other
+
+        angle_joint2_other = math.atan2(sin_angle_joint2_other, cos_angle_joint2_other)
+
+        # Calculate the angle for the first joint (theta1) for the other possible position
+        angle_joint1_other = math.atan2(target_y, target_x) - math.atan2(arm_segment_length * sin_angle_joint2_other, arm_segment_length + arm_segment_length * cos_angle_joint2_other)
+
+        # Convert radians to degrees
+        angle_joint1_other_degrees = math.degrees(angle_joint1_other)
+        angle_joint2_other_degrees = math.degrees(angle_joint2_other)
         if distance_to_target > 2 * arm_segment_length:
             return angle_joint1_degrees, angle_joint2_degrees
         else:
