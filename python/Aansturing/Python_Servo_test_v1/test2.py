@@ -3,7 +3,7 @@ import time
 
 serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
 
-dynamixel_id1 = 61
+dynamixel_id1 = 69
 dynamixel_id2 = 3
 dynamixel_id3 = 10
 
