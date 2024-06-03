@@ -50,7 +50,7 @@ def blind_spot(shoulder_angle, elbow_angle):
     angle1a_deg = deg(shoulder_angle) # shoulder angle a
     angle2a_deg = deg(elbow_angle) # elbow angle a
     # Check if the shoulder and elbow do not have an angle they cannot make. If so, the object is unreachable
-    if (-15 < angle2a_deg < 15 or -105 < angle1a_deg < -75):
+    if (-30 < angle2a_deg < 30 or -120 < angle1a_deg < -60):
         Exception()
         return True
     else: 
@@ -88,23 +88,18 @@ def main():
             blindSpot2 = blind_spot( shoulder_angle2, elbow_angle2)
             if blindSpot1 == False and blindSpot2 == False:
                 angle1, angle2 = choice(shoulder_angle1, elbow_angle1, shoulder_angle2, elbow_angle2, target_x, target_y)
-                print(f"Angle 1 = {angle1}")
-                print(f"Angle 2 = {angle2}")
             elif blindSpot1 == False and blindSpot2 == True:
                 print(f"x={target_x}, y={target_y}: Solution 1 -> A1={shoulder_angle1} ({deg(shoulder_angle1)}°), A2={elbow_angle1} ({deg(elbow_angle1)}°)")
                 angle1 = deg(shoulder_angle1)
                 angle2 = deg(elbow_angle1)
-                print(f"Angle 1 = {angle1}")
-                print(f"Angle 2 = {angle2}")
             elif blindSpot1 == True and blindSpot2 == False:
                 print(f"x={target_x}, y={target_y}: Solution 2 -> A1={shoulder_angle2} ({deg(shoulder_angle2)}°), A2={elbow_angle2} ({deg(elbow_angle2)}°)")
                 angle1 = deg(shoulder_angle2)
                 angle2 = deg(elbow_angle2)
-                print(f"Angle 1 = {angle1}")
-                print(f"Angle 2 = {angle2}")
             else:
                 print("Blind spot detected")
-
+            if(angle1 != None and angle2 != None):
+                print(f"Angle 1 = {angle1} \nAngle 2 = {angle2}")
         except ValueError as e:
             print(f"x={target_x}, y={target_y}: {e}")
 

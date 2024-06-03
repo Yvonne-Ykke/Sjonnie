@@ -1,6 +1,9 @@
-import math
-import serial
-import RPi.GPIO as GPIO
+#########################################################################################################
+# ============================== BRNO UNIVERSITY OF TECHNOLOGY ======================================== #
+# ============================== FACULTY OF MECHANICAL ENGINEERING ==================================== #
+# =========================INSITUTE OF AUTOMATION AND COMPUTER SCIENCE ================================ #
+# Autor: Roman Parak
+#########################################################################################################
 
 import pylab
 from pylab import *
@@ -9,18 +12,17 @@ import communication
 import dun_ax_12p as dyn_ax_12p
 import parameters
 import time
+import RPi.GPIO as GPIO
 
-from tkinter import *
+
 import time
 import threading
-
-
 
 #definieer de pins waar de communicatie langs gaat op raspberry pi 4
 TX_Pin = 14
 RX_Pin = 15
 TR_Pin = 18
-BaudRate = 1000000
+BaudRate = 1_000_000
 
 #Definieer servo id (is al bekend)(denk ik)
 S1_ID = 3
@@ -34,38 +36,15 @@ GPIO.setup(TX_Pin, GPIO.OUT)
 GPIO.setup(RX_Pin, GPIO.IN)
 GPIO.setup(TR_Pin, GPIO.OUT)
 
-ser = serial.Serial('/dev/serial0', BaudRate, timeout=1)
-
-
-
-def main():
-    
-    present_position(p_d, dC_AX_12p, S1_ID)
-    set_position(p_d, dC_AX_12p, S1_ID, 40)
-    control_servo(30, 10)
-
 class HSV_init_scale:
     def __init__(self):
         self.Position = 0
         self.Velocity = 0
-        
 
-def init_current_scale(root, hsv_var, label):
-    return Scale(root, from_=0, to=500, length=500, tickinterval=50, orient=HORIZONTAL, label=label, command=lambda v: setattr(scale_hsv, hsv_var, v))
+def main():
+  #control_servo(30, 70)
+  present_position(p_d, dC_AX_12p, S1_ID)
 
-def main_loop_scale(scale):
-    root=Tk()
-    root.title('Dynamixel AX-1A - Manual control')
-    hsv_var = ['Position','Velocity']
-    
-    s   = []
-    hsv = [0, 0]
-    for i in range(0,len(hsv_var)):
-        s = init_current_scale(root, hsv_var[i], hsv_var[i])
-        s.set(hsv[i])
-        s.pack()
-
-    root.mainloop()
 def present_position(p_d, dC_AX_12p, dyn_id):
   # initialization packet
   packet_command = [p_d.AX_12p_PRESENT_POSITION_L, p_d.AX_12p_RETURN_READ] # AREA {RAM} | STATUS RETURNS LEVELS
@@ -87,6 +66,7 @@ def present_position(p_d, dC_AX_12p, dyn_id):
     print('Error!')
 
   return a
+
 def present_temperature(p_d, dC_AX_12p, dyn_id):
   # initialization packet
   packet_command = [p_d.AX_12p_PRESENT_TEMPERATURE, p_d.AX_12p_RETURN_READ] # AREA {RAM} | STATUS RETURNS LEVELS
@@ -137,7 +117,6 @@ def set_position(p_d, dC_AX_12p, dyn_id, goal_pos):
     dC_AX_12p.release_packet_param_AX_12p()
   else:
     print('Error!')
-
 def is_motor_moving(p_d, dC_AX_12p, dyn_id):
   # initialization packet
   packet_command = [p_d.AX_12p_MOVING, p_d.AX_12p_RETURN_READ] # AREA {RAM} | STATUS RETURNS LEVELS
@@ -157,6 +136,7 @@ def is_motor_moving(p_d, dC_AX_12p, dyn_id):
 
   return int(result)
 
+# define global class for scale
 global scale_hsv
 # initialization class for scale
 scale_hsv = HSV_init_scale()
@@ -224,9 +204,6 @@ goal_speed1 = 0
 
 pos_forValue = 10
 
-
-
-
 def control_servo(pos, vel):
   global res, res_before, res_beforeN, pos_bR, pos_bL
 
@@ -259,7 +236,6 @@ def control_servo(pos, vel):
       # 237 - 240
   
   return res
-
 
 # Sinwave Generator
 def SinwaveformGenerator(arg):
@@ -301,8 +277,7 @@ def SinwaveformGenerator(arg):
   values.append(int(scale_hsv.Position))
   values1.append(int(scale_hsv.Velocity))
 
-
-
+# Real-time Ploter
 def RealtimePloter(arg):
   global values, values1
 
@@ -325,19 +300,14 @@ timer.start()
 timer2.start()
 
 # threading scale_loop
-threading.Thread(target=main_loop_scale, args=(scale_hsv,)).start()
+#threading.Thread(target=main_loop_scale, args=(scale_hsv,)).start()
 
 # Show actual result
 pylab.show()
 
 # Close port
 
+if __name__ == '__main__':
+  main()
+  s_p.close_serialPort()
 
-
-
-
-if __name__ == "__main__":
-    main()
-
-
-s_p.close_serialPort()
