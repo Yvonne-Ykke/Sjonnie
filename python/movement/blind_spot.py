@@ -2,9 +2,10 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from enum import Enum
+from functools import lru_cache
 
 # Parameters
-ARM_SEGMENT_LENGTH = 300.0
+SEGMENT_LENGTH = 300.0
 AX12_MIN_ANGLE = -150
 AX12_MAX_ANGLE = 150
 FORBIDDEN_RADIUS = 150.0
@@ -14,142 +15,103 @@ DOTS_PRECISION = 200
 shoulder_angles = np.radians(np.linspace(AX12_MIN_ANGLE, AX12_MAX_ANGLE, DOTS_PRECISION))  # Fine discretization
 elbow_angles = np.radians(np.linspace(AX12_MIN_ANGLE, AX12_MAX_ANGLE, DOTS_PRECISION))     # Fine discretization
 
-reachable_coordinates =[(ARM_SEGMENT_LENGTH * np.cos(shoulder_angle) + ARM_SEGMENT_LENGTH * np.cos(shoulder_angle + elbow_angle),
-                          ARM_SEGMENT_LENGTH * np.sin(shoulder_angle) + ARM_SEGMENT_LENGTH * np.sin(shoulder_angle + elbow_angle))
+reachable_coordinates = [(SEGMENT_LENGTH * (np.cos(shoulder_angle) + np.cos(shoulder_angle + elbow_angle)),
+                          SEGMENT_LENGTH * (np.sin(shoulder_angle) + np.sin(shoulder_angle + elbow_angle)))
                          for shoulder_angle in shoulder_angles
                          for elbow_angle in elbow_angles]
 
+
 x_reach, y_reach = zip(*reachable_coordinates)
 
-def distance(x, y):
-    return np.sqrt(x**2 + y**2)
+def point_is_out_of_reach(x, y, arm_segment_length):
+    if distance_from_origin(x, y) > 2 * arm_segment_length:
+         return True
+    
+def calculate_arm_angles(x, y, arm_segment_length):
 
-def inverse_kinematics(target_x, target_y, arm_segment_length):
-    # Calculate the distance from the base to the target point
-    distance_to_target = math.sqrt(target_x**2 + target_y**2)
-    if distance_to_target > 2 * arm_segment_length:
-        raise ValueError("The target point is not reachable.")
+    # Calculate the angle for the elbow joint (theta2)
+    cos_angle_elbow = (x**2 + y**2 - arm_segment_length**2 - arm_segment_length**2) / (2 * arm_segment_length * arm_segment_length)
+    sin_angle_elbow = math.sqrt(1 - cos_angle_elbow**2)
+    if x < 0 and y < 0:  # Select appropriate solution
+        sin_angle_elbow = -sin_angle_elbow
+    elbow_angle = math.atan2(sin_angle_elbow, cos_angle_elbow)
 
-    # Calculate the angle for the second joint (theta2)
-    cos_angle_joint2 = (target_x**2 + target_y**2 - arm_segment_length**2 - arm_segment_length**2) / (2 * arm_segment_length * arm_segment_length)
-    sin_angle_joint2 = math.sqrt(1 - cos_angle_joint2**2)
-    if target_x < 0 and target_y < 0:  # Passende oplossing selecteren
-        sin_angle_joint2 = -sin_angle_joint2
-    angle_joint2 = math.atan2(sin_angle_joint2, cos_angle_joint2)
-
-    # Calculate the angle for the first joint (theta1)
-    angle_joint1 = math.atan2(target_y, target_x) - math.atan2(arm_segment_length * sin_angle_joint2, arm_segment_length + arm_segment_length * cos_angle_joint2)
+    # Calculate the angle for the shoulder joint (theta1)
+    shoulder_angle = math.atan2(y, x) - math.atan2(arm_segment_length * sin_angle_elbow, arm_segment_length + arm_segment_length * cos_angle_elbow)
 
     # Convert radians to degrees
-    angle_joint1_degrees = math.degrees(angle_joint1)
-    angle_joint2_degrees = math.degrees(angle_joint2)
+    shoulder_angle_degrees = math.degrees(shoulder_angle)
+    elbow_angle_degrees = math.degrees(elbow_angle)
 
     # Check if the arm can come to rest on the right side
-    if target_x < 0:
-        # Calculate the angle for the second joint (theta2) for the other possible position
-        cos_angle_joint2_other = (target_x**2 + target_y**2 - arm_segment_length**2 - arm_segment_length**2) / (2 * arm_segment_length * arm_segment_length)
-        sin_angle_joint2_other = math.sqrt(1 - cos_angle_joint2_other**2)
-        if target_x < 0 and target_y > 0:  # Passende oplossing selecteren
-            sin_angle_joint2_other = -sin_angle_joint2_other
-        angle_joint2_other = math.atan2(sin_angle_joint2_other, cos_angle_joint2_other)
+    if x < 0:
+        # Calculate the angle for the elbow joint (theta2) for the other possible position
+        cos_angle_elbow_other = (x**2 + y**2 - arm_segment_length**2 - arm_segment_length**2) / (2 * arm_segment_length * arm_segment_length)
+        sin_angle_elbow_other = math.sqrt(1 - cos_angle_elbow_other**2)
+        if x < 0 and y > 0:  # Select appropriate solution
+            sin_angle_elbow_other = -sin_angle_elbow_other
+        elbow_angle_other = math.atan2(sin_angle_elbow_other, cos_angle_elbow_other)
 
-        # Calculate the angle for the first joint (theta1) for the other possible position
-        angle_joint1_other = math.atan2(target_y, target_x) - math.atan2(arm_segment_length * sin_angle_joint2_other, arm_segment_length + arm_segment_length * cos_angle_joint2_other)
+        # Calculate the angle for the shoulder joint (theta1) for the other possible position
+        shoulder_angle_other = math.atan2(y, x) - math.atan2(arm_segment_length * sin_angle_elbow_other, arm_segment_length + arm_segment_length * cos_angle_elbow_other)
 
         # Convert radians to degrees
-        angle_joint1_other_degrees = math.degrees(angle_joint1_other)
-        angle_joint2_other_degrees = math.degrees(angle_joint2_other)
+        shoulder_angle_other_degrees = math.degrees(shoulder_angle_other)
+        elbow_angle_other_degrees = math.degrees(elbow_angle_other)
 
         # Return the closest solution
-        if distance_to_target > 2 * arm_segment_length:
-            return angle_joint1_degrees, angle_joint2_degrees
-        else:
-            return angle_joint1_other_degrees, angle_joint2_other_degrees
-    elif target_x > 0 and target_y < 0:
-        cos_angle_joint2_other = (target_x**2 + target_y**2 - arm_segment_length**2 - arm_segment_length**2) / (2 * arm_segment_length * arm_segment_length)
-        sin_angle_joint2_other = math.sqrt(1 - cos_angle_joint2_other**2)
-        sin_angle_joint2_other = -sin_angle_joint2_other
+        if distance_from_origin(x, y) < 2 * arm_segment_length:
+            return shoulder_angle_other_degrees, elbow_angle_other_degrees
+        
+        return shoulder_angle_degrees, elbow_angle_degrees
+            
+    elif x > 0 and y < 0:
+        cos_angle_elbow_other = (x**2 + y**2 - arm_segment_length**2 - arm_segment_length**2) / (2 * arm_segment_length * arm_segment_length)
+        sin_angle_elbow_other = math.sqrt(1 - cos_angle_elbow_other**2)
+        sin_angle_elbow_other = -sin_angle_elbow_other
 
-        angle_joint2_other = math.atan2(sin_angle_joint2_other, cos_angle_joint2_other)
+        elbow_angle_other = math.atan2(sin_angle_elbow_other, cos_angle_elbow_other)
 
-        # Calculate the angle for the first joint (theta1) for the other possible position
-        angle_joint1_other = math.atan2(target_y, target_x) - math.atan2(arm_segment_length * sin_angle_joint2_other, arm_segment_length + arm_segment_length * cos_angle_joint2_other)
+        # Calculate the angle for the shoulder joint (theta1) for the other possible position
+        shoulder_angle_other = math.atan2(y, x) - math.atan2(arm_segment_length * sin_angle_elbow_other, arm_segment_length + arm_segment_length * cos_angle_elbow_other)
 
         # Convert radians to degrees
-        angle_joint1_other_degrees = math.degrees(angle_joint1_other)
-        angle_joint2_other_degrees = math.degrees(angle_joint2_other)
-        if distance_to_target > 2 * arm_segment_length:
-            return angle_joint1_degrees, angle_joint2_degrees
+        shoulder_angle_other_degrees = math.degrees(shoulder_angle_other)
+        elbow_angle_other_degrees = math.degrees(elbow_angle_other)
+        if distance_from_origin(x, y) > 2 * arm_segment_length:
+            return shoulder_angle_degrees, elbow_angle_degrees
         else:
-            return angle_joint1_other_degrees, angle_joint2_other_degrees
+            return shoulder_angle_other_degrees, elbow_angle_other_degrees
     else:
-        return angle_joint1_degrees, angle_joint2_degrees
+        return shoulder_angle_degrees, elbow_angle_degrees
 
-
-def map_to_servo(shoulder_angle):
-    	return -(shoulder_angle + 90) % 360 - 180
-
-def radians_to_degrees(radians):
-    return radians * 180 / np.pi
-
-def map_to_servo(angle):
-    return -(angle + 90) % 360 - 180
-
-def within_angle_range(angle):
-    return -150 <= angle <= 150
-
-def are_valid_angles(shoulder_angle, elbow_angle):
-    shoulder_servo_angle = map_to_servo(shoulder_angle)
-    print(f"origneel: {shoulder_angle:.1f}, {elbow_angle:.1f}")
-    print(f"Servo:: {shoulder_servo_angle:.1f}, elbow_angle: {elbow_angle:.1f}")
-    return within_angle_range(shoulder_servo_angle) and within_angle_range(elbow_angle)
-
-def is_forbidden_area(x, y):
-    return distance(x, y) <= FORBIDDEN_RADIUS
-
-
-class Status(Enum):
-    FORBIDDEN_AREA = "Forbidden area"
-    OUT_OF_REACH = "Out of reach"
-    REACHABLE = "Reachable"
-    BLIND_SPOT = "Blind spot"
-
-class TargetStatus:
-    def __init__(self, x, y, servo_angle_1, servo_angle_2, status):
-        self.x = x
-        self.y = y
-        self.servo_angle_1 = servo_angle_1
-        self.servo_angle_2 = servo_angle_2
-        self.status = status
-
-
-def process_target(x, y):
-    if is_forbidden_area(x, y):
-        return TargetStatus(x, y, None, None, Status.FORBIDDEN_AREA)
-    
-    try:
-        shoulder_angle, elbow_angle = inverse_kinematics(x, y, ARM_SEGMENT_LENGTH)
-    except ValueError:
-        return TargetStatus(x, y, None, None, Status.OUT_OF_REACH)
-    
-    are_valid_angles2 = are_valid_angles(shoulder_angle, elbow_angle)
-    if are_valid_angles2:
-        return TargetStatus(x, y, shoulder_angle, elbow_angle, Status.REACHABLE)
-    else:
-        print(" NO Valid angles!")
-        return TargetStatus(x, y, None, None, Status.BLIND_SPOT)
+def radians_to_degrees(radians): return radians * 180 / np.pi
+def is_in_range(angle): return -150 <= angle <= 150
+def point_hits_robot_base(x, y): return distance_from_origin(x, y) <= FORBIDDEN_RADIUS
+def convert_to_servo_angle(angle): return -(angle + 90) % 360 - 180
+def is_in_range(angle): return -150 <= angle <= 150
+def is_valid_angle(angle): return is_in_range(angle)
+def distance_from_origin(x, y): return np.sqrt(x ** 2 + y ** 2)
 
 def main(x, y):
-    return process_target(x, y)
+    return calculate_valid_angles(x, y)
+
+def calculate_valid_angles(x_pos, y_pos):
+    if point_hits_robot_base(x_pos, y_pos) or point_is_out_of_reach(x_pos, y_pos, SEGMENT_LENGTH): return None, None
+
+    shoulder_angle, elbow_angle = calculate_arm_angles(x_pos, y_pos, SEGMENT_LENGTH)
+    
+    if is_valid_angle(convert_to_servo_angle(shoulder_angle)) and is_valid_angle(elbow_angle):
+        return shoulder_angle, elbow_angle
+    return None, None
 
 def on_hover(event):
     if event.inaxes:
         x, y = event.xdata, event.ydata
-        target_status = process_target(x, y)
-        tooltip_text = f"x={x:.1f}, y={y:.1f}, ({target_status.status.value}), ({map_to_servo(target_status.servo_angle_1):.1f}, ({target_status.servo_angle_2:.1f})"
+        tooltip_text = f"x={x:.1f}, y={y:.1f}"
         annot1.xy = (x, y)
         annot1.set_text(tooltip_text)
-        annot1.get_bbox_patch().set_facecolor("lightgray" if target_status.status == Status.REACHABLE else "red")
+        annot1.get_bbox_patch().set_facecolor("lightgray")
         annot1.get_bbox_patch().set_alpha(0.8)
         annot1.set_visible(True)
     else:
@@ -158,38 +120,37 @@ def on_hover(event):
 def on_click(event):
     if event.inaxes:
         x, y = event.xdata, event.ydata
-        target_status = process_target(x, y)
-        if target_status.status == Status.REACHABLE: 
-            print(f"Angles: {map_to_servo(target_status.servo_angle_1):.1f}, {target_status.servo_angle_2:.1f}")
-        # Update arm positions based on calculated angles
-        if target_status.status == Status.REACHABLE:
-            shoulder_angle_rad = np.radians(target_status.servo_angle_1)
-            elbow_angle_rad = np.radians(target_status.servo_angle_2)
+        shoulder_angle, elbow_angle = calculate_valid_angles(x, y)
+
+        if (shoulder_angle is not None) and (elbow_angle is not None):
+            shoulder_angle_servo = convert_to_servo_angle(shoulder_angle)
+            print(f"Angles: {shoulder_angle_servo:.1f}, {elbow_angle:.1f}")
+        
+            shoulder_angle_rad = np.radians(shoulder_angle)
+            elbow_angle_rad = np.radians(elbow_angle)
 
             # Calculate coordinates of the arm segments
-            arm1_end_x = ARM_SEGMENT_LENGTH * np.cos(shoulder_angle_rad)
-            arm1_end_y = ARM_SEGMENT_LENGTH * np.sin(shoulder_angle_rad)
+            upper_arm_end_x = SEGMENT_LENGTH * np.cos(shoulder_angle_rad)
+            upper_arm_end_y = SEGMENT_LENGTH * np.sin(shoulder_angle_rad)
 
-            arm2_end_x = arm1_end_x + ARM_SEGMENT_LENGTH * np.cos(shoulder_angle_rad + elbow_angle_rad)
-            arm2_end_y = arm1_end_y + ARM_SEGMENT_LENGTH * np.sin(shoulder_angle_rad + elbow_angle_rad)
+            lower_arm_end_x = upper_arm_end_x + SEGMENT_LENGTH * np.cos(shoulder_angle_rad + elbow_angle_rad)
+            lower_arm_end_y = upper_arm_end_y + SEGMENT_LENGTH * np.sin(shoulder_angle_rad + elbow_angle_rad)
 
             # Update the plot with new arm positions
-            arm1_line.set_data([0, arm1_end_x], [0, arm1_end_y])
-            arm2_line.set_data([arm1_end_x, arm2_end_x], [arm1_end_y, arm2_end_y])
+            arm1_line.set_data([0, upper_arm_end_x], [0, upper_arm_end_y])
+            arm2_line.set_data([upper_arm_end_x, lower_arm_end_x], [upper_arm_end_y, lower_arm_end_y])
             fig.canvas.draw_idle()
             
-
 def plot():
     global fig, ax, arm1_line, arm2_line, annot1, annot2
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.plot(y_reach, x_reach, 'b.', markersize=1, label="Reachable Coordinates")
-    ax.set_xlabel("y (mm)")
-    ax.set_ylabel("x (mm)")
-    ax.set_title("Reachable Coordinates of the Robot Arm (Reversed Axes)")
+    ax.set(xlabel="y (mm)", ylabel="x (mm)", title="Reachable Coordinates of the Robot Arm (Reversed Axes)", aspect='equal')
     ax.grid(True)
     ax.axhline(0, color='black', linewidth=0.5)
     ax.axvline(0, color='black', linewidth=0.5)
     ax.legend()
+
     ax.axis('equal')
 
     # Initialize arm lines
@@ -213,19 +174,4 @@ def plot():
 
     fig.canvas.mpl_disconnect(cid_hover)
     fig.canvas.mpl_disconnect(cid_click)
-
-def on_hover(event):
-    if event.inaxes:
-        x, y = event.xdata, event.ydata
-        target_status = process_target(x, y)
-        tooltip_text = f"x={x:.1f}, y={y:.1f} ({target_status.status.value})"
-        annot1.xy = (x, y)
-        annot1.set_text(tooltip_text)
-        annot1.get_bbox_patch().set_facecolor("lightgray" if target_status.status == Status.REACHABLE else "red")
-        annot1.get_bbox_patch().set_alpha(0.8)
-        annot1.set_visible(True)
-    else:
-        annot1.set_visible(False)
-        annot2.set_visible(False)
-
 plot()
