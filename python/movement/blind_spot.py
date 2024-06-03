@@ -66,10 +66,12 @@ def inverse_kinematics(target_x, target_y, arm_length1, arm_length2):
 def radians_to_degrees(radians):
     return radians * 180 / np.pi
 
+def convert_shoulder_angle_to_servo(shoulder_angle):
+    	return -(shoulder_angle + 90) % 360 - 180
+
 def is_blind_spot(shoulder_angle, elbow_angle):
-    shoulder_angle_deg = radians_to_degrees(shoulder_angle)
-    elbow_angle_deg = radians_to_degrees(elbow_angle)
-    return (-150 <= shoulder_angle_deg <= 150) and (-150 <= elbow_angle_deg <= 150)
+    shoulder_angle_deg = convert_shoulder_angle_to_servo(shoulder_angle)
+    return (-150 <= shoulder_angle_deg <= 150) and (-150 <= elbow_angle <= 150)
 
 def is_forbidden_area(x, y):
     return distance(x, y) <= FORBIDDEN_RADIUS
@@ -91,6 +93,7 @@ class TargetStatus:
         self.servo_angle_2 = servo_angle_2
         self.status = status
 
+
 def process_target(x, y):
     if is_forbidden_area(x, y):
         return TargetStatus(x, y, None, None, Status.FORBIDDEN_AREA)
@@ -100,9 +103,8 @@ def process_target(x, y):
     except ValueError:
         return TargetStatus(x, y, None, None, Status.OUT_OF_REACH)
     
-    if not is_blind_spot(shoulder_angle, elbow_angle):
-        servo_angle_1, servo_angle_2 = convert_angle_for_servo(shoulder_angle), convert_angle_for_servo(elbow_angle)
-        return TargetStatus(x, y, servo_angle_1, servo_angle_2, Status.REACHABLE)
+    if is_blind_spot(shoulder_angle, elbow_angle):
+        return TargetStatus(x, y, shoulder_angle, elbow_angle, Status.REACHABLE)
     else:
         return TargetStatus(x, y, None, None, Status.BLIND_SPOT)
 
@@ -113,7 +115,7 @@ def on_hover(event):
     if event.inaxes:
         x, y = event.xdata, event.ydata
         target_status = process_target(x, y)
-        tooltip_text = f"x={x:.1f}, y={y:.1f} ({target_status.status.value})"
+        tooltip_text = f"x={x:.1f}, y={y:.1f}, ({target_status.status.value}), ({convert_shoulder_angle_to_servo(target_status.servo_angle_1):.1f}, ({target_status.servo_angle_2:.1f})"
         annot1.xy = (x, y)
         annot1.set_text(tooltip_text)
         annot1.get_bbox_patch().set_facecolor("lightgray" if target_status.status == Status.REACHABLE else "red")
@@ -127,9 +129,8 @@ def on_click(event):
         x, y = event.xdata, event.ydata
         target_status = process_target(x, y)
         print(f"Clicked on: x={x:.1f}, y={y:.1f}, Status: {target_status.status.value}")
-        if target_status.status == Status.REACHABLE:
-            print(f"Servo Angle 1: {target_status.servo_angle_1}, Servo Angle 2: {target_status.servo_angle_2}")
-
+        if target_status.status == Status.REACHABLE: 
+            print(f"Servo Angle 1: {convert_shoulder_angle_to_servo(target_status.servo_angle_1)}, Servo Angle 2: {target_status.servo_angle_2}")
         # Update arm positions based on calculated angles
         if target_status.status == Status.REACHABLE:
             shoulder_angle_rad = np.radians(target_status.servo_angle_1)
@@ -187,7 +188,7 @@ def on_hover(event):
     if event.inaxes:
         x, y = event.xdata, event.ydata
         target_status = process_target(x, y)
-        tooltip_text = f"x={x:.1f}, y={y:.1f} ({target_status.status.value})"
+        tooltip_text = f"x={x:.1f}, y={y:.1f} ({convert_shoulder_angle_to_servo(target_status.servo_angle_1):.1f}, {target_status.servo_angle_2:.1f}) ({target_status.status.value})"
         annot1.xy = (x, y)
         annot1.set_text(tooltip_text)
         annot1.get_bbox_patch().set_facecolor("lightgray" if target_status.status == Status.REACHABLE else "red")
