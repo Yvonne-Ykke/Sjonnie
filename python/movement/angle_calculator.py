@@ -2,7 +2,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from enum import Enum
-from functools import lru_cache
+import controller
 
 # Parameters
 SEGMENT_LENGTH = 300.0
@@ -27,50 +27,36 @@ def point_is_out_of_reach(x, y, arm_segment_length):
     if distance_from_origin(x, y) > 2 * arm_segment_length:
          return True
     
-def calculate_arm_angles(x, y, arm_segment_length):
-    cos_angle_elbow = (x**2 + y**2 - arm_segment_length**2 - arm_segment_length**2) / (2 * arm_segment_length * arm_segment_length)
+def calculate_arm_angles(x, y, segment_length):
+    cos_angle_elbow = (x**2 + y**2 - segment_length**2 - segment_length**2) / (2 * segment_length * segment_length)
     sin_angle_elbow = math.sqrt(1 - cos_angle_elbow**2)
     if x < 0 and y < 0:  # Select appropriate solution
         sin_angle_elbow = -sin_angle_elbow
     elbow_angle = math.atan2(sin_angle_elbow, cos_angle_elbow)
 
-    shoulder_angle = math.atan2(y, x) - math.atan2(arm_segment_length * sin_angle_elbow, arm_segment_length + arm_segment_length * cos_angle_elbow)
+    shoulder_angle = math.atan2(y, x) - math.atan2(segment_length * sin_angle_elbow, segment_length + segment_length * cos_angle_elbow)
 
     shoulder_angle_degrees = math.degrees(shoulder_angle)
     elbow_angle_degrees = math.degrees(elbow_angle)
 
-    if x < 0:
-        cos_angle_elbow_other = (x**2 + y**2 - arm_segment_length**2 - arm_segment_length**2) / (2 * arm_segment_length * arm_segment_length)
-        sin_angle_elbow_other = math.sqrt(1 - cos_angle_elbow_other**2)
-        if x < 0 and y > 0:  # Select appropriate solution
-            sin_angle_elbow_other = -sin_angle_elbow_other
-        elbow_angle_other = math.atan2(sin_angle_elbow_other, cos_angle_elbow_other)
-
-        shoulder_angle_other = math.atan2(y, x) - math.atan2(arm_segment_length * sin_angle_elbow_other, arm_segment_length + arm_segment_length * cos_angle_elbow_other)
-
-        shoulder_angle_other_degrees = math.degrees(shoulder_angle_other)
-        elbow_angle_other_degrees = math.degrees(elbow_angle_other)
-
-        if distance_from_origin(x, y) < 2 * arm_segment_length:
-            return shoulder_angle_other_degrees, elbow_angle_other_degrees
+    if distance_from_origin(x, y) > 2 * segment_length:
         return shoulder_angle_degrees, elbow_angle_degrees
 
+    if x < 0:
+        cos_angle_elbow_other = (x**2 + y**2 - segment_length**2 - segment_length**2) / (2 * segment_length * segment_length)
+        sin_angle_elbow_other = math.sqrt(1 - cos_angle_elbow_other**2)
+        if y > 0:  # Select appropriate solution
+            sin_angle_elbow_other = -sin_angle_elbow_other
+        elbow_angle_other = math.atan2(sin_angle_elbow_other, cos_angle_elbow_other)
+        shoulder_angle_other = math.atan2(y, x) - math.atan2(segment_length * sin_angle_elbow_other, segment_length + segment_length * cos_angle_elbow_other)
+        return math.degrees(shoulder_angle_other), math.degrees(elbow_angle_other)
     elif x > 0 and y < 0:
-        cos_angle_elbow_other = (x**2 + y**2 - arm_segment_length**2 - arm_segment_length**2) / (2 * arm_segment_length * arm_segment_length)
+        cos_angle_elbow_other = (x**2 + y**2 - segment_length**2 - segment_length**2) / (2 * segment_length * segment_length)
         sin_angle_elbow_other = math.sqrt(1 - cos_angle_elbow_other**2)
         sin_angle_elbow_other = -sin_angle_elbow_other
-
         elbow_angle_other = math.atan2(sin_angle_elbow_other, cos_angle_elbow_other)
-
-        shoulder_angle_other = math.atan2(y, x) - math.atan2(arm_segment_length * sin_angle_elbow_other, arm_segment_length + arm_segment_length * cos_angle_elbow_other)
-
-        shoulder_angle_other_degrees = math.degrees(shoulder_angle_other)
-        elbow_angle_other_degrees = math.degrees(elbow_angle_other)
-
-        if distance_from_origin(x, y) > 2 * arm_segment_length:
-            return shoulder_angle_degrees, elbow_angle_degrees
-        else:
-            return shoulder_angle_other_degrees, elbow_angle_other_degrees
+        shoulder_angle_other = math.atan2(y, x) - math.atan2(segment_length * sin_angle_elbow_other, segment_length + segment_length * cos_angle_elbow_other)
+        return math.degrees(shoulder_angle_other), math.degrees(elbow_angle_other)
     else:
         return shoulder_angle_degrees, elbow_angle_degrees
 
@@ -85,10 +71,10 @@ def distance_from_origin(x, y): return np.sqrt(x ** 2 + y ** 2)
 def main(x, y):
     return calculate_valid_angles(x, y)
 
-def calculate_valid_angles(x_pos, y_pos):
-    if point_hits_robot_base(x_pos, y_pos) or point_is_out_of_reach(x_pos, y_pos, SEGMENT_LENGTH): return None, None
+def calculate_valid_angles(x, y):
+    if point_hits_robot_base(x, y) or point_is_out_of_reach(x, y, SEGMENT_LENGTH): return None, None
 
-    shoulder_angle, elbow_angle = calculate_arm_angles(x_pos, y_pos, SEGMENT_LENGTH)
+    shoulder_angle, elbow_angle = calculate_arm_angles(x, y, SEGMENT_LENGTH)
     
     if is_valid_angle(convert_to_servo_angle(shoulder_angle)) and is_valid_angle(elbow_angle):
         return shoulder_angle, elbow_angle
@@ -113,6 +99,8 @@ def on_click(event):
 
         if (shoulder_angle is not None) and (elbow_angle is not None):
             shoulder_angle_servo = convert_to_servo_angle(shoulder_angle)
+            controller.move_servos(shoulder_angle_servo, -elbow_angle)
+
             print(f"Angles: {shoulder_angle_servo:.1f}, {elbow_angle:.1f}")
         
             shoulder_angle_rad = np.radians(shoulder_angle)
