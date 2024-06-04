@@ -28,43 +28,33 @@ def point_is_out_of_reach(x, y, arm_segment_length):
          return True
     
 def calculate_arm_angles(x, y, arm_segment_length):
-
-    # Calculate the angle for the elbow joint (theta2)
     cos_angle_elbow = (x**2 + y**2 - arm_segment_length**2 - arm_segment_length**2) / (2 * arm_segment_length * arm_segment_length)
     sin_angle_elbow = math.sqrt(1 - cos_angle_elbow**2)
     if x < 0 and y < 0:  # Select appropriate solution
         sin_angle_elbow = -sin_angle_elbow
     elbow_angle = math.atan2(sin_angle_elbow, cos_angle_elbow)
 
-    # Calculate the angle for the shoulder joint (theta1)
     shoulder_angle = math.atan2(y, x) - math.atan2(arm_segment_length * sin_angle_elbow, arm_segment_length + arm_segment_length * cos_angle_elbow)
 
-    # Convert radians to degrees
     shoulder_angle_degrees = math.degrees(shoulder_angle)
     elbow_angle_degrees = math.degrees(elbow_angle)
 
-    # Check if the arm can come to rest on the right side
     if x < 0:
-        # Calculate the angle for the elbow joint (theta2) for the other possible position
         cos_angle_elbow_other = (x**2 + y**2 - arm_segment_length**2 - arm_segment_length**2) / (2 * arm_segment_length * arm_segment_length)
         sin_angle_elbow_other = math.sqrt(1 - cos_angle_elbow_other**2)
         if x < 0 and y > 0:  # Select appropriate solution
             sin_angle_elbow_other = -sin_angle_elbow_other
         elbow_angle_other = math.atan2(sin_angle_elbow_other, cos_angle_elbow_other)
 
-        # Calculate the angle for the shoulder joint (theta1) for the other possible position
         shoulder_angle_other = math.atan2(y, x) - math.atan2(arm_segment_length * sin_angle_elbow_other, arm_segment_length + arm_segment_length * cos_angle_elbow_other)
 
-        # Convert radians to degrees
         shoulder_angle_other_degrees = math.degrees(shoulder_angle_other)
         elbow_angle_other_degrees = math.degrees(elbow_angle_other)
 
-        # Return the closest solution
         if distance_from_origin(x, y) < 2 * arm_segment_length:
             return shoulder_angle_other_degrees, elbow_angle_other_degrees
-        
         return shoulder_angle_degrees, elbow_angle_degrees
-            
+
     elif x > 0 and y < 0:
         cos_angle_elbow_other = (x**2 + y**2 - arm_segment_length**2 - arm_segment_length**2) / (2 * arm_segment_length * arm_segment_length)
         sin_angle_elbow_other = math.sqrt(1 - cos_angle_elbow_other**2)
@@ -72,12 +62,11 @@ def calculate_arm_angles(x, y, arm_segment_length):
 
         elbow_angle_other = math.atan2(sin_angle_elbow_other, cos_angle_elbow_other)
 
-        # Calculate the angle for the shoulder joint (theta1) for the other possible position
         shoulder_angle_other = math.atan2(y, x) - math.atan2(arm_segment_length * sin_angle_elbow_other, arm_segment_length + arm_segment_length * cos_angle_elbow_other)
 
-        # Convert radians to degrees
         shoulder_angle_other_degrees = math.degrees(shoulder_angle_other)
         elbow_angle_other_degrees = math.degrees(elbow_angle_other)
+
         if distance_from_origin(x, y) > 2 * arm_segment_length:
             return shoulder_angle_degrees, elbow_angle_degrees
         else:
