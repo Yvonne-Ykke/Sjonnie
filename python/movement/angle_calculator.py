@@ -2,7 +2,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from enum import Enum
-from functools import lru_cache
+import controller
 
 # Parameters
 SEGMENT_LENGTH = 300.0
@@ -99,6 +99,7 @@ def on_click(event):
 
         if (shoulder_angle is not None) and (elbow_angle is not None):
             shoulder_angle_servo = convert_to_servo_angle(shoulder_angle)
+            controller.move_servos(shoulder_angle_servo, elbow_angle)
             print(f"Angles: {shoulder_angle_servo:.1f}, {elbow_angle:.1f}")
         
             shoulder_angle_rad = np.radians(shoulder_angle)

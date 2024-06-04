@@ -3,7 +3,7 @@ import socket
 def move_servos(shoulder_angle, elbow_angle):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        client_socket.connect(('141.252.29.47', 65000))
+        client_socket.connect(('141.252.29.70', 65000))
         print("Verbinding met de server succesvol.")
 
         commando = f"{shoulder_angle},{elbow_angle}"
