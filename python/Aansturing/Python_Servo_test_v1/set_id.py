@@ -4,6 +4,6 @@ serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=Tru
 
 
 
-serial_connection.set_id(3, 69)
+serial_connection.set_id(10, 88)
 
 serial_connection.close()

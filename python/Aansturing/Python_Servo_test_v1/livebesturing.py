@@ -14,16 +14,17 @@ posm = 512
 gopen = 300
 gdicht = 30
 
-beneden = 1023
-boven = 0
+beneden = 0
+boven = 1023
 
-spdt = 300
-spda = 20
-spdg = 500
+spdt = 100
+spda = 10
+spdg = 300
 dynatrans = 69
-dynamixelgrip = 2
-dynamixel_id1 = 10
-dyn2 = 3
+dynagrip = 2
+dynashoulder = 61
+dynaelbow = 3
+dynarot = 88
 
 time.sleep(0.1)
 
@@ -34,7 +35,7 @@ def send(dyn_id=None, position=None):
     cpos = serial_connection.get_present_position(dyn_id, degrees=False)
     
     spd = spda
-    if dyn_id == dynamixelgrip:
+    if dyn_id == dynagrip:
         spd = spdg
     elif dyn_id == dynatrans:
         spd = spdt
@@ -57,67 +58,98 @@ def send(dyn_id=None, position=None):
 def smooth_send(dyn_id, position):
     cpos = 0
     spd = spda
-    if dyn_id == dynamixelgrip:
+    if dyn_id == dynagrip:
         spd = spdg
     elif dyn_id == dynatrans:
         spd = spdt
+    elif dyn_id == dynaelbow:
+        spd = spda
     time.sleep(0.05)
     dist = abs(position-cpos)
     
-    if not serial_connection.is_moving(dyn_id):
-        cpos = serial_connection.get_present_position(dyn_id, degrees=False)
+    #if not serial_connection.is_moving(dyn_id):
+    #    cpos = serial_connection.get_present_position(dyn_id, degrees=False)
             
     #TODO if distance is 20 dan ga die snelheid minderen
     if abs(position - cpos) > 350:
-        time.sleep(0.01)
-        serial_connection.goto(dyn_id, position, speed=int(abs((position-cpos)*0.5)*0.2), degrees=False)
-        time.sleep(3)
-        serial_connection.goto(dyn_id, position, speed=int(abs((position-cpos)*0.5)*0.1), degrees=False)
+        #time.sleep(0.01)
+        #serial_connection.goto(dyn_id, position, speed=int(abs((position-cpos)*0.5)*0.1), degrees=False)
+        serial_connection.goto(dyn_id, position, speed=spd, degrees=False)
+        #time.sleep(3)
+        #serial_connection.goto(dyn_id, position, speed=int(abs((position-cpos)*0.5)*0.1), degrees=False)
     if abs(position - cpos) < 350:
-        serial_connection.goto(dyn_id, position, speed=int(abs(position-cpos)*0.1), degrees=False)
-        time.sleep(5)
-        serial_connection.goto(dyn_id, position, speed=int(abs(position-cpos)*0.01), degrees=False)
+        serial_connection.goto(dyn_id, position, speed=int(abs((position-cpos)*0.5)*0.1), degrees=False)
+        #time.sleep(5)
+        #serial_connection.goto(dyn_id, position, speed=int(abs(position-cpos)*0.01), degrees=False)
 
 
-
-
-
+def stop():
+    cpos1 = serial_connection.get_present_position(dynagrip, degrees=False)
+    cpos2 = serial_connection.get_present_position(dynatrans, degrees=False)
+    cpos3 = serial_connection.get_present_position(dynarot, degrees=False)
+    cpos4 = serial_connection.get_present_position(dynaelbow, degrees=False)
+    cpos5 = serial_connection.get_present_position(dynashoulder, degrees=False)
+    try:
+        serial_connection.goto(dynatrans, cpos2, 1, degrees=False)
+        serial_connection.goto(dynagrip, cpos1, 1, degrees=False)
+        serial_connection.goto(dynarot, cpos3, 1, degrees=False)
+        serial_connection.goto(dynaelbow, cpos4, 1, degrees=False)
+        serial_connection.goto(dynashoulder, cpos5, 1, degrees=False)
+    except:
+        print('oeps')
 
 while True:
     
     c = stdscr.getch()
     if c == ord('w'): #vooruit
-        smooth_send(dyn2, 512)
+        smooth_send(dynaelbow, 512)
         #send(dyn2, 512)
     elif c == ord('a'): #links
-        smooth_send(dynamixel_id1, 200)
+        smooth_send(dynashoulder, 200)
         #send(dynamixel_id1, 200)
     elif c == ord('s'): #terug
         #TODO check of de positie van dyn1 helemaal links of rechts is ivm deadzone
-        smooth_send(dyn2, 200)
+        cpos = serial_connection.get_present_position(dynagrip, degrees=False)
+        if cpos < 512:
+            smooth_send(dynaelbow, 50)
+        elif cpos > 512:
+            smooth_send(dynaelbow, 983)
         #send(dyn2, 200)
     elif c == ord('d'): #rechts
-        smooth_send(dynamixel_id1, 900)
+        smooth_send(dynashoulder, 900)
         #send(dynamixel_id1, 900)
     elif c == ord('k'): #translatie
         
         if flag == 0:
             print('naar beneden')
-            send(dynatrans, 1023)
+            send(dynatrans, 0)
             flag = 1  # Zet de vlag naar 1
         else:
             print('naar boven')
-            send(dynatrans, 0)
+            send(dynatrans, 1023)
             flag = 0  # Zet de vlag naar 0
         #TODO naar boven wanneer weer erop klikken
         #TODO methode eraan toevoegen waardes zijn Motor, positie
+    elif c == ord('g'): #translatie
+
+        if flag == 0:
+            print('open grip')
+            send(dynagrip, 500)
+            flag = 1  # Zet de vlag naar 1
+        else:
+            print('sluit grip')
+            send(dynagrip, 0)
+            flag = 0  # Zet de vlag naar 0
     elif c == ord('q'):
         break  # Exit the while loop
     elif c == curses.KEY_HOME:
         x = y = 0
+    elif c == ord('z'):
+        stop()
 
 
 time.sleep(0.01)
 print("eind")
 # Close the serial connection
 serial_connection.close()
+s
