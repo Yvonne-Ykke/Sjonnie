@@ -4,7 +4,7 @@ import cv2 as cv
 developing = False
 
 class Color:
-    def __init__(self, name, low_hsv, high_hsv, low_hsv2 = None, high_hsv2 = None, bgr = None):
+    def __init__(self, name, low_hsv, high_hsv, bgr = None, low_hsv2 = None, high_hsv2 = None):
         self.name = name
         self.low_hsv = low_hsv
         self.high_hsv = high_hsv
@@ -18,7 +18,7 @@ colors = [
     Color("green", [40, 41, 74], [86, 255, 255], [0, 255, 0]),
     Color("yellow", [16, 80, 0], [36, 255, 255], [0, 255, 255]),
     Color("pink", [167, 63, 100], [176, 255, 255], [0, 50, 255]),
-    Color("silver", [10, 10, 100], [160, 255, 255])
+    Color("silver", [10, 10, 100], [160, 255, 255],[170,169,173])
 ]
 
 def masks(frame):
