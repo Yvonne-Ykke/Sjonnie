@@ -7,7 +7,7 @@ import discorpy.post.postprocessing as post
 import os
 
 # Initial parameters
-file_path = "C:/Users/joels/Documents/NHL/Jaar 2/Robotica/Sjonnie/python/camera/chessboard.jpg"
+file_path = "C:/Users/joels/Documents/NHL/Jaar 2/Robotica/Sjonnie/python/camera/chessboard-distorted.jpg"
 output_base = ""
 num_coef = 5  # Number of polynomial coefficients
 mat0 = io.load_image(file_path) # Load image
