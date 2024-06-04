@@ -1,106 +1,82 @@
 import cv2
 import numpy as np
-import glob
+import os
 
-def calibrate_camera(calibration_images_path, checkerboard_size, square_size):
-    # Termination criteria voor cornerSubPix
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+def calibrate_camera(objpoints, imgpoints, image_shape):
+    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, image_shape[::-1], None, None)
+    return ret, mtx, dist, rvecs, tvecs
 
-    # Voorbereiden van objectpunten zoals (0,0,0), (1,0,0), (2,0,0), ...., (8,5,0)
-    objp = np.zeros((checkerboard_size[0] * checkerboard_size[1], 3), np.float32)
-    objp[:, :2] = np.mgrid[0:checkerboard_size[0], 0:checkerboard_size[1]].T.reshape(-1, 2)
-    objp *= square_size
-
-    # Arrays opslaan objectpunten en beeldpunten van alle afbeeldingen
-    objpoints = []  # 3d punten in de wereldruimte
-    imgpoints = []  # 2d punten in afbeeldingsvlak
-
-    # Laad kalibratieafbeeldingen
-    images = glob.glob(calibration_images_path)
-
-    if not images:
-        raise ValueError("Geen kalibratieafbeeldingen gevonden.")
-
-    gray = None
-    for fname in images:
-        img = cv2.imread(fname)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-        # Zoek de schaakbordhoeken
-        ret, corners = cv2.findChessboardCorners(gray, checkerboard_size, None)
-
-        # Als gevonden, verfijn hoekpunten en voeg toe aan de lijst
-        if ret:
-            objpoints.append(objp)
-            corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-            imgpoints.append(corners2)
-
-            # Teken en toon de hoeken
-            img = cv2.drawChessboardCorners(img, checkerboard_size, corners2, ret)
-            cv2.imshow('img', img)
-
-    cv2.destroyAllWindows()
-
-    if gray is None:
-        raise ValueError("Geen schaakbordhoeken gevonden in de kalibratieafbeeldingen.")
-
-    # Kalibreer de camera
-    ret, camera_matrix, dist_coeffs, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
-
-    return camera_matrix, dist_coeffs, rvecs, tvecs
-
-def undistort_image(image_path, camera_matrix, dist_coeffs):
-    img = cv2.imread(image_path)
+def undistort_image(img, mtx, dist):
     h, w = img.shape[:2]
-    new_camera_matrix, roi = cv2.getOptimalNewCameraMatrix(camera_matrix, dist_coeffs, (w, h), 1, (w, h))
+    newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
 
-    # Gebruik undistort om de vervorming te corrigeren
-    dst = cv2.undistort(img, camera_matrix, dist_coeffs, None, new_camera_matrix)
+    # Correctie van de vervorming
+    dst = cv2.undistort(img, mtx, dist, None, newcameramtx)
 
-    # Snijd de afbeelding bij
+    # Bijsnijden van het beeld
     x, y, w, h = roi
-    dst = dst[y:y+h, x:x+w]
+    dst = dst[y:y + h, x:x + w]
 
     return dst
 
-def pixel_to_world(pixel_point, depth, camera_matrix, rvec, tvec):
-    # Inverse van de cameramatrix
-    inv_camera_matrix = np.linalg.inv(camera_matrix)
+def image_to_world(image_point, rvec, tvec, mtx, dist):
+    image_point = np.array([image_point], dtype=np.float32)
+    image_point = np.expand_dims(image_point, axis=1)
+    undistorted_point = cv2.undistortPoints(image_point, mtx, dist, P=mtx)
+    undistorted_point = np.squeeze(undistorted_point)
 
-    # Conversie naar homogene coördinaten
-    pixel_homogeneous = np.array([pixel_point[0], pixel_point[1], 1.0])
-
-    # Wereldcoördinaten berekenen
-    world_point = np.dot(inv_camera_matrix, pixel_homogeneous) * depth
-    world_point = np.dot(np.linalg.inv(cv2.Rodrigues(rvec)[0]), world_point - tvec)
-
+    # Omzetten van beeldpunt naar 3D wereldcoördinaten
+    world_point, _ = cv2.projectPoints(np.array([[0, 0, 0]]), rvec, tvec, mtx, dist)
     return world_point
 
-# Configuraties
-calibration_images_path = 'python\camera\calibration_images\*.jpg'  # Pad naar kalibratieafbeeldingen
-example_image_path = 'python\camera\calibration_images\example.jpg'  # Pad naar een voorbeeldafbeelding om te undistorten
-checkerboard_size = (9, 6)  # Aantal hoekpunten in de breedte en hoogte
-square_size = 1.0  # Grootte van een vierkant op het schaakbord, in dezelfde eenheden als je wereldcoördinaten
+def load_calibration_images(image_path):
+    if not os.path.isfile(image_path):
+        print(f"Error: Image file '{image_path}' does not exist.")
+        return None, None
 
-# Camera kalibratie
-camera_matrix, dist_coeffs, rvecs, tvecs = calibrate_camera(calibration_images_path, checkerboard_size, square_size)
-print("Camera matrix:\n", camera_matrix)
-print("Distortion coefficients:\n", dist_coeffs)
+    objpoints = []  # 3D punten in de wereldruimte
+    imgpoints = []  # 2D punten in de beeldruimte
 
-# Afbeelding undistorten
-undistorted_image = undistort_image(example_image_path, camera_matrix, dist_coeffs)
-cv2.imshow('Undistorted Image', undistorted_image)
+    # Definieer het aantal hoeken in je checkerboard
+    CHECKERBOARD = (6, 9)
+    criteria = (cv2.TermCriteria_EPS + cv2.TermCriteria_MAX_ITER, 30, 0.001)
 
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    # Voorbereiding van 3D punten in de wereldcoördinaten (0,0,0), (1,0,0), (2,0,0), ...
+    objp = np.zeros((CHECKERBOARD[0] * CHECKERBOARD[1], 3), np.float32)
+    objp[:, :2] = np.mgrid[0:CHECKERBOARD[1], 0:CHECKERBOARD[0]].T.reshape(-1, 2)
+    
+    img = cv2.imread(image_path)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-# Pixel naar wereldcoördinaten omzetting
-pixel_point = (100, 150)  # Pixelcoördinaten
-depth = 2.0  # Diepte of hoogte op basis waarvan je de wereldcoördinaten wilt bepalen
+    # Zoek de hoeken van het checkerboard
+    ret, corners = cv2.findChessboardCorners(gray, CHECKERBOARD, None)
 
-# Neem de eerste rotatie- en translatievector van de kalibratie
-rvec = rvecs[0]
-tvec = tvecs[0]
+    if ret:
+        objpoints.append(objp)
+        corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+        imgpoints.append(corners2)
 
-world_point = pixel_to_world(pixel_point, depth, camera_matrix, rvec, tvec)
-print("World coordinates:", world_point)
+    return objpoints, imgpoints
+
+# Voorbeeld gebruik
+calibration_image = os.path.join('calibration_images', 'example.jpg')
+objpoints, imgpoints = load_calibration_images(calibration_image)
+
+if objpoints is not None and imgpoints is not None:
+    gray_image = cv2.cvtColor(cv2.imread(calibration_image), cv2.COLOR_BGR2GRAY)
+    image_shape = gray_image.shape
+
+    ret, mtx, dist, rvecs, tvecs = calibrate_camera(objpoints, imgpoints, image_shape)
+
+    example_image = cv2.imread(calibration_image)
+    undistorted_image = undistort_image(example_image, mtx, dist)
+    cv2.imwrite('calibrated_result.png', undistorted_image)
+
+    # Voorbeeld van het omzetten van een beeldpunt naar een wereldcoördinaat
+    image_point = [100, 200]  # Vervang door je eigen coördinaten
+    rvec = rvecs[0]  # Rotatievector van de eerste afbeelding
+    tvec = tvecs[0]  # Translatievector van de eerste afbeelding
+
+    world_point = image_to_world(image_point, rvec, tvec, mtx, dist)
+    print("World coordinates: ", world_point)
+
