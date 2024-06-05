@@ -6,16 +6,18 @@ import controller
 
 # Parameters
 SEGMENT_LENGTH = 300.0
-AX12_MIN_ANGLE = -150
-AX12_MAX_ANGLE = 150
-FORBIDDEN_RADIUS = 150.0
+AX12_SHOULDER_MIN_ANGLE = -130
+AX12_SHOULDER_MAX_ANGLE = 130
+AX12_ELBOW_MIN_ANGLE = -150
+AX12_ELBOW_MAX_ANGLE = 150
+FORBIDDEN_RADIUS = 250.0
 DOTS_PRECISION = 200
 prev_elbow_angle = 0
 prev_shoulder_angle = 0
 
 # Generate reachable coordinates
-shoulder_angles = np.radians(np.linspace(AX12_MIN_ANGLE, AX12_MAX_ANGLE, DOTS_PRECISION))  # Fine discretization
-elbow_angles = np.radians(np.linspace(AX12_MIN_ANGLE, AX12_MAX_ANGLE, DOTS_PRECISION))     # Fine discretization
+shoulder_angles = np.radians(np.linspace(AX12_SHOULDER_MIN_ANGLE, AX12_SHOULDER_MAX_ANGLE, DOTS_PRECISION))  # Fine discretization
+elbow_angles = np.radians(np.linspace(AX12_ELBOW_MIN_ANGLE, AX12_ELBOW_MAX_ANGLE, DOTS_PRECISION))     # Fine discretization
 
 reachable_coordinates = [(SEGMENT_LENGTH * (np.cos(shoulder_angle) + np.cos(shoulder_angle + elbow_angle)),
                           SEGMENT_LENGTH * (np.sin(shoulder_angle) + np.sin(shoulder_angle + elbow_angle)))
@@ -47,14 +49,14 @@ def calculate_arm_angles(x, y, segment_length, current_pos_shoulder, current_pos
     shoulder_angle = math.atan2(y, x) - math.atan2(segment_length * sin_angle_elbow, segment_length + segment_length * cos_angle_elbow)
     shoulder_angle_degrees = math.degrees(shoulder_angle)
     elbow_angle_degrees = math.degrees(elbow_angle)
-    blind_spot_1 = not is_in_range(convert_to_servo_angle(shoulder_angle_degrees)) and is_in_range(elbow_angle_degrees)
+    blind_spot_1 = not is_shoulder_in_range(convert_to_servo_angle(shoulder_angle_degrees)) and is_elbow_in_range(elbow_angle_degrees)
 # Calculate elbow angle for the second solution
     sin_angle_elbow_other = -sin_angle_elbow
     elbow_angle_other = math.atan2(sin_angle_elbow_other, cos_angle_elbow)
     shoulder_angle_other = math.atan2(y, x) - math.atan2(segment_length * sin_angle_elbow_other, segment_length + segment_length * cos_angle_elbow)
     shoulder_angle_other_degrees = math.degrees(shoulder_angle_other)
     elbow_angle_other_degrees = math.degrees(elbow_angle_other)
-    blind_spot_2 = not is_in_range(convert_to_servo_angle(shoulder_angle_other_degrees)) and is_in_range(elbow_angle_other_degrees)
+    blind_spot_2 = not is_shoulder_in_range(convert_to_servo_angle(shoulder_angle_other_degrees)) and is_elbow_in_range(elbow_angle_other_degrees)
     # Determine which solution to use based on blind spots
     if blind_spot_1 and blind_spot_2:
         print("Blind spot found")
@@ -71,7 +73,8 @@ def calculate_arm_angles(x, y, segment_length, current_pos_shoulder, current_pos
         return choice(shoulder_angle_degrees, elbow_angle_degrees, shoulder_angle_other_degrees, elbow_angle_other_degrees, current_pos_shoulder, current_pos_elbow)
     
 def radians_to_degrees(radians): return radians * 180 / np.pi
-def is_in_range(angle): return -150 <= angle <= 150
+def is_shoulder_in_range(angle): return -130 <= angle <= 130
+def is_elbow_in_range(angle): return -150 <= angle <= 150
 def point_hits_robot_base(x, y): return distance_from_origin(x, y) <= FORBIDDEN_RADIUS
 def convert_to_servo_angle(angle): return -(angle + 90) % 360 - 180
 def is_in_range(angle): return -150 <= angle <= 150
