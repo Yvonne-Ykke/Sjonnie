@@ -35,20 +35,25 @@ def masks(frame):
 
 def detect(developing):
     if developing:
-        cap = cv.VideoCapture(0)
-    else:
         cap = cv.VideoCapture(1)
+    else:
+        cap = cv.VideoCapture(0)
     
     while(True):
         ret,img = cap.read()
         if img is None:
             break
-        cv.imshow("image", img)
+        
+        if developing:
+            cv.imshow("image", img)
+
         color_masks = masks(img)
         results = []
         for color_name, mask in color_masks:
             res = cv.bitwise_and(img,img, mask= mask)
             results.append(res)
+            
+            # if developing:
             cv.imshow(color_name, res)
         
         if cv.waitKey(1) & 0xFF == ord('q'):

@@ -9,9 +9,9 @@ import pathlib
 
 def contouring(developing):
     if developing:
-        cap = cv.VideoCapture(0)
-    else:
         cap = cv.VideoCapture(1)
+    else:
+        cap = cv.VideoCapture(0)
 
     while(True):
         ret,im = cap.read()
@@ -39,13 +39,16 @@ def contouring(developing):
                     holes += cv.contourArea(contours[child])
                     child = hierarchy[child][0]
                 
-
-                if 0.05 < factor < 0.12: #curved scissors
-                     #print (area, factor, holes)
-                     cv.drawContours(im, [cnt], -1, (255, 0, 0), 3)
-                elif 0.12 < factor < 0.2: #straight scissors
-                    #print (area, factor, holes)
-                    cv.drawContours(im, [cnt], -1, (0, 255, 255), 3)
+                if area > 500 and area < 100000:
+                    if 0.05 < factor < 0.12: #curved scissors
+                        #print (area, factor, holes)
+                        cv.drawContours(im, [cnt], -1, (255, 0, 0), 3)
+                        print("curved scissors")
+                    elif 0.12 < factor < 0.2: #straight scissors
+                        #print (area, factor, holes)
+                        cv.drawContours(im, [cnt], -1, (0, 255, 255), 3)
+                        print("straight scissors")
+                    
 
                 
 
@@ -62,9 +65,9 @@ def contouring(developing):
 
 def color_contouring(developing):
     if developing:
-        cap = cv.VideoCapture(0)
-    else:
         cap = cv.VideoCapture(1)
+    else:
+        cap = cv.VideoCapture(0)
 
     while(True):
         img = color_recognition.detect(developing)
