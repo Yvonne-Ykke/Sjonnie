@@ -63,7 +63,9 @@ def smooth_send(dyn_id, position):
     elif dyn_id == dynatrans:
         spd = spdt
     elif dyn_id == dynaelbow:
-        spd = spda
+        spd = int(spda*2)
+    elif dyn_id == dynarot:
+        spd = int(spda*4)
     time.sleep(0.05)
     dist = abs(position-cpos)
     
@@ -78,8 +80,9 @@ def smooth_send(dyn_id, position):
         #time.sleep(3)
         #serial_connection.goto(dyn_id, position, speed=int(abs((position-cpos)*0.5)*0.1), degrees=False)
     if abs(position - cpos) < 350:
-        serial_connection.goto(dyn_id, position, speed=int(abs((position-cpos)*0.5)*0.1), degrees=False)
+#        serial_connection.goto(dyn_id, position, speed=int(abs((position-cpos)*0.5)*0.1), degrees=False)
         #time.sleep(5)
+        serial_connection.goto(dyn_id, position, speed=spd, degrees=False)
         #serial_connection.goto(dyn_id, position, speed=int(abs(position-cpos)*0.01), degrees=False)
 
 
@@ -109,7 +112,7 @@ while True:
         #send(dynamixel_id1, 200)
     elif c == ord('s'): #terug
         #TODO check of de positie van dyn1 helemaal links of rechts is ivm deadzone
-        cpos = serial_connection.get_present_position(dynagrip, degrees=False)
+        cpos = serial_connection.get_present_position(dynaelbow, degrees=False)
         if cpos < 512:
             smooth_send(dynaelbow, 50)
         elif cpos > 512:
@@ -134,11 +137,22 @@ while True:
 
         if flag == 0:
             print('open grip')
-            send(dynagrip, 500)
+            send(dynagrip, 600)
             flag = 1  # Zet de vlag naar 1
         else:
             print('sluit grip')
-            send(dynagrip, 0)
+            send(dynagrip, 200)
+            
+            flag = 0  # Zet de vlag naar 0
+    elif c == ord('r'): #translatie
+        
+        if flag == 0:
+            print('links')
+            send(dynarot, 1023)
+            flag = 1  # Zet de vlag naar 1
+        else:
+            print('rechts')
+            send(dynarot, 0)
             flag = 0  # Zet de vlag naar 0
     elif c == ord('q'):
         break  # Exit the while loop
