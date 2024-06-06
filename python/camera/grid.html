@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid van Zwart-Witte Vierkantjes</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1cm);
+            grid-template-rows: repeat(5, 1cm);
+            gap: 0;
+        }
+        .cell {
+            width: 1cm;
+            height: 1cm;
+        }
+    </style>
+</head>
+<body>
+    <svg class="grid" width="5cm" height="5cm" xmlns="http://www.w3.org/2000/svg">
+        <script>
+            const svgNS = "http://www.w3.org/2000/svg";
+            const grid = document.querySelector('.grid');
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 5; col++) {
+                    const rect = document.createElementNS(svgNS, 'rect');
+                    rect.setAttribute('x', col * 10);
+                    rect.setAttribute('y', row * 10);
+                    rect.setAttribute('width', 10);
+                    rect.setAttribute('height', 10);
+                    rect.setAttribute('fill', (row + col) % 2 === 0 ? 'black' : 'white');
+                    grid.appendChild(rect);
+                }
+            }
+        </script>
+    </svg>
+</body>
+</html>
