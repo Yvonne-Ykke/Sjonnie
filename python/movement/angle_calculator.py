@@ -1,7 +1,6 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from enum import Enum
 import controller
 
 # Parameters
@@ -18,7 +17,7 @@ prev_shoulder_angle = 0
 # Generate reachable coordinates
 shoulder_angles = np.radians(np.linspace(AX12_SHOULDER_MIN_ANGLE, AX12_SHOULDER_MAX_ANGLE, DOTS_PRECISION))  # Fine discretization
 elbow_angles = np.radians(np.linspace(AX12_ELBOW_MIN_ANGLE, AX12_ELBOW_MAX_ANGLE, DOTS_PRECISION))     # Fine discretization
-
+# Generate all possible combinations of shoulder and elbow angles
 reachable_coordinates = [(SEGMENT_LENGTH * (np.cos(shoulder_angle) + np.cos(shoulder_angle + elbow_angle)),
                           SEGMENT_LENGTH * (np.sin(shoulder_angle) + np.sin(shoulder_angle + elbow_angle)))
                          for shoulder_angle in shoulder_angles
@@ -26,16 +25,16 @@ reachable_coordinates = [(SEGMENT_LENGTH * (np.cos(shoulder_angle) + np.cos(shou
 
 
 x_reach, y_reach = zip(*reachable_coordinates)
-
+# Check if the point is within the robot's reach
 def point_is_out_of_reach(x, y, arm_segment_length):
     if distance_from_origin(x, y) > 2 * arm_segment_length:
          return True
-    
+    # Check the shortes angle using current position
 def choice(shoulder_angle1, elbow_angle1, shoulder_angle2, elbow_angle2, current_pos_shoulder, current_pos_elbow): 
     # Calculate the angular distance between the current position and the target position for both solutions
     diff_a = abs(current_pos_shoulder - convert_to_servo_angle(shoulder_angle1)) + abs(current_pos_elbow - elbow_angle1)
     diff_b = abs(current_pos_shoulder - convert_to_servo_angle(shoulder_angle2)) + abs(current_pos_elbow - elbow_angle2)
-
+    # Choose the solution with the smallest angular distance
     if diff_a <= diff_b:
         return shoulder_angle1, elbow_angle1
     else:
@@ -83,7 +82,7 @@ def distance_from_origin(x, y): return np.sqrt(x ** 2 + y ** 2)
 
 def main(x, y):
     return calculate_valid_angles(x, y)
-
+# Calculate the valid angles for the given target position
 def calculate_valid_angles(x, y):
     global prev_elbow_angle, prev_shoulder_angle
     if point_hits_robot_base(x, y) or point_is_out_of_reach(x, y, SEGMENT_LENGTH): return None, None
@@ -95,6 +94,7 @@ def calculate_valid_angles(x, y):
 
 
 def on_hover(event):
+    # Check if the mouse is inside the plot
     if event.inaxes:
         x, y = event.xdata, event.ydata
         tooltip_text = f"x={x:.1f}, y={y:.1f}"
@@ -108,15 +108,16 @@ def on_hover(event):
 
 def on_click(event):
     if event.inaxes:
+        # Get the x and y coordinates of the click
         x, y = event.xdata, event.ydata
         shoulder_angle, elbow_angle = calculate_valid_angles(x, y)
-
+        # If the angles are valid, move the arm to the new position
         if (shoulder_angle is not None) and (elbow_angle is not None):
             shoulder_angle_servo = convert_to_servo_angle(shoulder_angle)
             controller.move_servos(shoulder_angle_servo, -elbow_angle)
 
             print(f"Angles: {shoulder_angle_servo:.1f}, {elbow_angle:.1f}")
-        
+            # Convert angles to radians
             shoulder_angle_rad = np.radians(shoulder_angle)
             elbow_angle_rad = np.radians(elbow_angle)
 
