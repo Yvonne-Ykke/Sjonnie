@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-import controller
+#import controller
 from movement import controller
 
 # Parameters
