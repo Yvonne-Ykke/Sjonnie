@@ -2,6 +2,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import controller
+from movement import controller
 
 # Parameters
 SEGMENT_LENGTH = 300.0
@@ -81,7 +82,14 @@ def is_valid_angle(angle): return is_in_range(angle)
 def distance_from_origin(x, y): return np.sqrt(x ** 2 + y ** 2)
 
 def main(x, y):
-    return calculate_valid_angles(x, y)
+    shoulder_angle, elbow_angle = calculate_valid_angles(x, y)
+    if (shoulder_angle is not None) and (elbow_angle is not None):
+        print(f"Angles: {shoulder_angle:.1f}, {elbow_angle:.1f}")
+        controller.move_servos(convert_to_servo_angle(shoulder_angle), elbow_angle)
+        return shoulder_angle, elbow_angle
+    else:
+        print("Invalid position")
+        return None, None
 # Calculate the valid angles for the given target position
 def calculate_valid_angles(x, y):
     global prev_elbow_angle, prev_shoulder_angle
@@ -166,4 +174,4 @@ def plot():
 
     fig.canvas.mpl_disconnect(cid_hover)
     fig.canvas.mpl_disconnect(cid_click)
-plot()
+#plot()
