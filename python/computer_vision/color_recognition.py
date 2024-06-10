@@ -2,7 +2,7 @@ import numpy as np
 import cv2 as cv
 
 
-developing = True
+developing = False
 
 class Color:
     def __init__(self, name, low_hsv, high_hsv, bgr=None, low_hsv2=None, high_hsv2=None):
