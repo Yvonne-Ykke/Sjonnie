@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import client
 import angle_calculator
-from movement import robot_arm_parameters as robot
+import robot_arm_parameters as robotParameters
+robot = robotParameters.Parameters
 
 DOTS_PRECISION = 200
 prev_elbow_angle = 0
 prev_shoulder_angle = 0
-
 
 # Generate reachable coordinates
 shoulder_angles = np.radians(np.linspace(robot.AX12_SHOULDER_MIN_ANGLE, robot.AX12_SHOULDER_MAX_ANGLE, DOTS_PRECISION))  # Fine discretization
