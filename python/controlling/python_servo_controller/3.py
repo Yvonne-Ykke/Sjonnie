@@ -7,14 +7,13 @@ import signal
 import sys
 import socket
 GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
 
 #-- Constants --#
 beneden = 1023
 boven = 0
 speed_gripper = 500
 speed_rotation = 1.5
-flag = 0
-ding = 0
 
 #-- Motor ID's --#
 shoulder = 61
@@ -23,6 +22,10 @@ trans = 69
 wrist = 88
 gripper = 2
 motors = [elbow, shoulder, wrist, trans, gripper] 
+
+cylinder = 1
+marker = 2
+tools = 3
 
 #-- Web server constants --#
 speed_mode = 0
@@ -37,6 +40,7 @@ vertical_ljoy = 8
 rasp_onoff = 9
 send_servo_data = 10
 grip = 11
+gripper_head_type = 12
 
 
 #-- Configuration --#
@@ -54,22 +58,17 @@ time.sleep(0.1)
 
 #-- PC debug handling --#
 def signal_handler(sig, frame):
-     print('You pressed Ctrl+C!')
-     s.shutdown(0)
-     s.close()
-     sys.exit(0)
+    print('You pressed Ctrl+C!')
+    s.shutdown(0)
+    s.close()
+    sys.exit(0)
 
 
 
 
 #-- Send servo data --#
 def read_and_send_servo_info(conn, webdata, spd, trns):
-    #-- Define Variables --#
-    # position = 0
-    # movementspeed = 0
-    # temperature = 0
-    # voltage = 0
-    # error = 0
+
     data = []
     current_motor = motors[webdata[send_servo_data] - 1]
 
@@ -114,7 +113,7 @@ def read_and_send_servo_info(conn, webdata, spd, trns):
 
 #-- Power off raspberry --#
 def stop_rasp(conn):
-    time.sleep(1)
+    wait(1)
     conn.send('Raspberry uit'.encode())
     conn.close()
     subprocess.call("sudo shutdown now", shell=True)
@@ -123,28 +122,45 @@ def stop_rasp(conn):
 def wait(wait_time_seconds):
     time.sleep(wait_time_seconds)
 
-def whack_a_mole(conn):
+def whack_a_mole(conn, webdata, speed):
     #TODO: Whack a mole maken
-    1+1
+    print('Whack a mole')
 
-def kilo_grip(conn, webdata):
+def kilo_grip(conn, webdata, speed):
     #TODO: Een stand maken waarij je weet dat je de kilo gripper hebt
-    1+1
+    print('Kilo grip')
 
-def scissors_grip(conn, webdata):
+def scissors_grip(conn, webdata, speed):
     #TODO: This
-    1+1
+    print('tools grip')
 
-def lights(conn, webdata):
-    1+1
+def lights():
+    #TODO: GPIO PIN HIGH AND OR LOW
+    GPIO.setup(20,GPIO.OUT)
+    GPIO.output(20,GPIO.HIGH)
 
+    print('lights on off')
 
-def handheld_control(conn, webdata, speed, trans_speed, pwr, flag, ding):
+def pinch_grip(webdata, flag, butopenclose):
+    #TODO: De gripper laten knijpen en krijgen welke gripper gebruikt wordt
+    
+    if int(webdata[grip]) == 1:
+        if butopenclose == 0:
+            if flag == 1:
+                serial_connection.goto(gripper, 823, speed_gripper, degrees=False)
+                flag = 0
+            elif flag == 0:
+                serial_connection.goto(gripper, 215, speed_gripper, degrees=False)
+                flag = 1
+            butopenclose += 1
+    if int(webdata[grip]) == 0:
+        butopenclose = 0
+    
+
+def handheld_control(conn, webdata, speed, trans_speed, pwr, flag, butopenclose):
     #TODO: This
-
-    #-- Define additional variables --#
-
     try:
+        pinch_grip(webdata, flag, butopenclose)
 
         pos = 0
         for value in webdata[vertical_rjoy:vertical_ljoy + 1]:
@@ -163,9 +179,9 @@ def handheld_control(conn, webdata, speed, trans_speed, pwr, flag, ding):
                 serial_connection.goto(motors[pos], current_motor_position, int(speed), degrees=False)
             pos += 1
 
-    except Exception as ex:
-        print("Error")
-        #conn.send("Error".encode())
+    except:
+        print("Handheld_Control_Error")
+        #conn.send("Handheld_Control_Error".encode())
         conn.close()
 
 
@@ -176,23 +192,36 @@ def main():
     wait(0.01)
     s.listen()
     wait(0.01)
-    flag = 0
-    ding = 0
+
     while(True):
         #-- Getting data from webserver --#
         signal.signal(signal.SIGINT, signal_handler)
         conn, addr = s.accept()
         txt = conn.recv(1024)
         txt2 = txt.decode()
-        print(txt2)
+        # print(txt2)
         webdata = txt2.split(",")
         webdata = [int(value) for value in webdata]
 
         speed = int(webdata[speed_mode])
         trans_speed = int(webdata[translation_speed_mode])
         pwr = int(webdata[power])
+        flag = 0
+        butopenclose = 0
+
 
         #-- Functions --#
+        if webdata[autonomous] == 1:
+            if webdata[gripper_head_type] == marker:
+                whack_a_mole(conn)
+            elif webdata[gripper_head_type] == cylinder:
+                kilo_grip(conn, webdata)
+            elif webdata[gripper_head_type] == tools:
+                scissors_grip(conn, webdata)
+        else:
+            handheld_control(conn, webdata, speed, trans_speed, pwr, flag, butopenclose)
+        
+
         if webdata[rasp_onoff] == 1:
             stop_rasp(conn)
 
@@ -202,19 +231,7 @@ def main():
         if webdata[send_servo_data] > 0:
             read_and_send_servo_info(conn, webdata, speed, trans_speed)
 
-        if webdata[autonomous] != 0:
-            #TODO: autonoom maken/ script aanroepen die dat voor je doet
-            #TODO: als bepaalde waardes veranderen dan moet er iets gebeuren
-            if webdata[autonomous] == 1:
-                whack_a_mole(conn)
-            elif webdata[autonomous] == 2:
-                kilo_grip(conn, webdata)
-            elif webdata[autonomous] == 3:
-                scissors_grip(conn, webdata)
-
-        else:
-            handheld_control(conn, webdata, speed, trans_speed, pwr, flag, ding)
-
+        
 
 if __name__ == "__main__":
     main()
