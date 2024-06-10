@@ -1,8 +1,7 @@
 import socket
 import sys
 import signal
-from movement.robot_arm import RobotArm
-from movement.angle_calculator import main as calculate_angles
+from robot_arm import RobotArm
 
 def _start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
