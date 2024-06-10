@@ -31,6 +31,7 @@ def contouring(developing):
             cnt = contours [cnr]
             area = cv.contourArea(cnt)
             perimeter = cv.arcLength(cnt, True)
+
             if perimeter > 0:
                 factor = 4 * math.pi * area / perimeter**2
                 holes = 0
@@ -43,12 +44,14 @@ def contouring(developing):
                     if 0.05 < factor < 0.12: #curved scissors
                         #print (area, factor, holes)
                         cv.drawContours(im, [cnt], -1, (255, 0, 0), 3)
+                        
                         print("curved scissors")
                     elif 0.12 < factor < 0.2: #straight scissors
                         #print (area, factor, holes)
                         cv.drawContours(im, [cnt], -1, (0, 255, 255), 3)
                         print("straight scissors")
                     
+
 
                 
 

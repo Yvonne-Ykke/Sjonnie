@@ -43,7 +43,7 @@ def masks(frame):
         if color.low_hsv2 is not None and color.high_hsv2 is not None:
             mask2 = cv.inRange(hsv, np.array(color.low_hsv2), np.array(color.high_hsv2))
             mask = mask | mask2
-        color_masks.append((color.name.capitalize(), mask))
+        color_masks.append((color.name.capitalize(), mask, color.bgr))
     return color_masks
 
 def detect(developing):
