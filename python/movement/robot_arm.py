@@ -33,25 +33,43 @@ def start_tcp_server():
     signal.signal(signal.SIGINT, signal_handler)
 
     while True:
-        client_socket, addr = server_socket.accept()
-        print(f"Verbinding geaccepteerd van {addr}")
+        client_socket = accept_tcp_connection(server_socket)
+        if client_socket is None: continue
         try:
-            command = client_socket.recv(1024).decode('utf-8')
-            print(f"Ontvangen commando: {command}")
-            if command.lower() == "quit":
-                break
-            shoulder_angle, elbow_angle = map(float, command.split(","))
+            command = get_command(client_socket)
+            if command == 'quit': break
+            shoulder_angle, elbow_angle = get_angles_from_command(command)
             move_to_position(shoulder_angle, elbow_angle)
-            client_socket.sendall("Positie ingesteld.\n".encode('utf-8'))
+            send_feedback_to_client(client_socket, shoulder_angle, elbow_angle)
         except Exception as e:
             print(f"Fout bij verwerken commando: {e}")
             client_socket.sendall(f"Fout: {str(e)}\n".encode('utf-8'))
         finally:
             client_socket.close()
             print("Verbinding met client gesloten.")
+
     server_socket.close()
     serial_connection.close()
     print("Server gesloten.")
+
+def send_feedback_to_client(client_socket, shoulder_angle, elbow_angle):
+    feedback = f"Positie ingesteld: Schouder hoek: {shoulder_angle}, Elleboog hoek: {elbow_angle}\n"
+    client_socket.sendall(feedback.encode('utf-8'))
+
+def get_angles_from_command(command):
+    shoulder_angle, elbow_angle = map(float, command.split(","))
+    return shoulder_angle, elbow_angle
+
+def get_command(client_socket):
+    command = client_socket.recv(1024).decode('utf-8')
+    print(f"Ontvangen commando: {command}")
+    command = command.lower()
+    return command
+ 
+def accept_tcp_connection(server_socket):
+        client_socket, addr = server_socket.accept()
+        print(f"Verbinding geaccepteerd van {addr}")
+        return client_socket
 
 if __name__ == "__main__":
     start_tcp_server()
