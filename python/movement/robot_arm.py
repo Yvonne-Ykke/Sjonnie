@@ -17,7 +17,7 @@ def start_tcp_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     try:
-        server_socket.bind(('0.0.0.0', 65000))  # Luister op alle netwerkinterfaces
+        server_socket.bind(('0.0.0.0', 65000))  # Listen on all networkinterfaces
         server_socket.listen(5)
         print("Server luistert op poort 65000...")
     except Exception as e:
