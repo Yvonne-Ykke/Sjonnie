@@ -1,8 +1,7 @@
-import math
 import numpy as np
 import matplotlib.pyplot as plt
-import python.movement.client as client
-import angle_calculator as angle_calculator
+import client
+import angle_calculator
 
 SEGMENT_LENGTH = 300.0
 AX12_SHOULDER_MIN_ANGLE = -130
@@ -44,12 +43,13 @@ def on_click(event):
     mouse_is_on_plot = event.inaxes
     if mouse_is_on_plot:
         mouse_x, mouse_y = event.xdata, event.ydata
-        shoulder_angle, elbow_angle = angle_calculator.main(mouse_x, mouse_y)
+        shoulder_angle, elbow_angle = angle_calculator.calculate_valid_angles(mouse_x, mouse_y)
         # If the angles are valid, move the arm to the new position
         if (shoulder_angle is not None) and (elbow_angle is not None):
-            client.send_arm_angles_to_robot(shoulder_angle, -elbow_angle)
+            shoulder_angle_servo = angle_calculator.convert_to_servo_angle(shoulder_angle)
+            client.send_arm_angles_to_robot(shoulder_angle_servo, -elbow_angle)
 
-            print(f"Angles: {shoulder_angle:.1f}, {elbow_angle:.1f}")
+            print(f"Angles: {shoulder_angle_servo:.1f}, {elbow_angle:.1f}")
             # Convert angles to radians
             shoulder_angle_rad = np.radians(shoulder_angle)
             elbow_angle_rad = np.radians(elbow_angle)
