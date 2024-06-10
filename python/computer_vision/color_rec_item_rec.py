@@ -15,7 +15,7 @@ def color_contouring(developing):
         ret,img = cap.read()
         if img is None:
             break
-        print(img)
+        
         color_masks = color_recognition.masks(img)
 
         results = []
@@ -54,7 +54,7 @@ def color_contouring(developing):
                     #print (child)
 
                     
-                    if area > 200 and area < 100000 and factor > 0.01:
+                    if area > 1000 and area < 100000 and factor > 0.01:
                         cv.drawContours(img, [cnt], -1, bgr, 1)
 
                         M = cv.moments(cnt)
@@ -68,16 +68,17 @@ def color_contouring(developing):
                         # TODO: CREATE RECTANGULAR CONTOUr
                         #cv.rectangle(img, (img, 0), (img + 100, 100), (0, 255,255), -1)
                         ##TODO: CHECK SHAPE IS RECTANGULAR
-                        if(color_name == 'blue'):
-                            min_contour_area = 500  # Define your minimum area threshold
-                            large_contours = [cnt for cnt in contours if cv.contourArea(cnt) > min_contour_area]
+                        
+                        min_contour_area = 500  # Define your minimum area threshold
+                        large_contours = [cnt for cnt in contours if cv.contourArea(cnt) > min_contour_area]
+                        for cnt in large_contours:
+                            cv.rectangle(img, (x, y), (x+w, y+h), bgr, 3)
+                            cv.putText(img, color_name, (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
+                            if 0.7 > factor > 0.2:
+                                re = 'blokje'
+                                cv.putText(img, re, (x+w, int(y+h*0.5)), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
 
-                            for cnt in large_contours:
-                                cv.rectangle(img, (x, y), (x+w, y+h), (0, 0, 200), 3)
-                                cv.putText(img, color_name, (10, 30), cv.FONT_HERSHEY_SIMPLEX, 0.65, (0, 0, 255), 3)
 
-
-        cv.imshow('res', res)
 
         time.sleep(0.1)
         cv.imshow("image", img)
