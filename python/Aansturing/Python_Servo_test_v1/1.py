@@ -182,10 +182,6 @@ def test():
                     print('Ja2')
                     serial_connection.goto(dynagrip, 200, spdg, degrees=False)
 
-
-		if int(webdata[smode]) == 50
-                   spd = 
-
             except:
                 continue
         else:
