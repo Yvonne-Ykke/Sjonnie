@@ -3,16 +3,16 @@ import cv2 as cv
 import os
 from tkinter import Tk, Button
 
+# Calibration criteria and chessboard size
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-rows, cols = 8, 8
-rows, cols = rows - 1, cols - 1
+rows, cols = 7, 7  # Number of inner corners per chessboard row and column
 objp = np.zeros((rows * cols, 3), np.float32)
 objp[:, :2] = np.mgrid[0:rows, 0:cols].T.reshape(-1, 2)
 objpoints = []
 imgpoints = []
 
-cap = cv.VideoCapture(0)
-
+# Camera setup
+cap = cv.VideoCapture(1)
 if not cap.isOpened():
     print("Failed to open camera")
     exit()
@@ -22,6 +22,7 @@ screenshot_count = 0
 screenshot_folder = 'screenshots'
 os.makedirs(screenshot_folder, exist_ok=True)
 
+# Function to clear the screenshot folder
 def clear_screenshot_folder():
     for filename in os.listdir(screenshot_folder):
         file_path = os.path.join(screenshot_folder, filename)
@@ -33,6 +34,7 @@ def clear_screenshot_folder():
         except Exception as e:
             print(f'Failed to delete {file_path}. Reason: {e}')
 
+# Function to take a screenshot
 def take_screenshot():
     global screenshot_count
     ret, frame = cap.read()
@@ -44,6 +46,7 @@ def take_screenshot():
     if screenshot_count >= 10:
         stop_program()
 
+# Function to stop the program
 def stop_program():
     global stop
     stop = True
@@ -70,10 +73,7 @@ while not stop:
 
     if ret:
         print("Chessboard corners found.")
-        objpoints.append(objp)
-        corners2 = cv.cornerSubPix(gray, corners, ((rows * 2 + 1), (rows * 2 + 1)), (-1, -1), criteria)
-        imgpoints.append(corners2)
-        cv.drawChessboardCorners(frame, (rows, cols), corners2, ret)
+        cv.drawChessboardCorners(frame, (rows, cols), corners, ret)
 
     cv.imshow('frame', frame)
     if cv.waitKey(1) == 27:  # Escape key
@@ -85,8 +85,21 @@ while not stop:
 cv.destroyAllWindows()
 cap.release()
 
-if not stop:
-    if len(objpoints) > 0 and len(imgpoints) > 0:
+# After taking screenshots, process them for calibration
+if screenshot_count >= 10:
+    print("Processing screenshots for calibration...")
+    for i in range(screenshot_count):
+        img_path = os.path.join(screenshot_folder, f'screenshot_{i}.png')
+        img = cv.imread(img_path)
+        gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        ret, corners = cv.findChessboardCorners(gray, (rows, cols), None)
+
+        if ret:
+            objpoints.append(objp)
+            corners2 = cv.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+            imgpoints.append(corners2)
+
+    if objpoints and imgpoints:
         print("Calibrating camera...")
         ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
@@ -99,3 +112,5 @@ if not stop:
             print("Failed to calibrate camera")
     else:
         print("No calibration data collected.")
+else:
+    print("Not enough screenshots for calibration.")
