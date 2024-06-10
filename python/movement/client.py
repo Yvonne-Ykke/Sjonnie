@@ -1,6 +1,6 @@
 import socket
 
-def move_servos(shoulder_angle, elbow_angle):
+def send_arm_angles_to_robot(shoulder_angle, elbow_angle):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         client_socket.connect(('141.252.29.70', 65000))
