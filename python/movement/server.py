@@ -1,8 +1,7 @@
 import socket
-from pyax12.connection import Connection
 import sys
 import signal
-import robot_arm 
+import robot_arm
 
 
 def _start_server():

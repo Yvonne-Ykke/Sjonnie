@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 @dataclass
-class RobotArmParameters:
+class Parameters:
     SEGMENT_LENGTH: float = 300.0
     AX12_SHOULDER_MIN_ANGLE: int = -130
     AX12_SHOULDER_MAX_ANGLE: int = 130
