@@ -19,7 +19,7 @@ colors = [
     Color("green", [40, 41, 74], [86, 255, 255], [0, 255, 0]),
     Color("yellow", [16, 62, 0], [36, 255, 255], [0, 255, 255]),
     Color("pink", [140, 40, 50], [175, 140, 160], [0, 50, 255]),
-    Color("silver", [0, 0, 100], [180, 10, 180],[192, 192, 192])
+    Color("silver", [0, 0, 0], [180, 20, 255],[192, 192, 192])
 ]
 
 def apply_clahe(frame):
@@ -61,15 +61,17 @@ def detect(developing):
 
         color_masks = masks(img)
         for color_name, mask in color_masks:
-            #if color_name == "Silver":
-                #gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-                #thres_silver = cv.adaptiveThreshold(gray, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY_INV, 11, 10)
-                #cv.imshow("thres_silver", thres_silver)
-                #res_silver = cv.bitwise_and(thres_silver, thres_silver, mask=mask)
-                #cv.imshow(color_name, res_silver)
-            #else:
-            res = cv.bitwise_and(img, img, mask=mask)
-            cv.imshow(color_name, res)
+            if color_name == "Silver":
+                test = cv.convertScaleAbs(img, alpha=1.5, beta=0)
+                cv.imshow("hans", test)
+                # gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+                # thres_silver = cv.adaptiveThreshold(gray, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY_INV, 13, 7)
+                # cv.imshow("Silvertres", thres_silver)
+                res = cv.bitwise_and(img, img, mask=mask)
+                cv.imshow("Silver", res)
+            else:
+                res = cv.bitwise_and(img, img, mask=mask)
+                cv.imshow(color_name, res)
                 
         if cv.waitKey(1) & 0xFF == ord('q'):
             cap.release()

@@ -2,7 +2,7 @@ import  color_recognition
 import contour
 import os
 
-developing = False
+developing = True
 
 def main():
     #color_recognition.detect(developing)
