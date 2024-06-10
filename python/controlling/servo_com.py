@@ -6,7 +6,7 @@ import serial
 TX_Pin = 8
 RX_Pin = 10
 TR_Pin = 12
-BaudRate = 1000000
+BAUD_RATE = 1000000
 
 # Definieer IDs van de servos
 S1_ID = 3
@@ -19,7 +19,7 @@ GPIO.setup(RX_Pin, GPIO.IN)
 GPIO.setup(TR_Pin, GPIO.IN)
 print("setup succesvol")
 # Open de seriële poort
-ser = serial.Serial('/dev/serial0', BaudRate, timeout=1)  # Pas aan naar de juiste seriële poort
+ser = serial.Serial('/dev/serial0', BAUD_RATE, timeout=1)  # Pas aan naar de juiste seriële poort
 print("setup succesvol")
 
 def switchCom(mode):

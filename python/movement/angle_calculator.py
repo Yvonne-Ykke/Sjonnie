@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-import controller
+import python.movement.client as client
 
 # Parameters
 SEGMENT_LENGTH = 300.0
@@ -75,7 +75,7 @@ def main(x, y):
     shoulder_angle, elbow_angle = calculate_valid_angles(x, y)
     if (shoulder_angle is not None) and (elbow_angle is not None):
         print(f"Angles: {shoulder_angle:.1f}, {elbow_angle:.1f}")
-        controller.move_servos(convert_to_servo_angle(shoulder_angle), elbow_angle)
+        shoulder_angle = convert_to_servo_angle(shoulder_angle)
         return shoulder_angle, elbow_angle
     else:
         print("Invalid position")
