@@ -9,7 +9,7 @@ import pathlib
 
 def contouring(developing):
     if developing:
-        cap = cv.VideoCapture(1)
+        cap = cv.VideoCapture(0)
     else:
         cap = cv.VideoCapture(0)
 

@@ -14,12 +14,12 @@ class Color:
         self.bgr = bgr
 
 colors = [
-    Color("blue", [80, 60, 0], [140, 255, 255], [255, 0, 0]),
-    Color("red", [165, 70, 50], [175, 255, 255], [0, 0, 255]),
+    Color("blue", [80, 40, 0], [140, 255, 255], [255, 0, 0]),
+    Color("red", [0, 50, 50], [15, 255, 255], [0, 0, 255], [178, 60, 50], [180, 255, 255]),
     Color("green", [40, 41, 74], [86, 255, 255], [0, 255, 0]),
     Color("yellow", [16, 62, 0], [36, 255, 255], [0, 255, 255]),
-    Color("pink", [0, 70, 50], [15, 255, 255], [0, 50, 255], [160, 70, 50], [164, 255, 255]),
-    Color("silver", [0, 0, 50], [360, 30, 100],[192, 192, 192])
+    Color("pink", [0, 30, 50], [0, 150, 155], [0, 50, 255], [140, 40, 50], [175, 140, 160]),
+    Color("silver", [0, 0, 100], [180, 10, 180],[192, 192, 192])
 ]
 
 def apply_clahe(frame):
@@ -50,7 +50,7 @@ def detect(developing):
     else:
         cap = cv.VideoCapture(0)
     
-    while(True):
+    while True:
         ret, img = cap.read()
         if img is None:
             break
@@ -60,19 +60,17 @@ def detect(developing):
         cv.imshow("image", img)
 
         color_masks = masks(img)
-        results = []
         for color_name, mask in color_masks:
-            if color_name == "Silver":
-                img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-                res = cv.bitwise_and(img, img, mask=mask)
-                results.append(res) 
-            else:
-                res = cv.bitwise_and(img, img, mask=mask)
-                results.append(res)
-            
-            # if developing:
+            #if color_name == "Silver":
+                #gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+                #thres_silver = cv.adaptiveThreshold(gray, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY_INV, 11, 10)
+                #cv.imshow("thres_silver", thres_silver)
+                #res_silver = cv.bitwise_and(thres_silver, thres_silver, mask=mask)
+                #cv.imshow(color_name, res_silver)
+            #else:
+            res = cv.bitwise_and(img, img, mask=mask)
             cv.imshow(color_name, res)
-        
+                
         if cv.waitKey(1) & 0xFF == ord('q'):
             cap.release()
             cv.destroyAllWindows()
