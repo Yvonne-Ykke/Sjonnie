@@ -2,7 +2,7 @@ import numpy as np
 import cv2 as cv
 
 
-developing = False
+DEVELOPING = False
 
 class Color:
     def __init__(self, name, low_hsv, high_hsv, bgr=None, low_hsv2=None, high_hsv2=None):
@@ -15,14 +15,12 @@ class Color:
 
 colors = [
     Color("blue", [80, 60, 0], [140, 255, 255], [255, 0, 0]),
-    Color("red", [0, 70, 50], [10, 255, 255], [0, 0, 255], [170, 70, 50], [180, 255, 255]),
+    Color("red", [165, 70, 50], [175, 255, 255], [0, 0, 255]),
     Color("green", [40, 41, 74], [86, 255, 255], [0, 255, 0]),
     Color("yellow", [16, 80, 0], [36, 255, 255], [0, 255, 255]),
-    Color("pink", [167, 63, 100], [176, 255, 255], [0, 50, 255]),
-    Color("silver", [10, 10, 100], [160, 255, 255],[170,169,173])
+    Color("pink", [0, 70, 50], [15, 255, 255], [0, 50, 255], [160, 70, 50], [164, 255, 255]),
+    Color("silver", [10, 10, 100], [160, 255, 255],[192, 192, 192])
 ]
-
-
 
 def apply_clahe(frame):
     lab = cv.cvtColor(frame, cv.COLOR_BGR2Lab)
@@ -76,5 +74,5 @@ def detect(developing):
             break
 
 if __name__ == "__main__":
-    detect(developing)
+    detect(DEVELOPING)
 
