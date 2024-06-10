@@ -40,3 +40,5 @@ class RobotArm:
             return None, None
         finally:
             self.serial_connection.close()
+
+
