@@ -2,7 +2,7 @@ import numpy as np
 import cv2 as cv
 
 
-DEVELOPING = False
+DEVELOPING = True
 
 class Color:
     def __init__(self, name, low_hsv, high_hsv, bgr=None, low_hsv2=None, high_hsv2=None):
@@ -17,7 +17,7 @@ colors = [
     Color("blue", [80, 60, 0], [140, 255, 255], [255, 0, 0]),
     Color("red", [165, 70, 50], [175, 255, 255], [0, 0, 255]),
     Color("green", [40, 41, 74], [86, 255, 255], [0, 255, 0]),
-    Color("yellow", [16, 80, 0], [36, 255, 255], [0, 255, 255]),
+    Color("yellow", [16, 62, 0], [36, 255, 255], [0, 255, 255]),
     Color("pink", [0, 70, 50], [15, 255, 255], [0, 50, 255], [160, 70, 50], [164, 255, 255]),
     Color("silver", [0, 0, 50], [360, 30, 100],[192, 192, 192])
 ]
@@ -62,8 +62,13 @@ def detect(developing):
         color_masks = masks(img)
         results = []
         for color_name, mask in color_masks:
-            res = cv.bitwise_and(img, img, mask=mask)
-            results.append(res)
+            if color_name == "Silver":
+                img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+                res = cv.bitwise_and(img, img, mask=mask)
+                results.append(res) 
+            else:
+                res = cv.bitwise_and(img, img, mask=mask)
+                results.append(res)
             
             # if developing:
             cv.imshow(color_name, res)
