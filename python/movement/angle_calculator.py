@@ -1,7 +1,5 @@
 import math
 import numpy as np
-import matplotlib.pyplot as plt
-import python.movement.client as client
 
 # Parameters
 SEGMENT_LENGTH = 300.0
@@ -71,7 +69,11 @@ def is_in_range(angle): return -150 <= angle <= 150
 def is_valid_angle(angle): return is_in_range(angle)
 def distance_from_origin(x, y): return np.sqrt(x ** 2 + y ** 2)
 
-def main(x, y):
+def main(x, y, elbow_angle = 0, shoulder_angle = 0):
+    global prev_elbow_angle, prev_shoulder_angle
+    prev_shoulder_angle = shoulder_angle
+    prev_elbow_angle = elbow_angle
+
     shoulder_angle, elbow_angle = calculate_valid_angles(x, y)
     if (shoulder_angle is not None) and (elbow_angle is not None):
         print(f"Angles: {shoulder_angle:.1f}, {elbow_angle:.1f}")
