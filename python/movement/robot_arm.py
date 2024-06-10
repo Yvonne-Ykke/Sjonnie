@@ -1,5 +1,3 @@
-# movement/robot_arm.py
-
 from pyax12.connection import Connection
 
 SERVO_1 = 61

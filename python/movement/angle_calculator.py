@@ -58,11 +58,7 @@ def _distance_from_origin(x, y): return np.sqrt(x ** 2 + y ** 2)
 def convert_to_servo_angle(angle): return -(angle + 90) % 360 - 180
 
 def main(x, y, elbow_angle = 0, shoulder_angle = 0):
-    global prev_elbow_angle, prev_shoulder_angle
-    prev_shoulder_angle = shoulder_angle
-    robot.prev_elbow_angle = elbow_angle
-
-    shoulder_angle, elbow_angle = calculate_valid_angles(x, y)
+    shoulder_angle, elbow_angle = calculate_valid_angles(x, y, elbow_angle, shoulder_angle)
     if (shoulder_angle is not None) and (elbow_angle is not None):
         print(f"Angles: {shoulder_angle:.1f}, {elbow_angle:.1f}")
         shoulder_angle = convert_to_servo_angle(shoulder_angle)
@@ -71,10 +67,7 @@ def main(x, y, elbow_angle = 0, shoulder_angle = 0):
         print("Invalid position")
         return None, None
 
-def calculate_valid_angles(x, y):
-    global prev_elbow_angle, prev_shoulder_angle
-    prev_elbow_angle = 0
-    prev_shoulder_angle = 0
+def calculate_valid_angles(x, y, prev_elbow_angle, prev_shoulder_angle):
     
     if _point_hits_robot_base(x, y) or point_is_out_of_reach(x, y, robot.SEGMENT_LENGTH): return None, None
     shoulder_angle, elbow_angle = calculate_arm_angles(x, y, robot.SEGMENT_LENGTH, prev_shoulder_angle, prev_elbow_angle)
