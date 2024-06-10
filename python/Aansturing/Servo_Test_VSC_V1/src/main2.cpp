@@ -22,6 +22,9 @@ void setup()
 //  ax12a.ledStatus(S1_ID, ON);
 //  ax12a.ledStatus(S2_ID, ON);
 
+//TODO: queue
+//FIXME: queue
+
 }
 
 void loop()
