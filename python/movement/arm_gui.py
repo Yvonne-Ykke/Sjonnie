@@ -6,6 +6,7 @@ import robot_arm_parameters as robotParameters
 robot = robotParameters.Parameters
 
 DOTS_PRECISION = 200
+global prev_shoulder_angle, prev_elbow_angle
 prev_elbow_angle = 0
 prev_shoulder_angle = 0
 
@@ -34,10 +35,13 @@ def _on_hover(event):
         annot1.set_visible(False)
 
 def _on_click(event):
+    global prev_shoulder_angle, prev_elbow_angle
     mouse_is_on_plot = event.inaxes
     if mouse_is_on_plot:
         mouse_x, mouse_y = event.xdata, event.ydata
-        shoulder_angle, elbow_angle = angle_calculator.calculate_valid_angles(mouse_x, mouse_y)
+        shoulder_angle, elbow_angle = angle_calculator.calculate_valid_angles(mouse_x, mouse_y, prev_shoulder_angle, prev_elbow_angle)
+        prev_shoulder_angle = shoulder_angle
+        prev_elbow_angle = elbow_angle
         # If the angles are valid, move the arm to the new position
         if (shoulder_angle is not None) and (elbow_angle is not None):
             shoulder_angle_servo = angle_calculator.convert_to_servo_angle(shoulder_angle)
