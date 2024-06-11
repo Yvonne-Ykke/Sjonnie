@@ -120,8 +120,9 @@ def color_contouring(developing):
 
 
         time.sleep(0.1)
-        cv.imshow("image", img)
+        
         if developing:
+            cv.imshow("image", img)
             cv.imshow('thres', threshoog)
             
         if cv.waitKey(1) & 0xFF == ord('q'):

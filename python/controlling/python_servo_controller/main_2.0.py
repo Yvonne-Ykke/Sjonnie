@@ -6,6 +6,9 @@ import RPi.GPIO as GPIO
 import signal
 import sys
 import socket
+import contour
+
+
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 
@@ -232,7 +235,7 @@ def handheld_control(conn, webdata, speed, trans_speed, pwr):
 def autonomous_control(conn, webdata, speed, trans_speed, pwr, flag, butopenclose):
     #TODO: This
     try:
-        pinch_grip(conn, webdata, flag, butopenclose)
+        contour.color_countouring(False)
     except:
         print("Autonomous_Control_Error")
         #conn.send("Autonomous_Control_Error".encode())
