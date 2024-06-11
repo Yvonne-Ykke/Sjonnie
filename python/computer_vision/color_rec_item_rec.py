@@ -22,16 +22,15 @@ def color_contouring(developing):
         for color_name, mask, bgr in color_masks:
             res = cv.bitwise_and(img,img, mask= mask)
             results.append(res)
-            #cv.imshow(color_name, res)
+            cv.imshow(color_name, res)
 
             #bgr = cv.cvtColor(bgr, cv.COLOR_HSV2BGR)
             imgray = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
             blur = cv.GaussianBlur(imgray,(5,5),0)
 
-            ret, threshoog = cv.threshold(blur, 45, 255, cv.THRESH_BINARY_INV)
+            ret, threshoog = cv.threshold(blur, 100, 255, cv.THRESH_BINARY_INV)
 
             contours, hierarchy = cv.findContours(threshoog, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-
             hierarchy = hierarchy[0]
             
             for cnr in range(len(contours)):
@@ -77,8 +76,6 @@ def color_contouring(developing):
                             if 0.7 > factor > 0.2:
                                 re = 'blokje'
                                 cv.putText(img, re, (x+w, int(y+h*0.5)), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
-
-
 
         time.sleep(0.1)
         cv.imshow("image", img)
