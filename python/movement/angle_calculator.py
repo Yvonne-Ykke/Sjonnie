@@ -68,7 +68,7 @@ def main(x, y, elbow_angle = 0, shoulder_angle = 0):
         return None, None
 
 def calculate_valid_angles(x, y, prev_elbow_angle, prev_shoulder_angle):
-    
+     
     if _point_hits_robot_base(x, y) or point_is_out_of_reach(x, y, robot.SEGMENT_LENGTH): return None, None
     shoulder_angle, elbow_angle = calculate_arm_angles(x, y, robot.SEGMENT_LENGTH, prev_shoulder_angle, prev_elbow_angle)
     
