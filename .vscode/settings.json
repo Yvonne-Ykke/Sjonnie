@@ -3,5 +3,8 @@
         "main"
     ],
     "editor.formatOnSave": true,
-    "editor.formatOnPaste": true
+    "editor.formatOnPaste": true,
+    "python.analysis.extraPaths": [
+        "./python/computer_vision"
+    ]
 }

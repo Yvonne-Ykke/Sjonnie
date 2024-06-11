@@ -6,6 +6,7 @@ import argparse
 import cv2
 import imutils
 import time
+
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video",
@@ -27,7 +28,7 @@ direction = ""
 # if a video path was not supplied, grab the reference
 # to the webcam
 if not args.get("video", False):
-	vs = VideoStream(src=0).start()
+	vs = VideoStream(src=1).start()
 # otherwise, grab a reference to the video file
 else:
 	vs = cv2.VideoCapture(args["video"])
