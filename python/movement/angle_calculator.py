@@ -51,8 +51,8 @@ def calculate_arm_angles(x, y, segment_length, current_pos_shoulder, current_pos
         # Use choice function to determine the closest angle
         return calculate_shortest_angles(shoulder_angle_degrees, elbow_angle_degrees, shoulder_angle_other_degrees, elbow_angle_other_degrees, current_pos_shoulder, current_pos_elbow)
     
-def _is_shoulder_in_range(angle): return -130 <= angle <= 130
-def _is_elbow_in_range(angle): return -150 <= angle <= 150
+def _is_shoulder_in_range(angle): return robot.AX12_SHOULDER_MIN_ANGLE <= angle <= robot.AX12_SHOULDER_MAX_ANGLE
+def _is_elbow_in_range(angle): return robot.AX12_ELBOW_MIN_ANGLE <= angle <= robot.AX12_ELBOW_MAX_ANGLE
 def _point_hits_robot_base(x, y): return _distance_from_origin(x, y) <= robot.FORBIDDEN_RADIUS
 def _distance_from_origin(x, y): return np.sqrt(x ** 2 + y ** 2)
 def convert_to_servo_angle(angle): return -(angle + 90) % 360 - 180
