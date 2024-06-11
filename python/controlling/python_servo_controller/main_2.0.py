@@ -103,7 +103,7 @@ def read_and_send_servo_info(conn, webdata, spd, trns):
         conn.send(result.encode())
 
     # Error handling
-    except (ValueError) as ex:
+    except (Exception) as ex:
         exception_result = [str(current_motor),"-","-","-","-",str(ex)]
         result_to_string = ",".join(exception_result)
         conn.send(result_to_string.encode())
@@ -124,13 +124,28 @@ def wait(wait_time_seconds):
 
 def whack_a_mole(webdata):
     #TODO: Whack a mole maken
-    SUPER_SPEED = 1000
-    WHACK_HIGH = 500
-    WHACK_LOW = 200
-    serial_connection.goto(TRANS, WHACK_HIGH, SUPER_SPEED, degrees=False)
-    wait(0.8)
-    serial_connection.goto(TRANS, WHACK_LOW, SUPER_SPEED, degrees=False)
+    #TODO: Whack a mole maken
+    SUPER_SPEED = 512
+    WHACK_HIGH = 430
+    WHACK_LOW = 345
+    global flag
+    global butopenclose
 
+    if int(webdata[GRIP]) == 1:
+        if butopenclose == 0:
+            if flag == 1:
+                serial_connection.goto(TRANS, WHACK_LOW, SUPER_SPEED, degrees=False)
+                wait(0.1)
+                serial_connection.goto(TRANS, WHACK_HIGH, SUPER_SPEED, degrees=False)
+                flag = 0
+            elif flag == 0:
+                serial_connection.goto(TRANS, WHACK_LOW, SUPER_SPEED, degrees=False)
+                wait(0.1)
+                serial_connection.goto(TRANS, WHACK_HIGH, SUPER_SPEED, degrees=False)
+                flag = 1
+            butopenclose += 1
+    if int(webdata[GRIP]) == 0:
+        butopenclose = 0
 
 def kilo_grip(conn, webdata):
     #TODO: Een stand maken waarij je weet dat je de kilo gripper hebt
@@ -157,10 +172,10 @@ def scissors_grip(webdata):
     if int(webdata[GRIP]) == 1:
         if butopenclose == 0:
             if flag == 1:
-                serial_connection.goto(GRIPPER, 823, SPEED_GRIPPER, degrees=False)
+                serial_connection.goto(GRIPPER, 583, SPEED_GRIPPER, degrees=False)
                 flag = 0
             elif flag == 0:
-                serial_connection.goto(GRIPPER, 215, SPEED_GRIPPER, degrees=False)
+                serial_connection.goto(GRIPPER, 350, SPEED_GRIPPER, degrees=False)
                 flag = 1
             butopenclose += 1
     if int(webdata[GRIP]) == 0:
@@ -181,6 +196,8 @@ def pinch_grip(conn, webdata):
     elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
         kilo_grip(conn, webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
+        scissors_grip(webdata)
+    else:
         scissors_grip(webdata)
 
 def handheld_control(conn, webdata, speed, trans_speed, pwr):
