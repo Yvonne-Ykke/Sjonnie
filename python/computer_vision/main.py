@@ -2,14 +2,14 @@ import  color_recognition
 import contour
 import os
 
-developing = True
+DEVELOPING = True
 
 def main():
     #color_recognition.detect(developing)
     #contour.contouring(developing)
     
     #info = 
-    contour.color_contouring(developing)
+    contour.color_contouring(DEVELOPING)
     # contour.contouring(developing)
     
     #Send infromatie naar esp32
