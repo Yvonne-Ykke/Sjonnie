@@ -46,11 +46,7 @@ def contouring(developing):
                     elif 0.12 < factor < 0.2: #straight scissors
                         #print (area, factor, holes)
                         cv.drawContours(im, [cnt], -1, (0, 255, 255), 3)
-                        print("straight scissors")
-                    
-
-
-                
+                        print("straight scissors")               
 
         cv.imshow('thres', threshoog)
         cv.imshow('contour_vision', imgray)
@@ -61,36 +57,51 @@ def contouring(developing):
             cv.destroyAllWindows()
             break
 
+def draw_scissors(area, factor, img, cnt, child, color_name, bgr):
+    if area > 500 and area < 100000:
+        x, y, w, h = cv.boundingRect(cnt)
+        if 0.05 < factor < 0.12: #curved scissors
+            #print (area, factor, holes)
+            cv.drawContours(img, [cnt], -1, bgr, 3)
+            cv.rectangle(img, (x, y), (x+w, y+h), bgr, 3)
+            cv.putText(img, 'scissors', (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
+            print("curved scissors " + color_name)
+        elif 0.12 < factor < 0.2: #straight scissors
+            #print (area, factor, holes)
+            cv.drawContours(img, [cnt], -1, bgr, 3)
+            cv.rectangle(img, (x, y), (x+w, y+h), bgr, 3)
+            cv.putText(img, 'straight scissors', (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
+            print("straight scissors " + color_name)
 
+        M = cv.moments(cnt)
+        if child <= 0:
+            if M['m00'] != 0:
+                cx = int(M['m10'] / M['m00'])
+                cy = int(M['m01'] / M['m00'])
+                cv.circle(img, (cx, cy), 5, (0, 255, 255), -1)
 
 def color_contouring(developing):
-    if developing:
-        cap = cv.VideoCapture(1)
-    else:
-        cap = cv.VideoCapture(0)
+    cap = cv.VideoCapture(0)
 
     while(True):
-        img = color_recognition.detect(developing)
         ret,img = cap.read()
         if img is None:
             break
         
         color_masks = color_recognition.masks(img)
 
-        results = []
-        for color_name, mask, bgr, count in color_masks:
+        for color_name, mask, bgr in color_masks:
             res = cv.bitwise_and(img,img, mask= mask)
-            results.append(res)
             cv.imshow(color_name, res)
 
+            imgray2 = cv.cvtColor(res, cv.COLOR_HSV2BGR)
             imgray = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
-            blur = cv.GaussianBlur(imgray,(5,5),0)
+            blur = cv.GaussianBlur(imgray,(3,3),0)
+            ret, threshoog = cv.threshold(imgray, 1, 255, cv.THRESH_BINARY)
+            contours, hierarchy = cv.findContours(imgray, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
-            ret, threshoog = cv.threshold(blur, 45, 255, cv.THRESH_BINARY_INV)
-
-            contours, hierarchy = cv.findContours(threshoog, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-
-            hierarchy = hierarchy[0]
+            if hierarchy is not None:
+                hierarchy = hierarchy[0]
             
             for cnr in range(len(contours)):
                 cnt = contours [cnr]
@@ -105,18 +116,8 @@ def color_contouring(developing):
                         child = hierarchy[child][0]
                     #print (area, factor, holes)
                     #print (child)
+                    draw_scissors(area, factor, img, cnt, child, color_name, bgr)
 
-                    
-                    if area > 200 and area < 100000 and factor > 0.01:
-                        cv.drawContours(img, [cnt], -1, bgr, 1)
-                        count += 1
-
-                        M = cv.moments(cnt)
-                        if child <= 0:
-                            if M['m00'] != 0:
-                                cx = int(M['m10'] / M['m00'])
-                                cy = int(M['m01'] / M['m00'])
-                                cv.circle(img, (cx, cy), 5, (0, 255, 255), -1)
 
         time.sleep(0.1)
         cv.imshow("image", img)
