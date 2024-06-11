@@ -8,10 +8,7 @@ import pathlib
 
 
 def contouring(developing):
-    if developing:
-        cap = cv.VideoCapture(0)
-    else:
-        cap = cv.VideoCapture(0)
+    cap = cv.VideoCapture(0)
 
     while(True):
         ret,im = cap.read()
@@ -134,4 +131,4 @@ def color_contouring(developing):
         
 
 if __name__ == "__main__":
-    contouring(True)
+    contouring(False)

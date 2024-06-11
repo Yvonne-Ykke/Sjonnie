@@ -2,7 +2,7 @@ import numpy as np
 import cv2 as cv
 
 
-developing = False
+DEVELOPING = True
 
 class Color:
     def __init__(self, name, low_hsv, high_hsv, bgr=None, low_hsv2=None, high_hsv2=None):
@@ -14,15 +14,13 @@ class Color:
         self.bgr = bgr
 
 colors = [
-    Color("blue", [80, 60, 0], [140, 255, 255], [255, 0, 0]),
-    Color("red", [0, 70, 50], [10, 255, 255], [0, 0, 255], [170, 70, 50], [180, 255, 255]),
+    Color("blue", [80, 40, 0], [140, 255, 255], [255, 0, 0]),
+    Color("red", [0, 50, 50], [15, 255, 255], [0, 0, 255], [178, 140, 50], [180, 255, 255]),
     Color("green", [40, 41, 74], [86, 255, 255], [0, 255, 0]),
-    Color("yellow", [16, 80, 0], [36, 255, 255], [0, 255, 255]),
-    Color("pink", [167, 63, 100], [176, 255, 255], [0, 50, 255]),
-    #Color("silver", [10, 10, 100], [160, 255, 255],[170,169,173])
+    Color("yellow", [16, 62, 0], [36, 255, 255], [0, 255, 255]),
+    Color("pink", [140, 40, 50], [175, 140, 160], [0, 50, 255]),
+    Color("silver", [0, 0, 0], [180, 20, 255],[192, 192, 192])
 ]
-
-
 
 def apply_clahe(frame):
     lab = cv.cvtColor(frame, cv.COLOR_BGR2Lab)
@@ -52,7 +50,7 @@ def detect(developing):
     else:
         cap = cv.VideoCapture(0)
     
-    while(True):
+    while True:
         ret, img = cap.read()
         if img is None:
             break
@@ -62,19 +60,24 @@ def detect(developing):
         cv.imshow("image", img)
 
         color_masks = masks(img)
-        results = []
         for color_name, mask in color_masks:
-            res = cv.bitwise_and(img, img, mask=mask)
-            results.append(res)
-            
-            # if developing:
-            cv.imshow(color_name, res)
-        
+            if color_name == "Silver":
+                test = cv.convertScaleAbs(img, alpha=1.5, beta=0)
+                cv.imshow("hans", test)
+                # gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+                # thres_silver = cv.adaptiveThreshold(gray, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY_INV, 13, 7)
+                # cv.imshow("Silvertres", thres_silver)
+                res = cv.bitwise_and(img, img, mask=mask)
+                cv.imshow("Silver", res)
+            else:
+                res = cv.bitwise_and(img, img, mask=mask)
+                cv.imshow(color_name, res)
+                
         if cv.waitKey(1) & 0xFF == ord('q'):
             cap.release()
             cv.destroyAllWindows()
             break
 
 if __name__ == "__main__":
-    detect(developing)
+    detect(DEVELOPING)
 
