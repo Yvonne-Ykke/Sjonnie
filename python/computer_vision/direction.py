@@ -10,7 +10,7 @@ from color_recognition import colors, Color
 # }
 
 # Function to detect the rectangle of a given color and find its center
-def detect_color_rectangle(frame, color):
+def detect_color_rectangle(frame, color, min_area=500):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     # Get the color range for the given color
@@ -27,9 +27,17 @@ def detect_color_rectangle(frame, color):
     # Find contours
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    if contours:
-        # Find the largest contour
-        largest_contour = max(contours, key=cv2.contourArea)
+    # Filter contours based on approximate rectangle shape and minimum area
+    rect_contours = []
+    for contour in contours:
+        perimeter = cv2.arcLength(contour, True)
+        approx = cv2.approxPolyDP(contour, 0.04 * perimeter, True)
+        if len(approx) == 4 and cv2.contourArea(contour) > min_area:
+            rect_contours.append(contour)
+
+    if rect_contours:
+        # Find the largest rectangular contour
+        largest_contour = max(rect_contours, key=cv2.contourArea)
         
         # Get the bounding box around the largest contour
         x, y, w, h = cv2.boundingRect(largest_contour)
@@ -55,8 +63,8 @@ def track_color_movement(selected_color):
 
     prev_center = None
     direction = ""
-    min_speed_threshold = 5  # Minimum speed to consider for movement
-    arrow_scale_factor = 0.5  # Scale factor for the arrow length
+    min_speed_threshold = 2  # Minimum speed to consider for movement
+    arrow_scale_factor = 5 # Scale factor for the arrow length
 
     while True:
         ret, frame = cap.read()
@@ -113,11 +121,9 @@ def track_color_movement(selected_color):
 
             # Display the direction on the frame
             cv2.putText(frame, f"Direction: {direction}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
-        else:
-            direction = "No object detected"
-            # Display the "No object detected" on the frame
-            cv2.putText(frame, direction, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        
+        # Print the current color name on the frame
+        cv2.putText(frame, f"Color: {selected_color.name}", (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
         # Display the resulting frame
         cv2.imshow('Frame', frame)
