@@ -122,10 +122,9 @@ def color_contouring(developing, detection):
                         child = hierarchy[child][0]
                     #print (area, factor, holes)
                     #print (child)
-                    draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing)
                     if area > 500 and area < 100000:
                         if detection == "scissors":
-                            draw_scissors(area, factor, img, cnt, child, color_name, bgr)
+                            draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing)
 
                         elif detection == "colors":
                             if 0.4 < factor < 0.7:
@@ -135,6 +134,7 @@ def color_contouring(developing, detection):
                                 cv.putText(img, color_name, (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
                         elif detection == "target":
                             print("not yet implemented")
+
             if developing:
                 cv.imshow(color_name, res)
 

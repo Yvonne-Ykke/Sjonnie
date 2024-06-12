@@ -1,8 +1,15 @@
 import  color_recognition
 import contour
+import direction
+from color_recognition import colors
 import os
 
 DEVELOPING = True
+COLORS = "colors"
+SCISSORS = "scissors"
+DIRECTION= "direction"
+TARGET = "target"
+
 
 def main():
     #color_recognition.detect(developing)
@@ -10,7 +17,9 @@ def main():
     
     #info = 
 
-    contour.color_contouring(DEVELOPING, "colors")
+    contour.color_contouring(DEVELOPING, SCISSORS)
+
+    # direction.track_color_movement(colors[0])
 
     # contour.contouring(developing)
     
