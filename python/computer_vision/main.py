@@ -9,16 +9,14 @@ def main():
     #contour.contouring(developing)
     
     #info = 
-    contour.color_contouring(DEVELOPING, "scissors")
+
+    contour.color_contouring(DEVELOPING, "colors")
+
     # contour.contouring(developing)
     
     #Send infromatie naar esp32
     #info = contour.color_contouring(developing)
     #comm.send(info)
-
-
-    
-
 
 
 if __name__ == "__main__":
