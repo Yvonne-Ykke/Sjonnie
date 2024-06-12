@@ -83,8 +83,11 @@ def draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing=Non
                 cy = int(M['m01'] / M['m00'])
                 cv.circle(img, (cx, cy), 5, (0, 255, 255), -1)
 
-def color_contouring(developing):
+def color_contouring(developing, detection):
     cap = cv.VideoCapture(0)
+
+    # if detection == "direction":
+        # get_direction(area, factor, img, cnt, color_name, bgr)
 
     while(True):
         ret,img = cap.read()
@@ -120,6 +123,20 @@ def color_contouring(developing):
                     #print (area, factor, holes)
                     #print (child)
                     draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing)
+                    if area > 500 and area < 100000:
+                        if detection == "scissors":
+                            draw_scissors(area, factor, img, cnt, child, color_name, bgr)
+
+                        elif detection == "colors":
+                            if 0.4 < factor < 0.7:
+                                x, y, w, h = cv.boundingRect(cnt)
+                                cv.drawContours(img, [cnt], -1, bgr, 3)
+                                cv.rectangle(img, (x, y), (x+w, y+h), bgr, 3)
+                                cv.putText(img, color_name, (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
+                        elif detection == "target":
+                            print("not yet implemented")
+            if developing:
+                cv.imshow(color_name, res)
 
 
         time.sleep(0.1)

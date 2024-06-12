@@ -9,7 +9,7 @@ def main():
     #contour.contouring(developing)
     
     #info = 
-    contour.color_contouring(DEVELOPING)
+    contour.color_contouring(DEVELOPING, "scissors")
     # contour.contouring(developing)
     
     #Send infromatie naar esp32
