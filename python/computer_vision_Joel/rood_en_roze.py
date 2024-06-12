@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 
+# Global variables to store clicked points
+points = []
+
 def nothing(x):
     pass
 
@@ -29,10 +32,17 @@ def detect_red(img, h_low1, h_high1, s_low1, s_high1, v_low1, v_high1,
 
     return result
 
+# Mouse callback function
+def mouse_callback(event, x, y, flags, param):
+    global points
+    if event == cv2.EVENT_LBUTTONDOWN:
+        points.append((x, y))
+
 # Open the camera
 cap = cv2.VideoCapture(0)
 
 cv2.namedWindow('image')
+cv2.setMouseCallback('image', mouse_callback)
 
 # Make trackbars for HSV ranges
 cv2.createTrackbar('H_low1', 'image', 0, 179, nothing)
@@ -75,6 +85,10 @@ while True:
     result = detect_red(frame, h_low1, h_high1, s_low1, s_high1, v_low1, v_high1,
                         h_low2, h_high2, s_low2, s_high2, v_low2, v_high2)
 
+    # Draw circles on the clicked points
+    for point in points:
+        cv2.circle(result, point, 5, (0, 255, 0), -1)
+
     # Display the result
     cv2.imshow('image', result)
 
@@ -85,3 +99,4 @@ while True:
 # Close the camera and windows
 cap.release()
 cv2.destroyAllWindows()
+ZZ

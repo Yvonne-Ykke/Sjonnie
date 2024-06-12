@@ -57,20 +57,23 @@ def contouring(developing):
             cv.destroyAllWindows()
             break
 
-def draw_scissors(area, factor, img, cnt, child, color_name, bgr):
+def draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing=None):
     if area > 500 and area < 100000:
         x, y, w, h = cv.boundingRect(cnt)
         if 0.05 < factor < 0.12: #curved scissors
             #print (area, factor, holes)
-            cv.drawContours(img, [cnt], -1, bgr, 3)
-            cv.rectangle(img, (x, y), (x+w, y+h), bgr, 3)
-            cv.putText(img, 'scissors', (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
+
+            if developing:
+                cv.drawContours(img, [cnt], -1, bgr, 3)
+                cv.rectangle(img, (x, y), (x+w, y+h), bgr, 3)
+                cv.putText(img, 'scissors', (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
             print("curved scissors " + color_name)
         elif 0.12 < factor < 0.2: #straight scissors
             #print (area, factor, holes)
-            cv.drawContours(img, [cnt], -1, bgr, 3)
-            cv.rectangle(img, (x, y), (x+w, y+h), bgr, 3)
-            cv.putText(img, 'straight scissors', (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
+            if developing:
+                cv.drawContours(img, [cnt], -1, bgr, 3)
+                cv.rectangle(img, (x, y), (x+w, y+h), bgr, 3)
+                cv.putText(img, 'straight scissors', (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
             print("straight scissors " + color_name)
 
         M = cv.moments(cnt)
@@ -80,8 +83,11 @@ def draw_scissors(area, factor, img, cnt, child, color_name, bgr):
                 cy = int(M['m01'] / M['m00'])
                 cv.circle(img, (cx, cy), 5, (0, 255, 255), -1)
 
-def color_contouring(developing):
+def color_contouring(developing, detection):
     cap = cv.VideoCapture(0)
+
+    # if detection == "direction":
+        # get_direction(area, factor, img, cnt, color_name, bgr)
 
     while(True):
         ret,img = cap.read()
@@ -92,7 +98,7 @@ def color_contouring(developing):
 
         for color_name, mask, bgr in color_masks:
             res = cv.bitwise_and(img,img, mask= mask)
-            cv.imshow(color_name, res)
+            #cv.imshow(color_name, res)
 
             imgray2 = cv.cvtColor(res, cv.COLOR_HSV2BGR)
             imgray = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
@@ -116,7 +122,21 @@ def color_contouring(developing):
                         child = hierarchy[child][0]
                     #print (area, factor, holes)
                     #print (child)
-                    draw_scissors(area, factor, img, cnt, child, color_name, bgr)
+                    draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing)
+                    if area > 500 and area < 100000:
+                        if detection == "scissors":
+                            draw_scissors(area, factor, img, cnt, child, color_name, bgr)
+
+                        elif detection == "colors":
+                            if 0.4 < factor < 0.7:
+                                x, y, w, h = cv.boundingRect(cnt)
+                                cv.drawContours(img, [cnt], -1, bgr, 3)
+                                cv.rectangle(img, (x, y), (x+w, y+h), bgr, 3)
+                                cv.putText(img, color_name, (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
+                        elif detection == "target":
+                            print("not yet implemented")
+            if developing:
+                cv.imshow(color_name, res)
 
 
         time.sleep(0.1)
@@ -127,7 +147,7 @@ def color_contouring(developing):
             
         if cv.waitKey(1) & 0xFF == ord('q'):
             img.release()
-            cv.destroyAllWindows()
+            #cv.destroyAllWindows()
             break
 
         
