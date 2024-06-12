@@ -4,16 +4,25 @@ import numpy as np
 def nothing(x):
     pass
 
-def detect_pink(img, h_min, h_max, s_min, s_max, v_min, v_max):
+def detect_red(img, h_low1, h_high1, s_low1, s_high1, v_low1, v_high1,
+               h_low2, h_high2, s_low2, s_high2, v_low2, v_high2):
     # Convert the image to HSV color space
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-    # Define lower and upper bounds for pink color in HSV
-    lower_pink = np.array([h_min, s_min, v_min])
-    upper_pink = np.array([h_max, s_max, v_max])
+    # Define lower and upper bounds for red color in HSV (1st range)
+    lower_red1 = np.array([h_low1, s_low1, v_low1])
+    upper_red1 = np.array([h_high1, s_high1, v_high1])
 
-    # Create a mask using the inRange function
-    mask = cv2.inRange(hsv, lower_pink, upper_pink)
+    # Define lower and upper bounds for red color in HSV (2nd range)
+    lower_red2 = np.array([h_low2, s_low2, v_low2])
+    upper_red2 = np.array([h_high2, s_high2, v_high2])
+
+    # Create masks using the inRange function for both ranges
+    mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
+    mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
+
+    # Combine the masks
+    mask = cv2.bitwise_or(mask1, mask2)
 
     # Apply the mask to the original image
     result = cv2.bitwise_and(img, img, mask=mask)
@@ -26,12 +35,19 @@ cap = cv2.VideoCapture(0)
 cv2.namedWindow('image')
 
 # Make trackbars for HSV ranges
-cv2.createTrackbar('H_min', 'image', 0, 179, nothing)
-cv2.createTrackbar('H_max', 'image', 179, 179, nothing)
-cv2.createTrackbar('S_min', 'image', 0, 255, nothing)
-cv2.createTrackbar('S_max', 'image', 255, 255, nothing)
-cv2.createTrackbar('V_min', 'image', 0, 255, nothing)
-cv2.createTrackbar('V_max', 'image', 255, 255, nothing)
+cv2.createTrackbar('H_low1', 'image', 0, 179, nothing)
+cv2.createTrackbar('H_high1', 'image', 10, 179, nothing)
+cv2.createTrackbar('S_low1', 'image', 100, 255, nothing)
+cv2.createTrackbar('S_high1', 'image', 255, 255, nothing)
+cv2.createTrackbar('V_low1', 'image', 100, 255, nothing)
+cv2.createTrackbar('V_high1', 'image', 255, 255, nothing)
+
+cv2.createTrackbar('H_low2', 'image', 160, 179, nothing)
+cv2.createTrackbar('H_high2', 'image', 179, 179, nothing)
+cv2.createTrackbar('S_low2', 'image', 100, 255, nothing)
+cv2.createTrackbar('S_high2', 'image', 255, 255, nothing)
+cv2.createTrackbar('V_low2', 'image', 100, 255, nothing)
+cv2.createTrackbar('V_high2', 'image', 255, 255, nothing)
 
 while True:
     # Read a frame from the camera
@@ -40,16 +56,24 @@ while True:
     if not ret:
         break
 
-    # Read the current position of trackbars
-    h_min = cv2.getTrackbarPos('H_min', 'image')
-    h_max = cv2.getTrackbarPos('H_max', 'image')
-    s_min = cv2.getTrackbarPos('S_min', 'image')
-    s_max = cv2.getTrackbarPos('S_max', 'image')
-    v_min = cv2.getTrackbarPos('V_min', 'image')
-    v_max = cv2.getTrackbarPos('V_max', 'image')
+    # Read the current position of trackbars for both ranges
+    h_low1 = cv2.getTrackbarPos('H_low1', 'image')
+    h_high1 = cv2.getTrackbarPos('H_high1', 'image')
+    s_low1 = cv2.getTrackbarPos('S_low1', 'image')
+    s_high1 = cv2.getTrackbarPos('S_high1', 'image')
+    v_low1 = cv2.getTrackbarPos('V_low1', 'image')
+    v_high1 = cv2.getTrackbarPos('V_high1', 'image')
 
-    # Detect pink pixels and remove the masked area
-    result = detect_pink(frame, h_min, h_max, s_min, s_max, v_min, v_max)
+    h_low2 = cv2.getTrackbarPos('H_low2', 'image')
+    h_high2 = cv2.getTrackbarPos('H_high2', 'image')
+    s_low2 = cv2.getTrackbarPos('S_low2', 'image')
+    s_high2 = cv2.getTrackbarPos('S_high2', 'image')
+    v_low2 = cv2.getTrackbarPos('V_low2', 'image')
+    v_high2 = cv2.getTrackbarPos('V_high2', 'image')
+
+    # Detect red pixels and remove the masked area
+    result = detect_red(frame, h_low1, h_high1, s_low1, s_high1, v_low1, v_high1,
+                        h_low2, h_high2, s_low2, s_high2, v_low2, v_high2)
 
     # Display the result
     cv2.imshow('image', result)
