@@ -6,7 +6,10 @@ import RPi.GPIO as GPIO
 import signal
 import sys
 import socket
+
+sys.path.append('../../computer_vision/')
 import contour
+
 
 
 GPIO.setwarnings(False)
@@ -183,7 +186,7 @@ def scissors_grip(webdata):
             butopenclose += 1
     if int(webdata[GRIP]) == 0:
         butopenclose = 0
-    print('tools grip')
+    
 
 def lights():
     #TODO: GPIO PIN HIGH AND OR LOW
@@ -224,6 +227,8 @@ def handheld_control(conn, webdata, speed, trans_speed, pwr):
             elif serial_connection.is_moving(MOTORS[pos]):
                 current_motor_position = serial_connection.get_present_position(MOTORS[pos], degrees=False)
                 serial_connection.goto(MOTORS[pos], current_motor_position, int(speed), degrees=False)
+            else:
+                pos += 1
             pos += 1
 
     except (Exception) as ex:
@@ -232,12 +237,12 @@ def handheld_control(conn, webdata, speed, trans_speed, pwr):
         conn.close()
 
 
-def autonomous_control(conn, webdata, speed, trans_speed, pwr, flag, butopenclose):
+def autonomous_control(conn, webdata, speed, trans_speed, pwr):
     #TODO: This
     try:
-        contour.color_countouring(False)
-    except:
-        print("Autonomous_Control_Error")
+        contour.color_contouring(False)
+    except (Exception) as ex:
+        print("Autonomous_Control_Error: " + str(ex))
         #conn.send("Autonomous_Control_Error".encode())
         conn.close()
 
