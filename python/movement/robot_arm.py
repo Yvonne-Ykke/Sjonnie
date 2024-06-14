@@ -4,6 +4,8 @@ import RPi.GPIO as GPIO
 SERVO_1 = 61
 SERVO_2 = 3
 
+GPIO.setmode(GPIO.BCM)
+
 class RobotArm:
     def __init__(self):
         try:
