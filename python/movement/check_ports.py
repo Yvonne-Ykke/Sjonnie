@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
 
 # Definieer de GPIO-pin (bijvoorbeeld pin 18)
-pin_nummer = 18
+pin_nummer = 17
 
 # GPIO initialisatie
 GPIO.setmode(GPIO.BCM)
