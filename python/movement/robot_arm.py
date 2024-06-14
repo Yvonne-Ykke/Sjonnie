@@ -5,6 +5,7 @@ SERVO_1 = 61
 SERVO_2 = 3
 
 GPIO.setmode(GPIO.BCM)
+GPIO.cleanup()
 GPIO.setup(18, GPIO.OUT)
 
 class RobotArm:
