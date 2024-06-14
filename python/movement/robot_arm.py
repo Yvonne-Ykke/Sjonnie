@@ -10,7 +10,7 @@ GPIO.setup(18, GPIO.OUT)
 
 class RobotArm:
     def move_to_position(self, shoulder_angle, elbow_angle):
-            if not self.serial_connection:
+            if not serial_connection:
                 print("Serial connection not established.")
                 return
             try:
