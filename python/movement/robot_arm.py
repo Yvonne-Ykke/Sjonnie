@@ -3,10 +3,6 @@ from pyax12.connection import Connection
 SERVO_1 = 61
 SERVO_2 = 3
 
-import RPi.GPIO as GPIO
-# Disable GPIO warnings globally
-GPIO.setwarnings(False)
-
 class RobotArm:
     def __init__(self):
         try:
@@ -16,7 +12,6 @@ class RobotArm:
             print(f"Error establishing serial connection: {e}")
             self.serial_connection = None
 
-
     def move_to_position(self, shoulder_angle, elbow_angle):
         if not self.serial_connection:
             print("Serial connection not established.")
@@ -24,11 +19,9 @@ class RobotArm:
         try:
             self.serial_connection.goto(SERVO_1, shoulder_angle, speed=20, degrees=True)
             self.serial_connection.goto(SERVO_2, elbow_angle, speed=20, degrees=True)
-            print(f"Bewegen naar positie: Schouder hoek: {shoulder_angle}, Elleboog hoek: {elbow_angle}")
+            print(f"Moving to position: Shoulder angle: {shoulder_angle}, Elbow angle: {elbow_angle}")
         except Exception as e:
-            print(f"Fout bij het bewegen naar positie: {e}")
-        finally:
-            self.serial_connection.close()
+            print(f"Error moving to position: {e}")
 
     def get_angles_from_arm(self):
         if not self.serial_connection:
@@ -39,9 +32,10 @@ class RobotArm:
             elbow_angle = self.serial_connection.get_present_position(SERVO_2, degrees=True)
             return shoulder_angle, elbow_angle
         except Exception as e:
-            print(f"Fout bij het ophalen van hoeken: {e}")
+            print(f"Error getting angles: {e}")
             return None, None
-        finally:
+
+    def close_connection(self):
+        if self.serial_connection:
             self.serial_connection.close()
-
-
+            print("Serial connection closed.")
