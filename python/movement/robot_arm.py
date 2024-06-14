@@ -13,15 +13,6 @@ class RobotArm:
             print(f"Error establishing serial connection: {e}")
             self.serial_connection = None
 
-        # GPIO pinnummer dat je wilt instellen
-        pin_nummer = 18  # Bijvoorbeeld pin 18
-
-        # GPIO initialisatie
-        GPIO.setmode(GPIO.BCM)  # Gebruik BCM pinnummering
-
-        # Zet de pin op uitvoer
-        GPIO.setup(pin_nummer, GPIO.OUT)
-
     def move_to_position(self, shoulder_angle, elbow_angle):
         if not self.serial_connection:
             print("Serial connection not established.")
@@ -29,6 +20,8 @@ class RobotArm:
         try:
             self.serial_connection.goto(SERVO_1, shoulder_angle, speed=20, degrees=True)
             self.serial_connection.goto(SERVO_2, elbow_angle, speed=20, degrees=True)
+            self.serial_connection.ping(SERVO_1)
+            self.serial_connection.ping(SERVO_2)
             print(f"Moving to position: Shoulder angle: {shoulder_angle}, Elbow angle: {elbow_angle}")
         except Exception as e:
             print(f"Error moving to position: {e}")
