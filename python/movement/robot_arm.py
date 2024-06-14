@@ -5,23 +5,18 @@ import time
 SERVO_1 = 61
 SERVO_2 = 3
 
-class RobotArm:
-    def __init__(self):
-        try:
-            self.serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
-            print("Serial connection established.")
-        except Exception as e:
-            print(f"Error establishing serial connection: {e}")
-            self.serial_connection = None
+serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
+GPIO.setup(18, GPIO.OUT)
 
+class RobotArm:
     def move_to_position(self, shoulder_angle, elbow_angle):
             if not self.serial_connection:
                 print("Serial connection not established.")
                 return
             try:
-                self.serial_connection.goto(SERVO_1, shoulder_angle, speed=20, degrees=True)
+                serial_connection.goto(SERVO_1, shoulder_angle, speed=20, degrees=True)
                 time.sleep(0.1)  # Korte vertraging toevoegen
-                self.serial_connection.goto(SERVO_2, elbow_angle, speed=20, degrees=True)
+                serial_connection.goto(SERVO_2, elbow_angle, speed=20, degrees=True)
                 time.sleep(0.1)  # Korte vertraging toevoegen
                 print(self.serial_connection.ping(SERVO_1))
                 print(self.serial_connection.ping(SERVO_2))
