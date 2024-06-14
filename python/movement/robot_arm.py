@@ -16,6 +16,7 @@ class RobotArm:
             print(f"Error establishing serial connection: {e}")
             self.serial_connection = None
 
+
     def move_to_position(self, shoulder_angle, elbow_angle):
         if not self.serial_connection:
             print("Serial connection not established.")
