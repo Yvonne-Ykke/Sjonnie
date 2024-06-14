@@ -20,8 +20,8 @@ class RobotArm:
         try:
             self.serial_connection.goto(SERVO_1, shoulder_angle, speed=20, degrees=True)
             self.serial_connection.goto(SERVO_2, elbow_angle, speed=20, degrees=True)
-            self.serial_connection.ping(SERVO_1)
-            self.serial_connection.ping(SERVO_2)
+            print(self.serial_connection.ping(SERVO_1))
+            print(self.serial_connection.ping(SERVO_2))
             print(f"Moving to position: Shoulder angle: {shoulder_angle}, Elbow angle: {elbow_angle}")
         except Exception as e:
             print(f"Error moving to position: {e}")
