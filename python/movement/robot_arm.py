@@ -8,7 +8,6 @@ class RobotArm:
     def __init__(self):
         try:
             self.serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
-            GPIO.setup(18, GPIO.OUT)
             print("Serial connection established.")
         except Exception as e:
             print(f"Error establishing serial connection: {e}")
