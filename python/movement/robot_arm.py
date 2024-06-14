@@ -1,4 +1,5 @@
 from pyax12.connection import Connection
+import RPi.GPIO as GPIO
 
 SERVO_1 = 61
 SERVO_2 = 3
@@ -11,6 +12,15 @@ class RobotArm:
         except Exception as e:
             print(f"Error establishing serial connection: {e}")
             self.serial_connection = None
+
+        # GPIO pinnummer dat je wilt instellen
+        pin_nummer = 18  # Bijvoorbeeld pin 18
+
+        # GPIO initialisatie
+        GPIO.setmode(GPIO.BCM)  # Gebruik BCM pinnummering
+
+        # Zet de pin op uitvoer
+        GPIO.setup(pin_nummer, GPIO.OUT)
 
     def move_to_position(self, shoulder_angle, elbow_angle):
         if not self.serial_connection:
