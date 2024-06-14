@@ -2,6 +2,9 @@ import socket
 import sys
 import signal
 from robot_arm import RobotArm
+import RPi.GPIO as GPIO
+# Disable GPIO warnings globally
+GPIO.setwarnings(False)
 
 def _start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

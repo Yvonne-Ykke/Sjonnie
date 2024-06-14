@@ -3,6 +3,10 @@ from pyax12.connection import Connection
 SERVO_1 = 61
 SERVO_2 = 3
 
+import RPi.GPIO as GPIO
+# Disable GPIO warnings globally
+GPIO.setwarnings(False)
+
 class RobotArm:
     def __init__(self):
         try:
