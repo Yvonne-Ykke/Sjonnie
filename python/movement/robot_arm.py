@@ -1,5 +1,6 @@
 from pyax12.connection import Connection
 import RPi.GPIO as GPIO
+import time
 
 SERVO_1 = 61
 SERVO_2 = 3
