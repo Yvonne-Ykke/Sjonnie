@@ -12,6 +12,7 @@ def _start_server():
         print("Server luistert op poort 65000...")
     except Exception as e:
         print(f"Fout bij het binden van de socket: {e}")
+        server_socket.close()
         sys.exit(1)
 
     def signal_handler(sig, frame):
@@ -20,6 +21,7 @@ def _start_server():
         sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)  # Handle termination signal
 
     robot = RobotArm()
 
@@ -28,17 +30,20 @@ def _start_server():
         if client_socket is None:
             continue
         try:
-            command = _get_command(client_socket)
-            if command == 'quit':
-                break
-            shoulder_angle, elbow_angle = _get_angles_from_command(command)
-            robot.move_to_position(shoulder_angle, elbow_angle)
-            _send_feedback_to_client(client_socket, shoulder_angle, elbow_angle)
+            with client_socket:
+                command = _get_command(client_socket)
+                if command == 'quit':
+                    break
+                shoulder_angle, elbow_angle = _get_angles_from_command(command)
+                robot.move_to_position(shoulder_angle, elbow_angle)
+                _send_feedback_to_client(client_socket, shoulder_angle, elbow_angle)
         except Exception as e:
             print(f"Fout bij verwerken commando: {e}")
-            client_socket.sendall(f"Fout: {str(e)}\n".encode('utf-8'))
+            try:
+                client_socket.sendall(f"Fout: {str(e)}\n".encode('utf-8'))
+            except Exception as e_send:
+                print(f"Fout bij verzenden foutmelding naar client: {e_send}")
         finally:
-            client_socket.close()
             print("Verbinding met client gesloten.")
 
     server_socket.close()
