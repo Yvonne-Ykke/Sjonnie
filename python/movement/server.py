@@ -3,6 +3,7 @@ import sys
 import signal
 from robot_arm import RobotArm
 import RPi.GPIO as GPIO
+
 # Disable GPIO warnings globally
 GPIO.setwarnings(False)
 
@@ -54,17 +55,33 @@ def _start_server():
 
 def _send_feedback_to_client(client_socket, shoulder_angle, elbow_angle):
     feedback = f"Positie ingesteld: Schouder hoek: {shoulder_angle}, Elleboog hoek: {elbow_angle}\n"
-    client_socket.sendall(feedback.encode('utf-8'))
+    _send_message(client_socket, feedback)
 
 def _get_angles_from_command(command):
     shoulder_angle, elbow_angle = map(float, command.split(","))
     return shoulder_angle, elbow_angle
 
 def _get_command(client_socket):
-    command = client_socket.recv(1024).decode('utf-8')
-    print(f"Ontvangen commando: {command}")
-    command = command.lower()
-    return command
+    message = _recv_message(client_socket)
+    print(f"Ontvangen commando: {message}")
+    return message.lower()
+
+def _send_message(client_socket, message):
+    message = message.encode('utf-8')
+    length = len(message)
+    client_socket.sendall(length.to_bytes(4, byteorder='big'))  # Verstuur de lengte als een 4-byte integer
+    client_socket.sendall(message)  # Verstuur het eigenlijke bericht
+
+def _recv_message(client_socket):
+    length_data = client_socket.recv(4)
+    if not length_data:
+        return None  # Verbinding is gesloten
+    length = int.from_bytes(length_data, byteorder='big')
+    message = b''
+    while len(message) < length:
+        to_read = min(length - len(message), 1024)
+        message += client_socket.recv(to_read)
+    return message.decode('utf-8')
 
 def _accept_tcp_connection(server_socket):
     try:
