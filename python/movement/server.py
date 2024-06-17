@@ -3,6 +3,7 @@ from robot_arm import RobotArm
 
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_socket.bind(('0.0.0.0', 65000))
     server_socket.listen(5)
     print("Server listening on port 65000...")
