@@ -13,7 +13,7 @@ HOST = '0.0.0.0'  # Luister op alle beschikbare interfaces
 PORT = 65432      # Kies een poortnummer
 # Open webserver socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 # Connect to the serial port
 serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True)
 

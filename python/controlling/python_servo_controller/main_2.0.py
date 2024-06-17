@@ -21,12 +21,13 @@ BOVEN = 0
 SPEED_GRIPPER = 500
 SPEED_ROTATION = 1.5
 #-- Motor ID's --#             --------------------------------
-SHOULDER = 61
+SHOULDER = 23
 ELBOW = 3
-TRANS = 69
+TRANS = 11
 WRIST = 88
 GRIPPER = 2
 MOTORS = [ELBOW, SHOULDER, WRIST, TRANS, GRIPPER]
+PEN_MOTORS = [ELBOW, SHOULDER, TRANS]
 #-- Head type constants --#    --------------------------------
 CYLINDER = 1
 MARKER = 2
@@ -45,7 +46,7 @@ RASP_ON_OFF = 9
 SEND_SERVO_DATA = 10
 GRIP = 11
 GRIPPER_HEAD_TYPE = 12
-
+COLOR = 13
 #-- Flag variables --#
 flag = 0
 butopenclose = 0
@@ -77,6 +78,7 @@ def read_and_send_servo_info(conn, webdata, spd, trns):
 
     data = []
     current_motor = MOTORS[webdata[SEND_SERVO_DATA] - 1]
+##TODO copy current motor and make is penmotors
 
     try:
         position_byte_sequence = serial_connection.read_data(current_motor, 0x24, 2)
@@ -132,8 +134,8 @@ def whack_a_mole(webdata):
     #TODO: Whack a mole maken
     #TODO: Whack a mole maken
     SUPER_SPEED = 512
-    WHACK_HIGH = 430
-    WHACK_LOW = 345
+    WHACK_HIGH = 110
+    WHACK_LOW = 0
     global flag
     global butopenclose
 
@@ -164,7 +166,7 @@ def kilo_grip(conn, webdata):
                 serial_connection.goto(GRIPPER, 823, SPEED_GRIPPER, degrees=False)
                 flag = 0
             elif flag == 0:
-                serial_connection.goto(GRIPPER, 215, SPEED_GRIPPER, degrees=False)
+                serial_connection.goto(GRIPPER, 250, SPEED_GRIPPER, degrees=False)
                 flag = 1
             butopenclose += 1
     if int(webdata[GRIP]) == 0:
@@ -195,8 +197,8 @@ def lights():
 
     print('lights on off')
 
+
 def pinch_grip(conn, webdata):
-    #TODO: De gripper laten knijpen en krijgen welke gripper gebruikt wordt
     if webdata[GRIPPER_HEAD_TYPE] == MARKER:
         whack_a_mole(webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
@@ -206,41 +208,86 @@ def pinch_grip(conn, webdata):
     else:
         scissors_grip(webdata)
 
+
 def handheld_control(conn, webdata, speed, trans_speed, pwr):
-    #TODO: This
+    #TODO: Check of het standje pen is of niet(zo wel dan zijn er maar 3 motors en anders 5)
+    if webdata[GRIPPER_HEAD_TYPE] == MARKER:
+        pen_motors_control(conn, webdata, speed, trans_speed, pwr)
+    else:
+        all_motors_control(conn, webdata, speed, trans_speed, pwr)
+
+
+def all_motors_control(conn, webdata, speed, trans_speed, pwr):
+    pos = 0
     try:
         pinch_grip(conn, webdata)
-        #print('hhcontrol')
 
-        pos = 0
         for value in webdata[VERTICAL_RJOY:VERTICAL_LJOY + 1]:
             if pos == 2:
                 speed *= SPEED_ROTATION
             elif pos == 3:
                 speed = trans_speed
             if value > 2000:
-                max = 1023
+                max = 1020
                 serial_connection.goto(MOTORS[pos], max, int(speed), degrees=False)
+                print('rechts')
             elif value < 1600:
-                min = 0
-                serial_connection.goto(MOTORS[pos], min , int(speed), degrees=False)
+                min = 3
+                serial_connection.goto(MOTORS[pos], min, int(speed), degrees=False)
+                print('links')
             elif serial_connection.is_moving(MOTORS[pos]):
                 current_motor_position = serial_connection.get_present_position(MOTORS[pos], degrees=False)
                 serial_connection.goto(MOTORS[pos], current_motor_position, int(speed), degrees=False)
-            else:
-                pos += 1
             pos += 1
 
     except (Exception) as ex:
-        print("Handheld_Control_Error: " + str(ex))
+        if ex == TypeError:
+            print("Motor: " + str(MOTORS[pos]) + " not connected.")
+            print("Suggestion: Selcect different gripperhead in: Settings - Gripper.")
+        else:
+            print("Handheld_Control_Error: " + str(ex) + " Motor: " + str(MOTORS[pos]))
+        conn.close()
+
+
+def pen_motors_control(conn, webdata, speed, trans_speed, pwr):
+    pos = 0
+    try:
+        pinch_grip(conn, webdata)
+        for value in webdata[VERTICAL_RJOY:HORIZONTAL_RJOY + 1]:
+            if value > 2000:
+                max = 1020
+                serial_connection.goto(PEN_MOTORS[pos], max, int(speed), degrees=False)
+            elif value < 1600:
+                min = 3
+                serial_connection.goto(PEN_MOTORS[pos], min, int(speed), degrees=False)
+            elif serial_connection.is_moving(PEN_MOTORS[pos]):
+                current_motor_position = serial_connection.get_present_position(PEN_MOTORS[pos], degrees=False)
+                serial_connection.goto(PEN_MOTORS[pos], current_motor_position, int(speed), degrees=False)
+            pos += 1
+
+    except (Exception) as ex:
+        print("Handheld_Control_Error: " + str(ex) + " Motor: " + str(PEN_MOTORS[pos]))
         #conn.send("Handheld_Control_Error".encode())
         conn.close()
 
 
 def autonomous_control(conn, webdata, speed, trans_speed, pwr):
     #TODO: This
+    color_mode = webdata[COLOR]
+    contour_mode = webdata[GRIPPER_HEAD_TYPE]
+    
+    if webdata[GRIPPER_HEAD_TYPE] == MARKER:
+        #TODO: whack a mole autonoom maken
+        whack_a_mole()
+    elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
+        #TODO: kilo grip autonoom maken
+        kilo_grip(conn, webdata)
+    elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
+        contour.color_contouring(False, 'scissors', color_mode)
+
     try:
-        contour.color_contouring(False)
+        
+        contour.color_contouring(False, contour_mode, color_mode)
     except (Exception) as ex:
         print("Autonomous_Control_Error: " + str(ex))
         #conn.send("Autonomous_Control_Error".encode())
@@ -263,7 +310,7 @@ def main():
         conn, addr = s.accept()
         txt = conn.recv(1024)
         txt2 = txt.decode()
-        # print(txt2)
+        print(txt2)
         webdata = txt2.split(",")
         webdata = [int(value) for value in webdata]
 

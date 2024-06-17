@@ -4,21 +4,21 @@ import time
 # Connect to the serial port
 serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
 
-dynamixel_id1 = 61
-dynamixel_id2 = 3
-dynamixel_id3 = 10
+dynamixel_id1 = 23
+dynamixel_id2 = 11
+dynamixel_id3 = 69
 
 time.sleep(0.01)
-
+while(True):
 # Go to 0°
-print("send1")
-serial_connection.goto(dynamixel_id1, 0, speed=512, degrees=False)
-time.sleep(0.01)
-serial_connection.goto(dynamixel_id2, 0, speed=512, degrees=False)
-time.sleep(0.01)
-serial_connection.goto(dynamixel_id3, 0, speed=512, degrees=False)
-print("ga naar 0")
-time.sleep(5)    # Wait 1 second
+    print("send1")
+    serial_connection.goto(dynamixel_id1, 512, speed=112, degrees=False)
+    time.sleep(0.01)
+    serial_connection.goto(dynamixel_id2, 0, speed=112, degrees=False)
+    time.sleep(0.01)
+    #serial_connection.goto(dynamixel_id3, 0, speed=512, degrees=False)
+    print("ga naar 0")
+    time.sleep(10)    # Wait 1 second
 
 #voor de motors moet de timing op 0.00010 en voor uitlezen 0.00005 in de library
 
