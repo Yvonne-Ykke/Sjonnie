@@ -14,16 +14,14 @@ import movement.robot_arm_parameters as robot_arm_parameters
 import movement.angle_calculator as angle_calculator
 import movement.client as client
 
-
-
 # Callback function for trackbars
 def nothing(x):
     pass
 
 def create_trackbars():
     cv.namedWindow('settings')
-    cv.createTrackbar('Min Area', 'settings', 1500, 1500, nothing)
-    cv.createTrackbar('Max Area', 'settings', 1500, 2000, nothing)
+    cv.createTrackbar('Min Area', 'settings', 1000, 1500, nothing)
+    cv.createTrackbar('Max Area', 'settings', 1500, 3000, nothing)
 
 def get_trackbar_values():
     min_area = cv.getTrackbarPos('Min Area', 'settings')
@@ -66,19 +64,23 @@ def color_contouring(developing, transformer):
                         cv.drawContours(img, [cnt], -1, (0, 255, 0), 3)  # Draw contour in green
                         cv.circle(img, (cX, cY), 5, (0, 0, 255), -1)  # Draw centroid in red
                         cv.putText(img, f"{real_world_coords[0][0]:.2f}, {real_world_coords[0][1]:.2f}", (cX, cY), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv.LINE_AA)
-                        # No need to send arm coordinates here
-                        shoulder, elbow = angle_calculator.calculate_arm_angles(real_world_coords[0][0], real_world_coords[0][1], 300, 0, 0)
-                        client.send_arm_angles_to_robot(shoulder, -elbow)
-                        print(f"Shoulder: {shoulder}, Elbow: {elbow}")
-                        time.sleep(1)
+                        
+                        # Check if the 's' key is pressed
+                        key = cv.waitKey(1)
+                        if key == ord('s'):
+                            # Send the robot arm coordinates
+                            shoulder, elbow = angle_calculator.main(real_world_coords[0][0], real_world_coords[0][1])
+                            client.send_arm_angles_to_robot(shoulder, -elbow)
+                            print(f"Shoulder: {shoulder}, Elbow: {elbow}")
+                            time.sleep(1)  # Delay for one second
+
         if developing:
             cv.imshow("image", img)
-
-        key = cv.waitKey(1)  # Capture key press event
-        if key == ord('q'):
+            
+        if cv.waitKey(1) & 0xFF == ord('q'):
             cap.release()
             cv.destroyAllWindows()
-
+            break
 
 if __name__ == "__main__":
     # Define camera coordinates (x, y) and corresponding real-world coordinates (X, Y)
@@ -106,7 +108,7 @@ if __name__ == "__main__":
         [0, 219]
     ]
 
-    # Initialize the transformer
-    transformer = CoordinateTransformer(camera_coords, real_world_coords)
+    # Initialize the transformer with the conversion rate
+    transformer = CoordinateTransformer(camera_coords, real_world_coords, conversion_rate=1.0)
 
     color_contouring(True, transformer)

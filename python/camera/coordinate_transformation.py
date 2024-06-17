@@ -4,10 +4,11 @@ import cv2
 import numpy as np
 
 class CoordinateTransformer:
-    def __init__(self, camera_coords, real_world_coords):
+    def __init__(self, camera_coords, real_world_coords, convertion_rate):
         self.camera_coords = np.array(camera_coords, dtype="float32")
         self.real_world_coords = np.array(real_world_coords, dtype="float32")
         self.homography_matrix, _ = cv2.findHomography(self.camera_coords, self.real_world_coords)
+        self.convertion_rate = convertion_rate 
     
     def capture_photo(self):
         cap = cv2.VideoCapture(0)
@@ -35,7 +36,11 @@ class CoordinateTransformer:
         camera_points = np.array(camera_points, dtype="float32")
         camera_points = np.array([camera_points])  # Reshape for perspectiveTransform
         real_world_points = cv2.perspectiveTransform(camera_points, self.homography_matrix)
-        return real_world_points[0]
+
+        # Apply conversion rate to each point
+        real_world_points = [(x * self.conversion_rate, y * self.conversion_rate) for x, y in real_world_points[0]]
+
+        return real_world_points
     
     def get_real_world_coordinates(self):
         image = self.capture_photo()

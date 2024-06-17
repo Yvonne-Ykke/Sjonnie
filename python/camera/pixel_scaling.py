@@ -11,7 +11,7 @@ square_size_mm = 19.5
 pattern_size = (7, 7)  # Inner corners per a chessboard row and column
 
 # Capture from the camera
-cap = cv.VideoCapture(1)
+cap = cv.VideoCapture(0)
 if not cap.isOpened():
     print("Failed to open camera")
     exit()
