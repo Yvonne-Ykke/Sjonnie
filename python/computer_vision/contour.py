@@ -123,35 +123,24 @@ def detect(color_name, img, mask, bgr, developing, detection):
     if developing:
         cv.imshow(color_name, res)
 
-def color_contouring(developing, detection, color):
-    cap = cv.VideoCapture(0)
-
-    while(True):
-        ret,img = cap.read()
-        if img is None:
-            break
-        
-        color_masks = color_recognition.masks(img)
-
-        if color != 0:
-            color_name, mask, bgr = color_masks[color - 1]
+def color_contouring(developing, detection, color, img):
+    
+    color_masks = color_recognition.masks(img)
+    if color != 0:
+        color_name, mask, bgr = color_masks[color - 1]
+        detect(color_name, img, mask, bgr, developing, detection)
+            
+    else:
+        for color_name, mask, bgr in color_masks:
             detect(color_name, img, mask, bgr, developing, detection)
-            
-        else:
-            for color_name, mask, bgr in color_masks:
-                detect(color_name, img, mask, bgr, developing, detection)
 
-        time.sleep(0.1)
+    time.sleep(0.1)
         
-        if developing:
-            cv.imshow("image", img)
+    if developing:
+        cv.imshow("image", img)
             
-        if cv.waitKey(1) & 0xFF == ord('q'):
-            img.release()
-            #cv.destroyAllWindows()
-            break
-
-        
+    if cv.waitKey(1) & 0xFF == ord('q'):
+        img.release()
 
 if __name__ == "__main__":
     contouring(False)
