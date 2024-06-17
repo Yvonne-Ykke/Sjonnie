@@ -1,60 +1,59 @@
-import socket
 from robot_arm import RobotArm  # Assuming this is your robot arm control module
 
-def start_server():
+import socket
+from pyax12.connection import Connection
+import sys
+import signal
+
+serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
+
+servo_1 = 23
+servo_2 = 3
+
+def move_to_position(shoulder_angle, elbow_angle):
+    serial_connection.goto(servo_1, shoulder_angle, speed = 20, degrees = True)
+    serial_connection.goto(servo_2, elbow_angle, speed = 20, degrees = True)
+    print(f"Bewegen naar positie: Schouder hoek: {shoulder_angle}, Elleboog hoek: {elbow_angle}")
+
+def start_tcp_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind(('0.0.0.0', 65000))
-    server_socket.listen(5)
-    print("Server listening on port 65000...")
-    robot = RobotArm()  # Initialize your RobotArm object here
-    
+    try:
+        server_socket.bind(('0.0.0.0', 65000))  # Luister op alle netwerkinterfaces
+        server_socket.listen(5)
+        print("Server luistert op poort 65000...")
+    except Exception as e:
+        print(f"Fout bij het binden van de socket: {e}")
+        sys.exit(1)
+
+    def signal_handler(sig, frame):
+        print('Je drukte op Ctrl+C!')
+        server_socket.close()
+        serial_connection.close()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+
     while True:
         client_socket, addr = server_socket.accept()
-        print(f"Connection accepted from {addr}")
-        
+        print(f"Verbinding geaccepteerd van {addr}")
         try:
-            # Receive data length (4 bytes)
-            length_data = client_socket.recv(4)
-            if not length_data:
+            command = client_socket.recv(1024).decode('utf-8')
+            print(f"Ontvangen commando: {command}")
+            if command.lower() == "quit":
                 break
-            
-            # Convert length bytes to integer
-            length = int.from_bytes(length_data, byteorder='big')
-            
-            # Receive actual data based on length
-            data = client_socket.recv(length).decode('utf-8')
-            
-            print(f"Received command: {data}")
-            
-            # Process received command
-            if data.strip().lower() == 'quit':
-                break
-            
-            # Split received data into two angles
-            angles = data.split(",")
-            if len(angles) != 2:
-                raise ValueError("Invalid data format. Expected two angles separated by comma.")
-            
-            shoulder_angle = float(angles[0])
-            elbow_angle = float(angles[1])
-            
-            # Move robot arm to the specified angles
-            robot.move_to_position(shoulder_angle, elbow_angle)
-            print(f"Moved robot arm to: Shoulder angle={shoulder_angle}, Elbow angle={elbow_angle}")
-        
-        except ValueError as ve:
-            print(f"ValueError: {ve}")
+            shoulder_angle, elbow_angle = map(float, command.split(","))
+            RobotArm.move_to_position(shoulder_angle, elbow_angle)
+            client_socket.sendall("Positie ingesteld.\n".encode('utf-8'))
         except Exception as e:
-            print(f"Error processing command: {e}")
-        
-        client_socket.close()
-
+            print(f"Fout bij verwerken commando: {e}")
+            client_socket.sendall(f"Fout: {str(e)}\n".encode('utf-8'))
+        finally:
+            client_socket.close()
+            print("Verbinding met client gesloten.")
     server_socket.close()
-    print("Server closed.")
-
-def main():
-    start_server()
+    serial_connection.close()
+    print("Server gesloten.")
 
 if __name__ == "__main__":
-    main()
+    start_tcp_server()
