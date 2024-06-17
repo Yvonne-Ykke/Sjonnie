@@ -12,27 +12,34 @@ def start_server():
         client_socket, addr = server_socket.accept()
         print(f"Connection accepted from {addr}")
         command = receive_message(client_socket)
-        print(f"Ontvangen command: {command}")
+        print(f"Received command: {command}")
 
         if not command or command.strip().lower() == 'quit':
             client_socket.close()
             break
 
-        shoulder_angle, elbow_angle = map(float, command.split(","))
-        
-        robot.move_to_position(shoulder_angle, elbow_angle)
+        try:
+            shoulder_angle, elbow_angle = map(float, command.split(","))
+            robot.move_to_position(shoulder_angle, elbow_angle)
+            print(f"Moved robot arm to: Shoulder angle={shoulder_angle}, Elbow angle={elbow_angle}")
+        except ValueError as ve:
+            print(f"ValueError: {ve}")
+        except Exception as e:
+            print(f"Error processing command: {e}")
 
         client_socket.close()
 
 def receive_message(sock):
-    length_data = sock.recv(4)
-    print(f"data ontvangen: {length_data}")
-    if not length_data:
+    try:
+        length_data = sock.recv(4)
+        if not length_data:
+            return None
+        length = int.from_bytes(length_data, byteorder='big')
+        data = sock.recv(length).decode('utf-8')
+        return data
+    except Exception as e:
+        print(f"Error receiving message: {e}")
         return None
-    length = int.from_bytes(length_data, byteorder='big')
-    data = sock.recv(length).decode('utf-8')
-    print(f"omgezette data: {data}")
-    return data
 
 def main():
     start_server()
