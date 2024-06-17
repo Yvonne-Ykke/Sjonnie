@@ -30,9 +30,8 @@ def get_trackbar_values():
     max_area = cv.getTrackbarPos('Max Area', 'settings')
     return min_area, max_area
 
-def color_contouring(developing, transformer):
+def color_contouring(developing, transformer): 
     cap = cv.VideoCapture(0)
-
     create_trackbars()
 
     while True:
@@ -44,8 +43,6 @@ def color_contouring(developing, transformer):
 
         for color_name, mask, bgr in color_masks:
             res = cv.bitwise_and(img, img, mask=mask)
-            # cv.imshow(color_name, res)
-
             imgray = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
             blur = cv.GaussianBlur(imgray, (3, 3), 0)
             ret, threshoog = cv.threshold(imgray, 1, 255, cv.THRESH_BINARY)
@@ -54,7 +51,6 @@ def color_contouring(developing, transformer):
             if hierarchy is not None:
                 hierarchy = hierarchy[0]
 
-            # Get current positions of the sliders
             min_area, max_area = get_trackbar_values()
             
             for cnr in range(len(contours)):
@@ -70,25 +66,18 @@ def color_contouring(developing, transformer):
                         cv.drawContours(img, [cnt], -1, (0, 255, 0), 3)  # Draw contour in green
                         cv.circle(img, (cX, cY), 5, (0, 0, 255), -1)  # Draw centroid in red
                         cv.putText(img, f"{real_world_coords[0][0]:.2f}, {real_world_coords[0][1]:.2f}", (cX, cY), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv.LINE_AA)
-                        
-                        # Check if the 's' key is pressed
-                        key = cv.waitKey(1)
-                        if key == ord('s'):
-                            # Send the robot arm coordinates
-                            shoulder, elbow = angle_calculator.main(real_world_coords[0][0], real_world_coords[0][1])
-                            client.send_arm_angles_to_robot(shoulder, -elbow)
-                            cv.waitKey(5000)  # Delay for one second
-
-        time.sleep(0.1)
-        
+                        # No need to send arm coordinates here
+                        shoulder, elbow = angle_calculator.calculate_arm_angles(real_world_coords[0][0], real_world_coords[0][1], 300, 0, 0)
+                        client.send_arm_angles_to_robot(shoulder, -elbow)
+                        print(f"Shoulder: {shoulder}, Elbow: {elbow}")
+                        time.sleep(1000)
         if developing:
             cv.imshow("image", img)
-            # cv.imshow('thres', threshoog)
-            
-        if cv.waitKey(1) & 0xFF == ord('q'):
+
+        key = cv.waitKey(1)  # Capture key press event
+        if key == ord('q'):
             cap.release()
             cv.destroyAllWindows()
-            break
 
 
 if __name__ == "__main__":
