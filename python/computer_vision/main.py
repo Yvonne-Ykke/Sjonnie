@@ -17,7 +17,7 @@ def main():
     
     #info = 
 
-    contour.color_contouring(DEVELOPING, SCISSORS)
+    contour.color_contouring(DEVELOPING, SCISSORS, 2)
 
     # direction.track_color_movement(colors[0])
 
