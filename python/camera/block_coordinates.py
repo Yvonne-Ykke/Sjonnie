@@ -22,8 +22,8 @@ def nothing(x):
 
 def create_trackbars():
     cv.namedWindow('settings')
-    cv.createTrackbar('Min Area', 'settings', 1000, 1500, nothing)
-    cv.createTrackbar('Max Area', 'settings', 1500, 3000, nothing)
+    cv.createTrackbar('Min Area', 'settings', 1500, 1500, nothing)
+    cv.createTrackbar('Max Area', 'settings', 1500, 2000, nothing)
 
 def get_trackbar_values():
     min_area = cv.getTrackbarPos('Min Area', 'settings')
@@ -70,7 +70,7 @@ def color_contouring(developing, transformer):
                         shoulder, elbow = angle_calculator.calculate_arm_angles(real_world_coords[0][0], real_world_coords[0][1], 300, 0, 0)
                         client.send_arm_angles_to_robot(shoulder, -elbow)
                         print(f"Shoulder: {shoulder}, Elbow: {elbow}")
-                        time.sleep(1000)
+                        time.sleep(1)
         if developing:
             cv.imshow("image", img)
 
@@ -83,15 +83,15 @@ def color_contouring(developing, transformer):
 if __name__ == "__main__":
     # Define camera coordinates (x, y) and corresponding real-world coordinates (X, Y)
     camera_coords = [
-        [202, 204],
-        [209, 277],
-        [217, 352],
-        [266, 179],
-        [274, 269],
-        [282, 345],
-        [330, 190],
-        [339, 262],
-        [347, 337]
+        [198, 89],
+        [205, 263],
+        [213, 338],
+        [263, 183],
+        [270, 256],
+        [277, 332],
+        [327, 177],
+        [335, 249],
+        [343, 325]
     ]
 
     real_world_coords = [

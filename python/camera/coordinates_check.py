@@ -4,16 +4,16 @@ import coordinate_transformation as ct
 
 # Define camera coordinates (x, y) and corresponding real-world coordinates (X, Y)
 camera_coords = [
-    [202, 204],
-    [209, 277],
-    [217, 352],
-    [266, 179],
-    [274, 269],
-    [282, 345],
-    [330, 190],
-    [339, 262],
-    [347, 337]
-]
+        [198, 89],
+        [205, 263],
+        [213, 338],
+        [263, 183],
+        [270, 256],
+        [277, 332],
+        [327, 177],
+        [335, 249],
+        [343, 325]
+    ]
 
 real_world_coords = [
     [-140, 375],
