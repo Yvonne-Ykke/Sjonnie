@@ -2,7 +2,7 @@ from pyax12.connection import Connection
 import RPi.GPIO as GPIO
 import time
 
-SERVO_1 = 61
+SERVO_1 = 23
 SERVO_2 = 3
 
 serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
