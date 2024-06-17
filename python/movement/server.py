@@ -43,10 +43,11 @@ def start_server():
                 send_feedback(client_socket, shoulder_angle, elbow_angle)
         except Exception as e:
             print(f"Error processing command: {e}")
-            try:
-                client_socket.sendall(f"Error: {str(e)}\n".encode('utf-8'))
-            except Exception as send_error:
-                print(f"Error sending error message to client: {send_error}")
+            if client_socket.fileno() != -1:
+                try:
+                    client_socket.sendall(f"Error: {str(e)}\n".encode('utf-8'))
+                except Exception as send_error:
+                    print(f"Error sending error message to client: {send_error}")
         finally:
             print("Client connection closed.")
 
@@ -58,13 +59,19 @@ def send_feedback(sock, shoulder_angle, elbow_angle):
     send_message(sock, feedback)
 
 def parse_command(command):
-    shoulder_angle, elbow_angle = map(float, command.split(","))
-    return shoulder_angle, elbow_angle
+    try:
+        shoulder_angle, elbow_angle = map(float, command.split(","))
+        return shoulder_angle, elbow_angle
+    except ValueError as e:
+        raise ValueError(f"Incomplete or invalid command: {command}") from e
 
 def get_command(sock):
     message = receive_message(sock)
-    print(f"Received command: {message}")
-    return message.lower()
+    if message:
+        print(f"Received command: {message}")
+        return message.lower()
+    else:
+        return ''
 
 def send_message(sock, message):
     message_bytes = message.encode('utf-8')
@@ -73,14 +80,21 @@ def send_message(sock, message):
     sock.sendall(message_bytes)  # Send the actual message
 
 def receive_message(sock):
-    length_data = sock.recv(4)
-    if not length_data:
-        return None  # Connection closed
-    length = int.from_bytes(length_data, byteorder='big')
-    message = b''
-    while len(message) < length:
-        message += sock.recv(length - len(message))
-    return message.decode('utf-8')
+    try:
+        length_data = sock.recv(4)
+        if not length_data:
+            return None  # Connection closed
+        length = int.from_bytes(length_data, byteorder='big')
+        message = b''
+        while len(message) < length:
+            part = sock.recv(length - len(message))
+            if not part:
+                break  # Connection closed
+            message += part
+        return message.decode('utf-8')
+    except Exception as e:
+        print(f"Error receiving message: {str(e)}")
+        return None
 
 def accept_tcp_connection(server_socket):
     try:

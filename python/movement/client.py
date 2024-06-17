@@ -11,7 +11,10 @@ def send_arm_angles_to_robot(shoulder_angle, elbow_angle):
         print(f"Sent command: {command}")
 
         response = receive_message(client_socket)
-        print(f"Received response: {response}")
+        if response:
+            print(f"Received response: {response}")
+        else:
+            print("No response received from the server.")
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
@@ -26,11 +29,18 @@ def send_message(sock, message):
     sock.sendall(message_bytes)  # Send the actual message
 
 def receive_message(sock):
-    length_data = sock.recv(4)
-    if not length_data:
-        return None  # Connection closed
-    length = int.from_bytes(length_data, byteorder='big')
-    message = b''
-    while len(message) < length:
-        message += sock.recv(length - len(message))
-    return message.decode('utf-8')
+    try:
+        length_data = sock.recv(4)
+        if not length_data:
+            return None  # Connection closed
+        length = int.from_bytes(length_data, byteorder='big')
+        message = b''
+        while len(message) < length:
+            part = sock.recv(length - len(message))
+            if not part:
+                break  # Connection closed
+            message += part
+        return message.decode('utf-8')
+    except Exception as e:
+        print(f"Error receiving message: {str(e)}")
+        return None
