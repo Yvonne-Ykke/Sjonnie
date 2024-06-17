@@ -83,11 +83,48 @@ def draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing=Non
                 cy = int(M['m01'] / M['m00'])
                 cv.circle(img, (cx, cy), 5, (0, 255, 255), -1)
 
-def color_contouring(developing, detection):
-    cap = cv.VideoCapture(0)
+def detect(color_name, img, mask, bgr, developing, detection):
+    res = cv.bitwise_and(img,img, mask= mask)
+    imgray2 = cv.cvtColor(res, cv.COLOR_HSV2BGR)
+    imgray = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
+    blur = cv.GaussianBlur(imgray,(3,3),0)
+    ret, threshoog = cv.threshold(imgray, 1, 255, cv.THRESH_BINARY)
+    contours, hierarchy = cv.findContours(imgray, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
-    # if detection == "direction":
-        # get_direction(area, factor, img, cnt, color_name, bgr)
+    if hierarchy is not None:
+        hierarchy = hierarchy[0]
+    
+    for cnr in range(len(contours)):
+        cnt = contours [cnr]
+        area = cv.contourArea(cnt)
+        perimeter = cv.arcLength(cnt, True)
+        if perimeter > 0:
+            factor = 4 * math.pi * area / perimeter**2 
+            holes = 0
+            child = hierarchy[cnr][2]
+            while child >= 0:
+                holes += cv.contourArea(contours[child])
+                child = hierarchy[child][0]
+            #print (area, factor, holes)
+            #print (child)
+            if area > 500 and area < 100000:
+                if detection == "scissors":
+                    draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing)
+
+                elif detection == "colors":
+                    if 0.4 < factor < 0.7:
+                        x, y, w, h = cv.boundingRect(cnt)
+                        cv.drawContours(img, [cnt], -1, bgr, 3)
+                        cv.rectangle(img, (x, y), (x+w, y+h), bgr, 3)
+                        cv.putText(img, color_name, (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
+                elif detection == "target":
+                    print("not yet implemented")
+
+    if developing:
+        cv.imshow(color_name, res)
+
+def color_contouring(developing, detection, color):
+    cap = cv.VideoCapture(0)
 
     while(True):
         ret,img = cap.read()
@@ -96,54 +133,18 @@ def color_contouring(developing, detection):
         
         color_masks = color_recognition.masks(img)
 
-        for color_name, mask, bgr in color_masks:
-            res = cv.bitwise_and(img,img, mask= mask)
-            #cv.imshow(color_name, res)
-
-            imgray2 = cv.cvtColor(res, cv.COLOR_HSV2BGR)
-            imgray = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
-            blur = cv.GaussianBlur(imgray,(3,3),0)
-            ret, threshoog = cv.threshold(imgray, 1, 255, cv.THRESH_BINARY)
-            contours, hierarchy = cv.findContours(imgray, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-
-            if hierarchy is not None:
-                hierarchy = hierarchy[0]
+        if color != 0:
+            color_name, mask, bgr = color_masks[color - 1]
+            detect(color_name, img, mask, bgr, developing, detection)
             
-            for cnr in range(len(contours)):
-                cnt = contours [cnr]
-                area = cv.contourArea(cnt)
-                perimeter = cv.arcLength(cnt, True)
-                if perimeter > 0:
-                    factor = 4 * math.pi * area / perimeter**2 
-                    holes = 0
-                    child = hierarchy[cnr][2]
-                    while child >= 0:
-                        holes += cv.contourArea(contours[child])
-                        child = hierarchy[child][0]
-                    #print (area, factor, holes)
-                    #print (child)
-                    if area > 500 and area < 100000:
-                        if detection == "scissors":
-                            draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing)
-
-                        elif detection == "colors":
-                            if 0.4 < factor < 0.7:
-                                x, y, w, h = cv.boundingRect(cnt)
-                                cv.drawContours(img, [cnt], -1, bgr, 3)
-                                cv.rectangle(img, (x, y), (x+w, y+h), bgr, 3)
-                                cv.putText(img, color_name, (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
-                        elif detection == "target":
-                            print("not yet implemented")
-
-            if developing:
-                cv.imshow(color_name, res)
-
+        else:
+            for color_name, mask, bgr in color_masks:
+                detect(color_name, img, mask, bgr, developing, detection)
 
         time.sleep(0.1)
         
         if developing:
             cv.imshow("image", img)
-            cv.imshow('thres', threshoog)
             
         if cv.waitKey(1) & 0xFF == ord('q'):
             img.release()

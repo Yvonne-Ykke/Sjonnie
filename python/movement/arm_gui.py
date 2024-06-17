@@ -47,7 +47,6 @@ def _on_click(event):
             shoulder_angle_servo = angle_calculator.convert_to_servo_angle(shoulder_angle)
             client.send_arm_angles_to_robot(shoulder_angle_servo, -elbow_angle)
 
-            print(f"Angles: {shoulder_angle_servo:.1f}, {elbow_angle:.1f}")
             # Convert angles to radians
             shoulder_angle_rad = np.radians(shoulder_angle)
             elbow_angle_rad = np.radians(elbow_angle)

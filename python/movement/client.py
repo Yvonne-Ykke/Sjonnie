@@ -1,21 +1,17 @@
 import socket
 
 def send_arm_angles_to_robot(shoulder_angle, elbow_angle):
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        client_socket.connect(('141.252.29.70', 65000))
-        print("Verbinding met de server succesvol.")
+        with socket.create_connection(('141.252.29.70', 65000)) as client_socket:
+            print("Connected to the server.")
 
-        commando = f"{shoulder_angle},{elbow_angle}"
-        client_socket.sendall(commando.encode('utf-8'))
-        print(f"Verzonden commando: {commando}")
-
-        response = client_socket.recv(1024).decode('utf-8')
-        print(f"Ontvangen antwoord: {response}")
+            command = f"{shoulder_angle},{elbow_angle}"
+            send_message(client_socket, command)
+            print(f"Sent command: {command}")
 
     except Exception as e:
-        print(f"Er trad een fout op: {str(e)}")
-    finally:
-        client_socket.close()
-        print("Verbinding gesloten.")
+        print(f"An error occurred: {str(e)}")
 
+def send_message(sock, message):
+    message_bytes = message.encode('utf-8')
+    sock.sendall(message_bytes)
