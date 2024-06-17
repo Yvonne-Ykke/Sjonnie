@@ -1,5 +1,5 @@
 import socket
-from robot_arm import RobotArm
+from robot_arm import RobotArm  # Assuming this is your robot arm control module
 
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -7,7 +7,7 @@ def start_server():
     server_socket.bind(('0.0.0.0', 65000))
     server_socket.listen(5)
     print("Server listening on port 65000...")
-    robot = RobotArm()
+    robot = RobotArm()  # Initialize your RobotArm object here
     
     while True:
         client_socket, addr = server_socket.accept()
@@ -31,7 +31,15 @@ def start_server():
             if data.strip().lower() == 'quit':
                 break
             
-            shoulder_angle, elbow_angle = map(float, data.split(","))
+            # Split received data into two angles
+            angles = data.split(",")
+            if len(angles) != 2:
+                raise ValueError("Invalid data format. Expected two angles separated by comma.")
+            
+            shoulder_angle = float(angles[0])
+            elbow_angle = float(angles[1])
+            
+            # Move robot arm to the specified angles
             robot.move_to_position(shoulder_angle, elbow_angle)
             print(f"Moved robot arm to: Shoulder angle={shoulder_angle}, Elbow angle={elbow_angle}")
         

@@ -15,11 +15,3 @@ def send_arm_angles_to_robot(shoulder_angle, elbow_angle):
 def send_message(sock, message):
     message_bytes = message.encode('utf-8')
     sock.sendall(message_bytes)
-
-def receive_message(sock):
-    try:
-        message = sock.recv(1024)  # Assuming maximum message size of 1024 bytes
-        return message.decode('utf-8')
-    except Exception as e:
-        print(f"Error receiving message: {str(e)}")
-        return None
