@@ -13,7 +13,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import movement.robot_arm_parameters as robot_arm_parameters
 import movement.angle_calculator as angle_calculator
 import movement.client as client
-convertion_rate = 1.151516
+
+conversion_rate = 1.151516
+
 # Callback function for trackbars
 def nothing(x):
     pass
@@ -28,15 +30,26 @@ def get_trackbar_values():
     max_area = cv.getTrackbarPos('Max Area', 'settings')
     return min_area, max_area
 
-def color_contouring(developing, transformer): 
+def click_event(event, x, y, flags, params):
+    if event == cv.EVENT_LBUTTONDOWN:
+        real_world_coords = params.convert_coordinates([(x, y)])
+        print(f"Clicked Coordinates: ({x}, {y}) -> Real World Coordinates: {real_world_coords}")
+        shoulder, elbow = angle_calculator.main(real_world_coords[0][0], real_world_coords[0][1])
+        client.send_arm_angles_to_robot(shoulder, -elbow)
+        print(f"Shoulder: {shoulder}, Elbow: {elbow}")
+
+def color_contouring(developing, transformer):
     cap = cv.VideoCapture(0)
     create_trackbars()
+
+    cv.namedWindow('image')
+    cv.setMouseCallback('image', click_event, param=transformer)
 
     while True:
         ret, img = cap.read()
         if img is None:
             break
-        
+
         color_masks = color_definitions.masks(img)
 
         for color_name, mask, bgr in color_masks:
@@ -50,7 +63,7 @@ def color_contouring(developing, transformer):
                 hierarchy = hierarchy[0]
 
             min_area, max_area = get_trackbar_values()
-            
+
             for cnr in range(len(contours)):
                 cnt = contours[cnr]
                 area = cv.contourArea(cnt)
@@ -64,7 +77,7 @@ def color_contouring(developing, transformer):
                         cv.drawContours(img, [cnt], -1, (0, 255, 0), 3)  # Draw contour in green
                         cv.circle(img, (cX, cY), 5, (0, 0, 255), -1)  # Draw centroid in red
                         cv.putText(img, f"{real_world_coords[0][0]:.2f}, {real_world_coords[0][1]:.2f}", (cX, cY), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv.LINE_AA)
-                        
+
                         # Check if the 's' key is pressed
                         key = cv.waitKey(1)
                         if key == ord('s'):
@@ -76,7 +89,7 @@ def color_contouring(developing, transformer):
 
         if developing:
             cv.imshow("image", img)
-            
+
         if cv.waitKey(1) & 0xFF == ord('q'):
             cap.release()
             cv.destroyAllWindows()
@@ -108,6 +121,6 @@ if __name__ == "__main__":
         [0, 219]
     ]
     # Initialize the transformer with the conversion rate
-    transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate)
+    transformer = CoordinateTransformer(camera_coords, real_world_coords, conversion_rate)
 
     color_contouring(True, transformer)
