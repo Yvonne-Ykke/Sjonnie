@@ -4,37 +4,33 @@ def send_arm_angles_to_robot(shoulder_angle, elbow_angle):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         client_socket.connect(('141.252.29.70', 65000))
-        print("Verbinding met de server succesvol.")
+        print("Connected to the server.")
 
-        commando = f"{shoulder_angle},{elbow_angle}"
-        _send_message(client_socket, commando)
-        print(f"Verzonden commando: {commando}")
+        command = f"{shoulder_angle},{elbow_angle}"
+        send_message(client_socket, command)
+        print(f"Sent command: {command}")
 
-        response = _recv_message(client_socket)
-        print(f"Ontvangen antwoord: {response}")
+        response = receive_message(client_socket)
+        print(f"Received response: {response}")
 
     except Exception as e:
-        print(f"Er trad een fout op: {str(e)}")
+        print(f"An error occurred: {str(e)}")
     finally:
         client_socket.close()
-        print("Verbinding gesloten.")
+        print("Connection closed.")
 
-def _send_message(client_socket, message):
-    message = message.encode('utf-8')
-    length = len(message)
-    client_socket.sendall(length.to_bytes(4, byteorder='big'))  # Verstuur de lengte als een 4-byte integer
-    client_socket.sendall(message)  # Verstuur het eigenlijke bericht
+def send_message(sock, message):
+    message_bytes = message.encode('utf-8')
+    length = len(message_bytes)
+    sock.sendall(length.to_bytes(4, byteorder='big'))  # Send the length as a 4-byte integer
+    sock.sendall(message_bytes)  # Send the actual message
 
-def _recv_message(client_socket):
-    length_data = client_socket.recv(4)
+def receive_message(sock):
+    length_data = sock.recv(4)
     if not length_data:
-        return None  # Verbinding is gesloten
+        return None  # Connection closed
     length = int.from_bytes(length_data, byteorder='big')
     message = b''
     while len(message) < length:
-        to_read = min(length - len(message), 1024)
-        message += client_socket.recv(to_read)
+        message += sock.recv(length - len(message))
     return message.decode('utf-8')
-
-# Voorbeeld van functieaanroep
-send_arm_angles_to_robot(45, 90)
