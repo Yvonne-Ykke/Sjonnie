@@ -14,8 +14,6 @@ class RobotArm:
                 print("Serial connection not established.")
                 return
             try:
-                shoulder_angle = 0
-                elbow_angle = 0
                 serial_connection.goto(SERVO_1, shoulder_angle, speed=20, degrees=True)
                 time.sleep(0.1)  # Korte vertraging toevoegen
                 serial_connection.goto(SERVO_2, elbow_angle, speed=20, degrees=True)

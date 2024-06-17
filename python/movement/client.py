@@ -9,12 +9,6 @@ def send_arm_angles_to_robot(shoulder_angle, elbow_angle):
             send_message(client_socket, command)
             print(f"Sent command: {command}")
 
-            response = receive_message(client_socket)
-            if response:
-                print(f"Received response: {response}")
-            else:
-                print("No response received from the server.")
-
     except Exception as e:
         print(f"An error occurred: {str(e)}")
 
