@@ -6,7 +6,6 @@ import RPi.GPIO as GPIO
 import signal
 import sys
 import socket
-import cv2 as cv
 
 sys.path.append('../../computer_vision/')
 import contour
@@ -15,7 +14,6 @@ import contour
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
-
 
 #-- Constants --#              --------------------------------
 BENEDEN = 1023
@@ -73,15 +71,10 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 
-
-
 #-- Send servo data --#
 def read_and_send_servo_info(conn, webdata, spd, trns):
-
     data = []
     current_motor = MOTORS[webdata[SEND_SERVO_DATA] - 1]
-##TODO copy current motor and make is penmotors
-
     try:
         position_byte_sequence = serial_connection.read_data(current_motor, 0x24, 2)
         position = utils.little_endian_bytes_to_int(position_byte_sequence)
@@ -96,7 +89,6 @@ def read_and_send_servo_info(conn, webdata, spd, trns):
         motor_speed = spd
 
         voltage_byte_sequence = serial_connection.read_data(current_motor, 0x2a, 1)
-        # voltage = voltage_byte_sequence[0]
         voltage = round(float(voltage_byte_sequence[0]*0.1), 2)
 
         temperature_byte_sequence = serial_connection.read_data(current_motor, 0x2b, 2)
@@ -119,8 +111,6 @@ def read_and_send_servo_info(conn, webdata, spd, trns):
         conn.send(result_to_string.encode())
 
 
-
-
 #-- Power off raspberry --#
 def stop_rasp(conn):
     wait(1)
@@ -128,12 +118,13 @@ def stop_rasp(conn):
     conn.close()
     subprocess.call("sudo shutdown now", shell=True)
 
+
 #-- Readable wait function --#
 def wait(wait_time_seconds):
     time.sleep(wait_time_seconds)
 
+
 def whack_a_mole(webdata):
-    #TODO: Whack a mole maken
     #TODO: Whack a mole maken
     SUPER_SPEED = 512
     WHACK_HIGH = 110
@@ -157,11 +148,11 @@ def whack_a_mole(webdata):
     if int(webdata[GRIP]) == 0:
         butopenclose = 0
 
+
 def kilo_grip(conn, webdata):
     #TODO: Een stand maken waarij je weet dat je de kilo gripper hebt
     global butopenclose
     global flag
-
     if int(webdata[GRIP]) == 1:
         if butopenclose == 0:
             if flag == 1:
@@ -173,6 +164,7 @@ def kilo_grip(conn, webdata):
             butopenclose += 1
     if int(webdata[GRIP]) == 0:
         butopenclose = 0
+
 
 def scissors_grip(webdata):
     #TODO: This
@@ -273,11 +265,13 @@ def pen_motors_control(conn, webdata, speed, trans_speed, pwr):
         conn.close()
 
 
-def autonomous_control(conn, webdata, speed, trans_speed, pwr, img):
+def autonomous_control(conn, webdata, speed, trans_speed, pwr):
     #TODO: This
-    s.settimeout(None)
+
+
     color_mode = webdata[COLOR]
     contour_mode = webdata[GRIPPER_HEAD_TYPE]
+    
     if webdata[GRIPPER_HEAD_TYPE] == MARKER:
         #TODO: whack a mole autonoom maken
         whack_a_mole()
@@ -285,28 +279,28 @@ def autonomous_control(conn, webdata, speed, trans_speed, pwr, img):
         #TODO: kilo grip autonoom maken
         kilo_grip(conn, webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
-        print("hello")
-        contour.color_contouring(False, 'scissors', color_mode, img)
+        contour.color_contouring(False, 'scissors', color_mode)
 
     try:
         
-        contour.color_contouring(False, contour_mode, color_mode, img)
+        contour.color_contouring(False, contour_mode, color_mode)
     except (Exception) as ex:
         print("Autonomous_Control_Error: " + str(ex))
         #conn.send("Autonomous_Control_Error".encode())
         conn.close()
-    s.settimeout(0)
 
 
 
+
+
+
+    #-- Main function
 def main():
     s.bind((HOST, PORT))
     wait(0.01)
     s.listen()
     wait(0.01)
 
-    cap = cv.VideoCapture(0)
-    
     flag = 0
     butopenclose = 0
     while(True):
@@ -317,30 +311,27 @@ def main():
         txt2 = txt.decode()
         print(txt2)
         webdata = txt2.split(",")
+        webdata = [int(value) for value in webdata]
 
-        if len(webdata) > 2:
-            webdata = [int(value) for value in webdata]
-
-            speed = int(webdata[SPEED_MODE])
-            trans_speed = int(webdata[TRANSLATION_SPEED_MODE])
-            pwr = int(webdata[POWER])
-
-            ret,img = cap.read()
+        speed = int(webdata[SPEED_MODE])
+        trans_speed = int(webdata[TRANSLATION_SPEED_MODE])
+        pwr = int(webdata[POWER])
 
         #-- Functions --#
-            if webdata[AUTONOMOUS] == 1:
-                autonomous_control(conn, webdata, speed, trans_speed, pwr, img)
-            else:
-                handheld_control(conn, webdata, speed, trans_speed, pwr)
+        if webdata[AUTONOMOUS] == 1:
+            autonomous_control(conn, webdata, speed, trans_speed, pwr)
+        else:
+            handheld_control(conn, webdata, speed, trans_speed, pwr)
 
-            if webdata[RASP_ON_OFF] == 1:
-                stop_rasp(conn)
+        if webdata[RASP_ON_OFF] == 1:
+            stop_rasp(conn)
 
-            if webdata[LIGHT] == 1:
-                lights()
+        if webdata[LIGHT] == 1:
+            lights()
 
-            if webdata[SEND_SERVO_DATA] > 0:
-                read_and_send_servo_info(conn, webdata, speed, trans_speed)
+        if webdata[SEND_SERVO_DATA] > 0:
+            read_and_send_servo_info(conn, webdata, speed, trans_speed)
+
 
 
 if __name__ == "__main__":
