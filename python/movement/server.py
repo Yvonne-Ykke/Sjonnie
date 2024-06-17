@@ -26,10 +26,13 @@ def start_server():
 
 def receive_message(sock):
     length_data = sock.recv(4)
+    print(f"data ontvangen: ")
     if not length_data:
         return None
     length = int.from_bytes(length_data, byteorder='big')
-    return sock.recv(length).decode('utf-8')
+    data = sock.recv(length).decode('utf-8')
+    print(f"omgezette data: {data}")
+    return data
 
 def main():
     start_server()
