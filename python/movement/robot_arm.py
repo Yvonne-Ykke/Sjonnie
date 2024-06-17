@@ -9,7 +9,7 @@ serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=Tru
 GPIO.setup(18, GPIO.OUT)
 
 class RobotArm:
-    def move_to_position(self, shoulder_angle, elbow_angle):
+    def move_to_position(shoulder_angle, elbow_angle):
             if not serial_connection:
                 print("Serial connection not established.")
                 return
@@ -24,7 +24,7 @@ class RobotArm:
             except Exception as e:
                 print(f"Error moving to position: {e}")
 
-    def get_angles_from_arm(self):
+    def get_angles_from_arm():
         if not serial_connection:
             print("Serial connection not established.")
             return None, None
@@ -36,7 +36,7 @@ class RobotArm:
             print(f"Error getting angles: {e}")
             return None, None
 
-    def close_connection(self):
+    def close_connection():
         if serial_connection:
             serial_connection.close()
             print("Serial connection closed.")
