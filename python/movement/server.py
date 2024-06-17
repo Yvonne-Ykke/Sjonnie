@@ -12,10 +12,15 @@ def start_server():
         print(f"Connection accepted from {addr}")
         try:
             command = receive_message(client_socket)
-            if command.lower() == 'quit':
+            if not command:
+                break
+            if command.strip().lower() == 'quit':
                 break
             shoulder_angle, elbow_angle = map(float, command.split(","))
             robot.move_to_position(shoulder_angle, elbow_angle)
+            print(f"Moved robot arm to: Shoulder angle={shoulder_angle}, Elbow angle={elbow_angle}")
+        except ValueError as ve:
+            print(f"ValueError: {ve}")
         except Exception as e:
             print(f"Error processing command: {e}")
         finally:

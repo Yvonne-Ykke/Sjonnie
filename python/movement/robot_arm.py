@@ -23,7 +23,6 @@ class RobotArm:
                 print(f"Moving to position: Shoulder angle: {shoulder_angle}, Elbow angle: {elbow_angle}")
             except Exception as e:
                 print(f"Error moving to position: {e}")
-                print(f"Shoulder angle: {shoulder_angle}, Elbow angle: {elbow_angle}")
 
     def get_angles_from_arm(self):
         if not serial_connection:
