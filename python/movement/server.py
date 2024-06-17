@@ -26,7 +26,7 @@ def start_server():
 
 def receive_message(sock):
     length_data = sock.recv(4)
-    print(f"data ontvangen: ")
+    print(f"data ontvangen: {length_data}")
     if not length_data:
         return None
     length = int.from_bytes(length_data, byteorder='big')
