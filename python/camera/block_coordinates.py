@@ -13,14 +13,14 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import movement.robot_arm_parameters as robot_arm_parameters
 import movement.angle_calculator as angle_calculator
 import movement.client as client
-
+convertion_rate = 1.151516
 # Callback function for trackbars
 def nothing(x):
     pass
 
 def create_trackbars():
     cv.namedWindow('settings')
-    cv.createTrackbar('Min Area', 'settings', 1000, 1500, nothing)
+    cv.createTrackbar('Min Area', 'settings', 1000, 2000, nothing)
     cv.createTrackbar('Max Area', 'settings', 1500, 3000, nothing)
 
 def get_trackbar_values():
@@ -107,8 +107,7 @@ if __name__ == "__main__":
         [0, 298],
         [0, 219]
     ]
-
     # Initialize the transformer with the conversion rate
-    transformer = CoordinateTransformer(camera_coords, real_world_coords, conversion_rate=1.0)
+    transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate)
 
     color_contouring(True, transformer)

@@ -38,7 +38,7 @@ class CoordinateTransformer:
         real_world_points = cv2.perspectiveTransform(camera_points, self.homography_matrix)
 
         # Apply conversion rate to each point
-        real_world_points = [(x * self.conversion_rate, y * self.conversion_rate) for x, y in real_world_points[0]]
+        real_world_points = [(x * self.convertion_rate, y * self.convertion_rate) for x, y in real_world_points[0]]
 
         return real_world_points
     
