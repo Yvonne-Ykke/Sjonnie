@@ -3,6 +3,7 @@ import contour
 import direction
 from color_recognition import colors
 import os
+import cv2 as cv
 
 DEVELOPING = True
 COLORS = "colors"
@@ -12,20 +13,45 @@ TARGET = "target"
 
 
 def main():
-    #color_recognition.detect(developing)
-    #contour.contouring(developing)
+    cap = cv.VideoCapture(0)
+
+    if not cap.isOpened():
+        print("Error: Could not open video capture")
+        return
+
+    while True:
+        ret, img = cap.read()
+        if not ret:
+            print("Error: Could not read frame")
+            break
+
+        contour.color_contouring(DEVELOPING, SCISSORS, 0, img)
+
+
+
+# def main():
+#     #color_recognition.detect(developing)
+#     #contour.contouring(developing)
+#     cap = cv.VideoCapture(0)
+
+
+#     if not cap.isOpened():
+#         print("Error: Could not open video capture")
+#         return
     
-    #info = 
 
-    contour.color_contouring(DEVELOPING, SCISSORS, 0)
+#     ret,img = cap.read()
+#     #info = 
 
-    # direction.track_color_movement(colors[0])
+#     contour.color_contouring(DEVELOPING, SCISSORS, 0, img)
 
-    # contour.contouring(developing)
+#     # direction.track_color_movement(colors[0])
+
+#     # contour.contouring(developing)
     
-    #Send infromatie naar esp32
-    #info = contour.color_contouring(developing)
-    #comm.send(info)
+#     #Send infromatie naar esp32
+#     #info = contour.color_contouring(developing)
+#     #comm.send(info)
 
 
 if __name__ == "__main__":
