@@ -13,11 +13,11 @@ class RobotArm:
                 print("Serial connection not established.")
                 return
             try:
-                serial_connection.goto(SERVO_1, shoulder_angle, speed=20, degrees=True)
+                serial_connection.goto(SERVO_1, shoulder_angle, speed=40, degrees=True)
                 time.sleep(0.1)  # Korte vertraging toevoegen
-                serial_connection.goto(SERVO_2, elbow_angle, speed=20, degrees=True)
+                serial_connection.goto(SERVO_2, elbow_angle, speed=40, degrees=True)
                 time.sleep(0.1)  # Korte vertraging toevoegen
-                serial_connection.goto(SERVO_3, wrist_angle, speed=20, degrees=True)
+                serial_connection.goto(SERVO_3, wrist_angle, speed=40, degrees=True)
                 time.sleep(0.1)  # Korte vertraging toevoegen
     
                 print(f"Moving to position: Shoulder angle: {shoulder_angle}, Elbow angle: {elbow_angle}, Wrist angle: {wrist_angle}")
