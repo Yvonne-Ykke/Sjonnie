@@ -9,11 +9,13 @@ serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=Tru
 
 servo_1 = 23
 servo_2 = 3
+servo_3 = 88
 
-def move_to_position(shoulder_angle, elbow_angle):
+def move_to_position(shoulder_angle, elbow_angle, wrist_angle):
     serial_connection.goto(servo_1, shoulder_angle, speed = 20, degrees = True)
     serial_connection.goto(servo_2, elbow_angle, speed = 20, degrees = True)
-    print(f"Bewegen naar positie: Schouder hoek: {shoulder_angle}, Elleboog hoek: {elbow_angle}")
+    serial_connection.goto(servo_3, wrist_angle, speed = 20, degrees = True)
+    print(f"Bewegen naar positie: Schouder hoek: {shoulder_angle}, Elleboog hoek: {elbow_angle}, Pols hoek: {wrist_angle}")
 
 def start_tcp_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -42,8 +44,8 @@ def start_tcp_server():
             print(f"Ontvangen commando: {command}")
             if command.lower() == "quit":
                 break
-            shoulder_angle, elbow_angle = map(float, command.split(","))
-            RobotArm.move_to_position(shoulder_angle, elbow_angle)
+            shoulder_angle, elbow_angle, wrist_angle = map(float, command.split(","))
+            RobotArm.move_to_position(shoulder_angle, elbow_angle, wrist_angle)
             client_socket.sendall("Positie ingesteld.\n".encode('utf-8'))
         except Exception as e:
             print(f"Fout bij verwerken commando: {e}")

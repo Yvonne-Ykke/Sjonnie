@@ -6,6 +6,7 @@ import os
 import time
 import color_recognition as color_definitions 
 from coordinate_transformation import CoordinateTransformer
+import wrist_rotation
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -35,6 +36,10 @@ def click_event(event, x, y, flags, params):
         shoulder, elbow = angle_calculator.main(real_world_coords[0][0], real_world_coords[0][1])
         client.send_arm_angles_to_robot(shoulder, -elbow)
         print(f"Shoulder: {shoulder}, Elbow: {elbow}")
+
+import cv2 as cv
+import numpy as np
+import time
 
 def color_contouring(developing, transformer):
     cap = cv.VideoCapture(0)
@@ -66,24 +71,45 @@ def color_contouring(developing, transformer):
                 cnt = contours[cnr]
                 area = cv.contourArea(cnt)
                 if min_area < area < max_area:
-                    M = cv.moments(cnt)
-                    if M["m00"] != 0:
-                        cX = int(M["m10"] / M["m00"])
-                        cY = int(M["m01"] / M["m00"])
-                        real_world_coords = transformer.convert_coordinates([(cX, cY)])
-                        print(f"Camera Coordinates: ({cX}, {cY}) -> Real World Coordinates: {real_world_coords}")
-                        cv.drawContours(img, [cnt], -1, (0, 255, 0), 3)  # Draw contour in green
-                        cv.circle(img, (cX, cY), 5, (0, 0, 255), -1)  # Draw centroid in red
-                        cv.putText(img, f"{real_world_coords[0][0]:.2f}, {real_world_coords[0][1]:.2f}", (cX, cY), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv.LINE_AA)
+                    # Approximate the contour to a polygon
+                    epsilon = 0.04 * cv.arcLength(cnt, True)
+                    approx = cv.approxPolyDP(cnt, epsilon, True)
+                    
+                    # Check if the approximated polygon has 4 vertices
+                    if len(approx) == 4:
+                        M = cv.moments(cnt)
+                        if M["m00"] != 0:
+                            cX = int(M["m10"] / M["m00"])
+                            cY = int(M["m01"] / M["m00"])
+                            real_world_coords = transformer.convert_coordinates([(cX, cY)])
+                            print(f"Camera Coordinates: ({cX}, {cY}) -> Real World Coordinates: {real_world_coords}")
 
-                        # Check if the 's' key is pressed
-                        key = cv.waitKey(1)
-                        if key == ord('s'):
-                            # Send the robot arm coordinates
-                            shoulder, elbow = angle_calculator.main(real_world_coords[0][0], real_world_coords[0][1])
-                            client.send_arm_angles_to_robot(shoulder, -elbow)
-                            print(f"Shoulder: {shoulder}, Elbow: {elbow}")
-                            time.sleep(1)  # Delay for one second
+                            # Get the minimum area rectangle
+                            rect = cv.minAreaRect(cnt)
+                            box = cv.boxPoints(rect)
+                            box = np.int0(box)
+                            angle = rect[2]
+                            if angle < -45:
+                                angle += 90
+                            print(f"Angle: {angle} degrees")
+
+                            # Draw the contour, centroid, and angle
+                            cv.drawContours(img, [cnt], -1, (0, 255, 0), 3)  # Draw contour in green
+                            cv.circle(img, (cX, cY), 5, (0, 0, 255), -1)  # Draw centroid in red
+                            cv.drawContours(img, [box], 0, (255, 0, 0), 2)  # Draw rectangle in blue
+                            cv.putText(img, f"{real_world_coords[0][0]:.2f}, {real_world_coords[0][1]:.2f}", (cX, cY), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv.LINE_AA)
+                            cv.putText(img, f"Angle: {angle:.2f}", (cX + 50, cY), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1, cv.LINE_AA)
+
+                            # Check if the 's' key is pressed
+                            key = cv.waitKey(1)
+                            if key == ord('s'):
+                                # Send the robot arm coordinates
+                                shoulder, elbow = angle_calculator.main(real_world_coords[0][0], real_world_coords[0][1])
+                                client.send_arm_angles_to_robot(shoulder, -elbow)
+                                wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, elbow, angle)
+                                client.rotate_wrist(wrist_angle)
+                                print(f"Shoulder: {shoulder}, Elbow: {elbow}")
+                                time.sleep(1)  # Delay for one second
 
         if developing:
             cv.imshow("image", img)
