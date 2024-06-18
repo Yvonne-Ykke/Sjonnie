@@ -125,12 +125,16 @@ def wait(wait_time_seconds):
     time.sleep(wait_time_seconds)
 
 def get_data():
-    conn, addr = s.accept()
-    txt = conn.recv(1024)
-    txt2 = txt.decode()
-    print(txt2)
-    webdata = txt2.split(",")
+    for len_buf in buf:
+        conn, addr = s.accept()
+        txt = conn.recv(1024)
+        txt2 = txt.decode()
+        print(txt2)
+        webdata = txt2.split(",")
     return webdata, conn
+
+def get_buffer_length():
+    1+1
 
 
 def main():
@@ -159,9 +163,9 @@ def main():
 
         #-- Functions --#
             if webdata[AUTONOMOUS] == 1:
-                controls.autonomous_control(conn, webdata, speed, trans_speed, pwr, img)
+                controls.autonomous_control(serial_connection, conn, webdata, speed, trans_speed, pwr, img)
             else:
-                controls.handheld_control(conn, webdata, speed, trans_speed, pwr)
+                controls.handheld_control(serial_connection, conn, webdata, speed, trans_speed, pwr)
 
             if webdata[RASP_ON_OFF] == 1:
                 stop_rasp(conn)

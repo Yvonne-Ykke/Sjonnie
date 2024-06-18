@@ -49,9 +49,7 @@ COLOR = 13
 flag = 0
 butopenclose = 0
 
-
-
-def whack_a_mole(webdata):
+def whack_a_mole(serial_connection, webdata):
     #TODO: Whack a mole maken
     #TODO: Whack a mole maken
     SUPER_SPEED = 512
@@ -76,7 +74,7 @@ def whack_a_mole(webdata):
     if int(webdata[GRIP]) == 0:
         butopenclose = 0
 
-def kilo_grip(conn, webdata):
+def kilo_grip(serial_connection, conn, webdata):
     #TODO: Een stand maken waarij je weet dat je de kilo gripper hebt
     global butopenclose
     global flag
@@ -93,7 +91,7 @@ def kilo_grip(conn, webdata):
     if int(webdata[GRIP]) == 0:
         butopenclose = 0
 
-def scissors_grip(webdata):
+def scissors_grip(serial_connection, webdata):
     #TODO: This
     global flag
     global butopenclose
@@ -119,29 +117,29 @@ def lights():
     print('lights on off')
 
 
-def pinch_grip(conn, webdata):
+def pinch_grip(serial_connection, conn, webdata):
     if webdata[GRIPPER_HEAD_TYPE] == MARKER:
         whack_a_mole(webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
-        kilo_grip(conn, webdata)
+        kilo_grip(serial_connection, conn, webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
         scissors_grip(webdata)
     else:
         scissors_grip(webdata)
 
 
-def handheld_control(conn, webdata, speed, trans_speed, pwr):
+def handheld_control(serial_connection, conn, webdata, speed, trans_speed, pwr):
     #TODO: Check of het standje pen is of niet(zo wel dan zijn er maar 3 motors en anders 5)
     if webdata[GRIPPER_HEAD_TYPE] == MARKER:
-        pen_motors_control(conn, webdata, speed, trans_speed, pwr)
+        pen_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr)
     else:
-        all_motors_control(conn, webdata, speed, trans_speed, pwr)
+        all_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr)
 
 
-def all_motors_control(conn, webdata, speed, trans_speed, pwr):
+def all_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr):
     pos = 0
     try:
-        pinch_grip(conn, webdata)
+        pinch_grip(serial_connection, conn, webdata)
 
         for value in webdata[VERTICAL_RJOY:VERTICAL_LJOY + 1]:
             if pos == 2:
@@ -166,14 +164,14 @@ def all_motors_control(conn, webdata, speed, trans_speed, pwr):
             print("Motor: " + str(MOTORS[pos]) + " not connected.")
             print("Suggestion: Selcect different gripperhead in: Settings - Gripper.")
         else:
-            print("Handheld_Control_Error: " + str(ex) + " Motor: " + str(MOTORS[pos]))
+            print("Controls.Handheld_Control_Error: " + str(ex) + " Motor: " + str(MOTORS[pos]))
         conn.close()
 
 
-def pen_motors_control(conn, webdata, speed, trans_speed, pwr):
+def pen_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr):
     pos = 0
     try:
-        pinch_grip(conn, webdata)
+        pinch_grip(serial_connection, conn, webdata)
         for value in webdata[VERTICAL_RJOY:HORIZONTAL_RJOY + 1]:
             if value > 2000:
                 max = 1020
@@ -192,17 +190,17 @@ def pen_motors_control(conn, webdata, speed, trans_speed, pwr):
         conn.close()
 
 
-def autonomous_control(conn, webdata, speed, trans_speed, pwr, img):
+def autonomous_control(serial_connection, conn, webdata, speed, trans_speed, pwr, img):
     #TODO: This
 
     color_mode = webdata[COLOR]
     contour_mode = webdata[GRIPPER_HEAD_TYPE]
     if webdata[GRIPPER_HEAD_TYPE] == MARKER:
         #TODO: whack a mole autonoom maken
-        whack_a_mole()
+        whack_a_mole(serial_connection, webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
         #TODO: kilo grip autonoom maken
-        kilo_grip(conn, webdata)
+        kilo_grip(serial_connection, conn, webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
         contour.color_contouring(False, 'scissors', color_mode, img)
 
