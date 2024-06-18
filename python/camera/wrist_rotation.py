@@ -4,16 +4,17 @@ import math
 WRIST = 88
 
 def calculate_wrist_rotation(shoulder_angle, elbow_angle, target_rotation):
-    forearm_angle_deg = shoulder_angle + elbow_angle
+    if shoulder_angle < 0 and elbow_angle < 0 or shoulder_angle > 0 and elbow_angle > 0:
+        forearm_angle_deg = abs(shoulder_angle + elbow_angle)
+    else:
+        forearm_angle_deg = abs((abs(shoulder_angle) - abs(elbow_angle)))
     forearm_angle_deg = (forearm_angle_deg + 180) % 360 - 180
     print(f"Forearm angle: {forearm_angle_deg:.2f} degrees")
-    wrist_rotation = forearm_angle_deg - target_rotation
+    wrist_rotation = target_rotation - forearm_angle_deg 
     wrist_rotation = max(min(wrist_rotation, 150), -150)
-    wrist_rotation_offset = 0
-    if shoulder_angle < 0:
-        wrist_rotation_offset = -90
-    else:
-        wrist_rotation_offset = wrist_rotation_offset
+    wrist_rotation_offset = 45
+    if shoulder_angle > 0:
+        wrist_rotation_offset += 90
     wrist_rotation += wrist_rotation_offset
     print(f"Wrist rotation: {wrist_rotation:.2f} degrees")
     
