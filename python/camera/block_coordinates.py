@@ -15,6 +15,7 @@ import movement.robot_arm_parameters as robot_arm_parameters
 import movement.angle_calculator as angle_calculator
 import movement.client as client
 convertion_rate = 1.1398
+convertion_rate = 1.2
 
 # Callback function for trackbars
 def nothing(x):
