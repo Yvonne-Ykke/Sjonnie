@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from movement import robot_arm_parameters as robotParameters
+import movement.robot_arm_parameters as robotParameters
 robot = robotParameters.Parameters
 
 # Check if the point is within the robot's reach
