@@ -54,7 +54,9 @@ def calculate_arm_angles(x, y, segment_length, current_pos_shoulder, current_pos
 def _is_shoulder_in_range(angle): return robot.AX12_SHOULDER_MIN_ANGLE <= angle <= robot.AX12_SHOULDER_MAX_ANGLE
 def _is_elbow_in_range(angle): return robot.AX12_ELBOW_MIN_ANGLE <= angle <= robot.AX12_ELBOW_MAX_ANGLE
 def _point_hits_robot_base(x, y): return _distance_from_origin(x, y) <= robot.FORBIDDEN_RADIUS
-def _distance_from_origin(x, y): return np.sqrt(x ** 2 + y ** 2)
+def _distance_from_origin(x, y): 
+    print(f"x: {x}, y: {y}")
+    return np.sqrt(x ** 2 + y ** 2)
 def convert_to_servo_angle(angle): return -(angle + 90) % 360 - 180
 
 def main(x, y, elbow_angle = 0, shoulder_angle = 0):
@@ -64,12 +66,19 @@ def main(x, y, elbow_angle = 0, shoulder_angle = 0):
         shoulder_angle = convert_to_servo_angle(shoulder_angle)
         return shoulder_angle, elbow_angle
     else:
-        print("Invalid position")
-        return None, None
+         print("Invalid position")
+         return None, None
 
 def calculate_valid_angles(x, y, prev_elbow_angle, prev_shoulder_angle):
      
-    if _point_hits_robot_base(x, y) or point_is_out_of_reach(x, y, robot.SEGMENT_LENGTH): return None, None
+    if _point_hits_robot_base(x, y):
+        print("Point hits robot base")
+        return None, None
+    
+    if  point_is_out_of_reach(x, y, robot.SEGMENT_LENGTH): 
+        print("Point is out of reach")
+        return None, None
+    
     shoulder_angle, elbow_angle = calculate_arm_angles(x, y, robot.SEGMENT_LENGTH, prev_shoulder_angle, prev_elbow_angle)
     
     return shoulder_angle, elbow_angle

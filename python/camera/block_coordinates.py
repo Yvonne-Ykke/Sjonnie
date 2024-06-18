@@ -34,13 +34,16 @@ def click_event(event, x, y, flags, params):
     if event == cv.EVENT_LBUTTONDOWN:
         real_world_coords = params.convert_coordinates([(x, y)])
         print(f"Clicked Coordinates: ({x}, {y}) -> Real World Coordinates: {real_world_coords}")
-        shoulder, elbow = angle_calculator.main(real_world_coords[0][0], real_world_coords[0][1])
+        
+        # Extracting x and y from the first element of real_world_coords
+        real_world_x, real_world_y = real_world_coords[0]
+        shoulder, elbow = angle_calculator.main(real_world_x, real_world_y)
 
-        if elbow is not None:
+        if shoulder is not None and elbow is not None:
             client.send_arm_angles_to_robot(shoulder, -elbow, 45)
             print(f"Shoulder: {shoulder}, Elbow: {elbow}")
         else:
-            print("Unable to calculate elbow angle.")
+            print("Unable to calculate shoulder or elbow angle.")
 
 def color_contouring(developing, transformer):
     cap = cv.VideoCapture(0)
@@ -80,14 +83,14 @@ def color_contouring(developing, transformer):
                         cX = int(M["m10"] / M["m00"])
                         cY = int(M["m01"] / M["m00"])
                         real_world_coords = transformer.convert_coordinates([(cX, cY)])
-                        print(f"Camera Coordinates: ({cX}, {cY}) -> Real World Coordinates: {real_world_coords}")
+                        # print(f"Camera Coordinates: ({cX}, {cY}) -> Real World Coordinates: {real_world_coords}")
 
                         # Get the minimum area rectangle
                         rect = cv.minAreaRect(cnt)
                         box = cv.boxPoints(rect)
                         box = np.int0(box)
                         angle = rect[2]
-                        print(f"Angle: {angle} degrees")
+                        # print(f"Angle: {angle} degrees")
 
                         # Draw the contour, centroid, and angle
                         cv.drawContours(img, [cnt], -1, (0, 255, 0), 3)  # Draw contour in green
@@ -104,7 +107,7 @@ def color_contouring(developing, transformer):
                             if elbow is not None:
                                 wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, angle)
                                 client.send_arm_angles_to_robot(shoulder, -elbow, wrist_angle)
-                                print(f"Shoulder: {shoulder}, Elbow: {elbow}, wrist_angle: {wrist_angle}")
+                                # print(f"Shoulder: {shoulder}, Elbow: {elbow}, wrist_angle: {wrist_angle}")
                                 time.sleep(1)  # Delay for one second
                             else:
                                 print("Unable to calculate elbow angle.")
