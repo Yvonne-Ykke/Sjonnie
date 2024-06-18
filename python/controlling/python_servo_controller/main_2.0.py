@@ -9,6 +9,8 @@ import socket
 import cv2 as cv
 import threading
 import controls
+import struct
+import fcntl
 
 sys.path.append('../../computer_vision/')
 import contour
@@ -55,8 +57,8 @@ HOST = '0.0.0.0'  # Luister op alle beschikbare interfaces
 PORT = 65432      # Kies een poortnummer
 
 # Open socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+#s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 # Open serial port
 serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True)
@@ -125,26 +127,28 @@ def wait(wait_time_seconds):
     time.sleep(wait_time_seconds)
 
 def get_data():
-    for len_buf in buf:
-        conn, addr = s.accept()
-        txt = conn.recv(1024)
-        txt2 = txt.decode()
-        print(txt2)
-        webdata = txt2.split(",")
+    conn, addr = s.accept()
+    txt = conn.recv(2048)
+    txt2 = txt.decode()
+    print(txt2)
+    webdata = txt2.split(",")
     return webdata, conn
 
-def get_buffer_length():
-    1+1
-
-
-def main():
+def start_socket():
+    global s
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((HOST, PORT))
     wait(0.01)
     s.listen()
     wait(0.01)
 
-    cap = cv.VideoCapture(0)
+def main():
+    start_socket()
 
+    cap = cv.VideoCapture(0)
+    conn, addr = s.accept()
+    conn.recv(1024)
     flag = 0
     butopenclose = 0
     while(True):
@@ -164,6 +168,7 @@ def main():
         #-- Functions --#
             if webdata[AUTONOMOUS] == 1:
                 controls.autonomous_control(serial_connection, conn, webdata, speed, trans_speed, pwr, img)
+                start_socket()
             else:
                 controls.handheld_control(serial_connection, conn, webdata, speed, trans_speed, pwr)
 
