@@ -7,11 +7,10 @@ import signal
 import sys
 import socket
 import cv2 as cv
+import threading
 
 sys.path.append('../../computer_vision/')
 import contour
-
-
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
@@ -49,6 +48,7 @@ SEND_SERVO_DATA = 10
 GRIP = 11
 GRIPPER_HEAD_TYPE = 12
 COLOR = 13
+
 #-- Flag variables --#
 flag = 0
 butopenclose = 0
@@ -56,6 +56,7 @@ butopenclose = 0
 #-- Configuration --#
 HOST = '0.0.0.0'  # Luister op alle beschikbare interfaces
 PORT = 65432      # Kies een poortnummer
+
 # Open socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -71,9 +72,6 @@ def signal_handler(sig, frame):
     s.shutdown(0)
     s.close()
     sys.exit(0)
-
-
-
 
 #-- Send servo data --#
 def read_and_send_servo_info(conn, webdata, spd, trns):
@@ -117,9 +115,6 @@ def read_and_send_servo_info(conn, webdata, spd, trns):
         exception_result = [str(current_motor),"-","-","-","-",str(ex)]
         result_to_string = ",".join(exception_result)
         conn.send(result_to_string.encode())
-
-
-
 
 #-- Power off raspberry --#
 def stop_rasp(conn):
@@ -275,7 +270,7 @@ def pen_motors_control(conn, webdata, speed, trans_speed, pwr):
 
 def autonomous_control(conn, webdata, speed, trans_speed, pwr, img):
     #TODO: This
-    s.settimeout(None)
+
     color_mode = webdata[COLOR]
     contour_mode = webdata[GRIPPER_HEAD_TYPE]
     if webdata[GRIPPER_HEAD_TYPE] == MARKER:
@@ -285,18 +280,22 @@ def autonomous_control(conn, webdata, speed, trans_speed, pwr, img):
         #TODO: kilo grip autonoom maken
         kilo_grip(conn, webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
-        print("hello")
         contour.color_contouring(False, 'scissors', color_mode, img)
 
     try:
-        
         contour.color_contouring(False, contour_mode, color_mode, img)
     except (Exception) as ex:
         print("Autonomous_Control_Error: " + str(ex))
         #conn.send("Autonomous_Control_Error".encode())
         conn.close()
-    s.settimeout(0)
 
+def get_data():
+    conn, addr = s.accept()
+    txt = conn.recv(1024)
+    txt2 = txt.decode()
+    print(txt2)
+    webdata = txt2.split(",")
+    return webdata, conn
 
 
 def main():
@@ -306,17 +305,13 @@ def main():
     wait(0.01)
 
     cap = cv.VideoCapture(0)
-    
+
     flag = 0
     butopenclose = 0
     while(True):
         #-- Getting data from webserver --#
         signal.signal(signal.SIGINT, signal_handler)
-        conn, addr = s.accept()
-        txt = conn.recv(1024)
-        txt2 = txt.decode()
-        print(txt2)
-        webdata = txt2.split(",")
+        webdata, conn = get_data()
 
         if len(webdata) > 2:
             webdata = [int(value) for value in webdata]
