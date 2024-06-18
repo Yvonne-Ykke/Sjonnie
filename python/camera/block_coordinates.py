@@ -89,8 +89,8 @@ def color_contouring(developing, transformer):
                             box = cv.boxPoints(rect)
                             box = np.int0(box)
                             angle = rect[2]
-                            if angle < -45:
-                                angle += 90
+                            #if angle < -45:
+                                #angle += 90
                             print(f"Angle: {angle} degrees")
 
                             # Draw the contour, centroid, and angle
@@ -105,10 +105,9 @@ def color_contouring(developing, transformer):
                             if key == ord('s'):
                                 # Send the robot arm coordinates
                                 shoulder, elbow = angle_calculator.main(real_world_coords[0][0], real_world_coords[0][1])
-                                client.send_arm_angles_to_robot(shoulder, -elbow)
                                 wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, elbow, angle)
-                                client.rotate_wrist(wrist_angle)
-                                print(f"Shoulder: {shoulder}, Elbow: {elbow}")
+                                client.send_arm_angles_to_robot(shoulder, -elbow, wrist_angle)
+                                print(f"Shoulder: {shoulder}, Elbow: {elbow}, wrist_angle: {wrist_angle}")
                                 time.sleep(1)  # Delay for one second
 
         if developing:

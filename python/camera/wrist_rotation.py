@@ -8,7 +8,13 @@ def calculate_wrist_rotation(shoulder_angle, elbow_angle, target_rotation):
     forearm_angle_deg = (forearm_angle_deg + 180) % 360 - 180
     print(f"Forearm angle: {forearm_angle_deg:.2f} degrees")
     wrist_rotation = forearm_angle_deg - target_rotation
-    wrist_rotation = (wrist_rotation + 180) % 360 - 180
+    wrist_rotation = max(min(wrist_rotation, 150), -150)
+    wrist_rotation_offset = 0
+    if shoulder_angle < 0:
+        wrist_rotation_offset = -90
+    else:
+        wrist_rotation_offset = wrist_rotation_offset
+    wrist_rotation += wrist_rotation_offset
     print(f"Wrist rotation: {wrist_rotation:.2f} degrees")
     
     return wrist_rotation
