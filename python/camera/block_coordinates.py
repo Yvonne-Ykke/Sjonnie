@@ -15,6 +15,7 @@ import movement.robot_arm_parameters as robot_arm_parameters
 import movement.angle_calculator as angle_calculator
 import movement.client as client
 convertion_rate = 1.1398
+
 # Callback function for trackbars
 def nothing(x):
     pass
@@ -34,12 +35,12 @@ def click_event(event, x, y, flags, params):
         real_world_coords = params.convert_coordinates([(x, y)])
         print(f"Clicked Coordinates: ({x}, {y}) -> Real World Coordinates: {real_world_coords}")
         shoulder, elbow = angle_calculator.main(real_world_coords[0][0], real_world_coords[0][1])
-        client.send_arm_angles_to_robot(shoulder, -elbow, 45)
-        print(f"Shoulder: {shoulder}, Elbow: {elbow}")
 
-import cv2 as cv
-import numpy as np
-import time
+        if elbow is not None:
+            client.send_arm_angles_to_robot(shoulder, -elbow, 45)
+            print(f"Shoulder: {shoulder}, Elbow: {elbow}")
+        else:
+            print("Unable to calculate elbow angle.")
 
 def color_contouring(developing, transformer):
     cap = cv.VideoCapture(0)
@@ -52,6 +53,9 @@ def color_contouring(developing, transformer):
         ret, img = cap.read()
         if img is None:
             break
+
+        # Undistort the captured frame
+        img = cv.undistort(img, transformer.mtx, transformer.dist)
 
         color_masks = color_definitions.masks(img)
 
@@ -83,8 +87,6 @@ def color_contouring(developing, transformer):
                         box = cv.boxPoints(rect)
                         box = np.int0(box)
                         angle = rect[2]
-                        #if angle < -45:
-                            #angle += 90
                         print(f"Angle: {angle} degrees")
 
                         # Draw the contour, centroid, and angle
@@ -99,10 +101,13 @@ def color_contouring(developing, transformer):
                         if key == ord('s'):
                             # Send the robot arm coordinates
                             shoulder, elbow = angle_calculator.main(real_world_coords[0][0], real_world_coords[0][1])
-                            wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, angle)
-                            client.send_arm_angles_to_robot(shoulder, -elbow, wrist_angle)
-                            print(f"Shoulder: {shoulder}, Elbow: {elbow}, wrist_angle: {wrist_angle}")
-                            time.sleep(1)  # Delay for one second
+                            if elbow is not None:
+                                wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, angle)
+                                client.send_arm_angles_to_robot(shoulder, -elbow, wrist_angle)
+                                print(f"Shoulder: {shoulder}, Elbow: {elbow}, wrist_angle: {wrist_angle}")
+                                time.sleep(1)  # Delay for one second
+                            else:
+                                print("Unable to calculate elbow angle.")
 
         if developing:
             cv.imshow("image", img)
@@ -123,7 +128,7 @@ if __name__ == "__main__":
         [374, 363],
         [434, 223],
         [434, 293],
-        [434, 362]
+        [434,362]
     ]
 
     real_world_coords = [
@@ -137,6 +142,7 @@ if __name__ == "__main__":
         [0, 298],
         [0, 219]
     ]
+
     # Initialize the transformer with the conversion rate
     transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate)
 

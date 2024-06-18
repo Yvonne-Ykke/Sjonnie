@@ -2,7 +2,7 @@ import socket
 
 def send_arm_angles_to_robot(shoulder_angle, elbow_angle, wrist_angle):
     try:
-        with socket.create_connection(('141.252.29.70', 65000)) as client_socket:
+        with socket.create_connection(('141.252.29.70', 65001)) as client_socket:
             print("Connected to the server.")
 
             command = f"{shoulder_angle},{elbow_angle},{wrist_angle}"
