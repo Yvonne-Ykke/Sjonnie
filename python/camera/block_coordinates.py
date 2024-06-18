@@ -13,7 +13,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import movement.robot_arm_parameters as robot_arm_parameters
 import movement.angle_calculator as angle_calculator
 import movement.client as client
-convertion_rate = 1.151516
+convertion_rate = 1.1398
 # Callback function for trackbars
 def nothing(x):
     pass
@@ -85,15 +85,15 @@ def color_contouring(developing, transformer):
 if __name__ == "__main__":
     # Define camera coordinates (x, y) and corresponding real-world coordinates (X, Y)
     camera_coords = [
-        [198, 89],
-        [205, 263],
-        [213, 338],
-        [263, 183],
-        [270, 256],
-        [277, 332],
-        [327, 177],
-        [335, 249],
-        [343, 325]
+        [313, 223],
+        [313, 293],
+        [313, 363],
+        [374, 223],
+        [374, 293],
+        [374, 363],
+        [434, 223],
+        [434, 293],
+        [434, 362]
     ]
 
     real_world_coords = [
