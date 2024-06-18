@@ -119,11 +119,11 @@ def lights():
 
 def pinch_grip(serial_connection, conn, webdata):
     if webdata[GRIPPER_HEAD_TYPE] == MARKER:
-        whack_a_mole(webdata)
+        whack_a_mole(serial_connecion, webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
         kilo_grip(serial_connection, conn, webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
-        scissors_grip(webdata)
+        scissors_grip(serial_connection, webdata)
     else:
         scissors_grip(webdata)
 
