@@ -59,22 +59,29 @@ def contouring(developing):
 
 def draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing=None):
     if area > 500 and area < 100000:
-        x, y, w, h = cv.boundingRect(cnt)
         if 0.05 < factor < 0.12: #curved scissors
-            #print (area, factor, holes)
-
             if developing:
                 cv.drawContours(img, [cnt], -1, bgr, 3)
-                cv.rectangle(img, (x, y), (x+w, y+h), bgr, 3)
-                cv.putText(img, 'scissors', (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
+                cv.putText(img, 'curved scissors', (cnt[0][0][0], cnt[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
             print("curved scissors " + color_name)
         elif 0.12 < factor < 0.2: #straight scissors
             #print (area, factor, holes)
             if developing:
                 cv.drawContours(img, [cnt], -1, bgr, 3)
-                cv.rectangle(img, (x, y), (x+w, y+h), bgr, 3)
-                cv.putText(img, 'straight scissors', (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
+                cv.putText(img, 'straight scissors', (cnt[0][0][0], cnt[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
             print("straight scissors " + color_name)
+
+        rect = cv.minAreaRect(cnt)
+        box = cv.boxPoints(rect)
+        box = np.int0(box)
+        cv.drawContours(img, [box], 0, bgr, 2)
+
+        angle = rect[2]
+        if angle < -45:
+            angle += 90
+
+        cv.putText(img, f'Angle: {angle:.2f}', (int(rect[0][0]), int(rect[0][1])),
+                   cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
         M = cv.moments(cnt)
         if child <= 0:
