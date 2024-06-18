@@ -1,21 +1,8 @@
-from robot_arm import RobotArm  # Assuming this is your robot arm control module
+from robot_arm import RobotArm  
 
 import socket
-from pyax12.connection import Connection
 import sys
 import signal
-
-serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
-
-servo_1 = 23
-servo_2 = 3
-servo_3 = 88
-
-def move_to_position(shoulder_angle, elbow_angle, wrist_angle):
-    serial_connection.goto(servo_1, shoulder_angle, speed = 20, degrees = True)
-    serial_connection.goto(servo_2, elbow_angle, speed = 20, degrees = True)
-    serial_connection.goto(servo_3, wrist_angle, speed = 20, degrees = True)
-    print(f"Bewegen naar positie: Schouder hoek: {shoulder_angle}, Elleboog hoek: {elbow_angle}, Pols hoek: {wrist_angle}")
 
 def start_tcp_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -31,7 +18,6 @@ def start_tcp_server():
     def signal_handler(sig, frame):
         print('Je drukte op Ctrl+C!')
         server_socket.close()
-        serial_connection.close()
         sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
@@ -54,7 +40,6 @@ def start_tcp_server():
             client_socket.close()
             print("Verbinding met client gesloten.")
     server_socket.close()
-    serial_connection.close()
     print("Server gesloten.")
 
 if __name__ == "__main__":

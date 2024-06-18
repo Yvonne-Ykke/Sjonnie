@@ -138,6 +138,7 @@ if __name__ == "__main__":
         [0, 219]
     ]
     # Initialize the transformer with the conversion rate
-    transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate)
+    calibration_data_path = 'calibration_data.npz'
+    transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate, calibration_data_path)
 
     color_contouring(True, transformer)

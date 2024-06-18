@@ -1,14 +1,19 @@
-# coordinate_transformer.py
-
 import cv2
 import numpy as np
 
 class CoordinateTransformer:
-    def __init__(self, camera_coords, real_world_coords, convertion_rate):
+    def __init__(self, camera_coords, real_world_coords, convertion_rate, calibration_data_path):
         self.camera_coords = np.array(camera_coords, dtype="float32")
         self.real_world_coords = np.array(real_world_coords, dtype="float32")
         self.homography_matrix, _ = cv2.findHomography(self.camera_coords, self.real_world_coords)
-        self.convertion_rate = convertion_rate 
+        self.convertion_rate = convertion_rate
+        self.load_calibration_data(calibration_data_path)
+    
+    def load_calibration_data(self, calibration_data_path):
+        # Load the calibration data from the npz file
+        calibration_data = np.load(calibration_data_path)
+        self.camera_matrix = calibration_data['mtx']
+        self.dist_coeffs = calibration_data['dist']
     
     def capture_photo(self):
         cap = cv2.VideoCapture(0)
@@ -35,7 +40,12 @@ class CoordinateTransformer:
     def convert_coordinates(self, camera_points):
         camera_points = np.array(camera_points, dtype="float32")
         camera_points = np.array([camera_points])  # Reshape for perspectiveTransform
-        real_world_points = cv2.perspectiveTransform(camera_points, self.homography_matrix)
+
+        # Correct for lens distortion
+        undistorted_points = cv2.undistortPoints(camera_points, self.camera_matrix, self.dist_coeffs, None, self.camera_matrix)
+
+        # Apply the homography matrix
+        real_world_points = cv2.perspectiveTransform(undistorted_points, self.homography_matrix)
 
         # Apply conversion rate to each point
         real_world_points = [(x * self.convertion_rate, y * self.convertion_rate) for x, y in real_world_points[0]]
