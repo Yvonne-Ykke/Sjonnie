@@ -6,14 +6,11 @@ import RPi.GPIO as GPIO
 import signal
 import sys
 import socket
+import cv2 as cv
+import threading
 
 sys.path.append('../../computer_vision/')
 import contour
-
-
-
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
 
 #-- Constants --#              --------------------------------
 BENEDEN = 1023
@@ -47,84 +44,13 @@ SEND_SERVO_DATA = 10
 GRIP = 11
 GRIPPER_HEAD_TYPE = 12
 COLOR = 13
+
 #-- Flag variables --#
 flag = 0
 butopenclose = 0
 
-#-- Configuration --#
-HOST = '0.0.0.0'  # Luister op alle beschikbare interfaces
-PORT = 65432      # Kies een poortnummer
-# Open socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-# Open serial port
-serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True)
-time.sleep(0.1)
-
-
-#-- PC debug handling --#
-def signal_handler(sig, frame):
-    print('You pressed Ctrl+C!')
-    s.shutdown(0)
-    s.close()
-    sys.exit(0)
-
-
-#-- Send servo data --#
-def read_and_send_servo_info(conn, webdata, spd, trns):
-    data = []
-    current_motor = MOTORS[webdata[SEND_SERVO_DATA] - 1]
-    try:
-        position_byte_sequence = serial_connection.read_data(current_motor, 0x24, 2)
-        position = utils.little_endian_bytes_to_int(position_byte_sequence)
-        position = utils.dxl_angle_to_degrees(position)
-
-        if current_motor == SHOULDER | current_motor == ELBOW | current_motor == WRIST:
-            spd = spd
-        elif current_motor == TRANS:
-            spd = trns
-        elif current_motor == GRIPPER:
-            spd = SPEED_GRIPPER
-        motor_speed = spd
-
-        voltage_byte_sequence = serial_connection.read_data(current_motor, 0x2a, 1)
-        voltage = round(float(voltage_byte_sequence[0]*0.1), 2)
-
-        temperature_byte_sequence = serial_connection.read_data(current_motor, 0x2b, 2)
-        temperature = utils.little_endian_bytes_to_int(temperature_byte_sequence)
-
-        error = "-"
-
-        all_byte_sequences = [current_motor, voltage, motor_speed, temperature, position, error]
-        for byte_sequence in all_byte_sequences:
-            data.append(str(byte_sequence))
-
-        result = ",".join(data)
-        print(result)
-        conn.send(result.encode())
-
-    # Error handling
-    except (Exception) as ex:
-        exception_result = [str(current_motor),"-","-","-","-",str(ex)]
-        result_to_string = ",".join(exception_result)
-        conn.send(result_to_string.encode())
-
-
-#-- Power off raspberry --#
-def stop_rasp(conn):
-    wait(1)
-    conn.send('Raspberry uit'.encode())
-    conn.close()
-    subprocess.call("sudo shutdown now", shell=True)
-
-
-#-- Readable wait function --#
-def wait(wait_time_seconds):
-    time.sleep(wait_time_seconds)
-
-
-def whack_a_mole(webdata):
+def whack_a_mole(serial_connection, webdata):
+    #TODO: Whack a mole maken
     #TODO: Whack a mole maken
     SUPER_SPEED = 512
     WHACK_HIGH = 110
@@ -148,11 +74,11 @@ def whack_a_mole(webdata):
     if int(webdata[GRIP]) == 0:
         butopenclose = 0
 
-
-def kilo_grip(conn, webdata):
+def kilo_grip(serial_connection, conn, webdata):
     #TODO: Een stand maken waarij je weet dat je de kilo gripper hebt
     global butopenclose
     global flag
+
     if int(webdata[GRIP]) == 1:
         if butopenclose == 0:
             if flag == 1:
@@ -165,8 +91,7 @@ def kilo_grip(conn, webdata):
     if int(webdata[GRIP]) == 0:
         butopenclose = 0
 
-
-def scissors_grip(webdata):
+def scissors_grip(serial_connection, webdata):
     #TODO: This
     global flag
     global butopenclose
@@ -192,29 +117,29 @@ def lights():
     print('lights on off')
 
 
-def pinch_grip(conn, webdata):
+def pinch_grip(serial_connection, conn, webdata):
     if webdata[GRIPPER_HEAD_TYPE] == MARKER:
         whack_a_mole(webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
-        kilo_grip(conn, webdata)
+        kilo_grip(serial_connection, conn, webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
         scissors_grip(webdata)
     else:
         scissors_grip(webdata)
 
 
-def handheld_control(conn, webdata, speed, trans_speed, pwr):
+def handheld_control(serial_connection, conn, webdata, speed, trans_speed, pwr):
     #TODO: Check of het standje pen is of niet(zo wel dan zijn er maar 3 motors en anders 5)
     if webdata[GRIPPER_HEAD_TYPE] == MARKER:
-        pen_motors_control(conn, webdata, speed, trans_speed, pwr)
+        pen_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr)
     else:
-        all_motors_control(conn, webdata, speed, trans_speed, pwr)
+        all_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr)
 
 
-def all_motors_control(conn, webdata, speed, trans_speed, pwr):
+def all_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr):
     pos = 0
     try:
-        pinch_grip(conn, webdata)
+        pinch_grip(serial_connection, conn, webdata)
 
         for value in webdata[VERTICAL_RJOY:VERTICAL_LJOY + 1]:
             if pos == 2:
@@ -239,14 +164,14 @@ def all_motors_control(conn, webdata, speed, trans_speed, pwr):
             print("Motor: " + str(MOTORS[pos]) + " not connected.")
             print("Suggestion: Selcect different gripperhead in: Settings - Gripper.")
         else:
-            print("Handheld_Control_Error: " + str(ex) + " Motor: " + str(MOTORS[pos]))
+            print("Controls.Handheld_Control_Error: " + str(ex) + " Motor: " + str(MOTORS[pos]))
         conn.close()
 
 
-def pen_motors_control(conn, webdata, speed, trans_speed, pwr):
+def pen_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr):
     pos = 0
     try:
-        pinch_grip(conn, webdata)
+        pinch_grip(serial_connection, conn, webdata)
         for value in webdata[VERTICAL_RJOY:HORIZONTAL_RJOY + 1]:
             if value > 2000:
                 max = 1020
@@ -265,78 +190,23 @@ def pen_motors_control(conn, webdata, speed, trans_speed, pwr):
         conn.close()
 
 
-def autonomous_control(conn, webdata, speed, trans_speed, pwr):
+def autonomous_control(serial_connection, conn, webdata, speed, trans_speed, pwr, img):
     #TODO: This
-
 
     color_mode = webdata[COLOR]
     contour_mode = webdata[GRIPPER_HEAD_TYPE]
-    
     if webdata[GRIPPER_HEAD_TYPE] == MARKER:
         #TODO: whack a mole autonoom maken
-        whack_a_mole()
+        whack_a_mole(serial_connection, webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
         #TODO: kilo grip autonoom maken
-        kilo_grip(conn, webdata)
+        kilo_grip(serial_connection, conn, webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
-        contour.color_contouring(False, 'scissors', color_mode)
+        contour.color_contouring(False, 'scissors', color_mode, img)
 
     try:
-        
-        contour.color_contouring(False, contour_mode, color_mode)
+        contour.color_contouring(False, contour_mode, color_mode, img)
     except (Exception) as ex:
         print("Autonomous_Control_Error: " + str(ex))
         #conn.send("Autonomous_Control_Error".encode())
         conn.close()
-
-
-
-
-
-
-    #-- Main function
-def main():
-    s.bind((HOST, PORT))
-    wait(0.01)
-    s.listen()
-    wait(0.01)
-
-    flag = 0
-    butopenclose = 0
-    while(True):
-        #-- Getting data from webserver --#
-        signal.signal(signal.SIGINT, signal_handler)
-        conn, addr = s.accept()
-        txt = conn.recv(1024)
-        txt2 = txt.decode()
-        print(txt2)
-        webdata = txt2.split(",")
-        webdata = [int(value) for value in webdata]
-
-        speed = int(webdata[SPEED_MODE])
-        trans_speed = int(webdata[TRANSLATION_SPEED_MODE])
-        pwr = int(webdata[POWER])
-
-        #-- Functions --#
-        if webdata[AUTONOMOUS] == 1:
-            autonomous_control(conn, webdata, speed, trans_speed, pwr)
-        else:
-            handheld_control(conn, webdata, speed, trans_speed, pwr)
-
-        if webdata[RASP_ON_OFF] == 1:
-            stop_rasp(conn)
-
-        if webdata[LIGHT] == 1:
-            lights()
-
-        if webdata[SEND_SERVO_DATA] > 0:
-            read_and_send_servo_info(conn, webdata, speed, trans_speed)
-
-
-
-if __name__ == "__main__":
-    main()
-
-serial_connection.close()
-
-
