@@ -38,10 +38,10 @@ for _ in range(100):
         break
 
     # Undistort the frame
-    dst = cv.undistort(frame, mtx, dist, None, newcameramtx)
+    #dst = cv.undistort(frame, mtx, dist, None, newcameramtx)
 
     # Convert to grayscale
-    gray = cv.cvtColor(dst, cv.COLOR_BGR2GRAY)
+    gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
     # Find the chessboard corners
     ret, corners = cv.findChessboardCorners(gray, pattern_size, None)
@@ -65,6 +65,7 @@ for _ in range(100):
 
     # Display the frames
     cv.imshow('Chessboard and Undistorted Frame', frame)
+    #cv.imshow('dst', dst)
     cv.waitKey(10)
     # Exit the loop on 'ESC' key press
     if cv.waitKey(1) == 27:  # ESC key
