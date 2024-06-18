@@ -34,7 +34,7 @@ def click_event(event, x, y, flags, params):
         real_world_coords = params.convert_coordinates([(x, y)])
         print(f"Clicked Coordinates: ({x}, {y}) -> Real World Coordinates: {real_world_coords}")
         shoulder, elbow = angle_calculator.main(real_world_coords[0][0], real_world_coords[0][1])
-        client.send_arm_angles_to_robot(shoulder, -elbow)
+        client.send_arm_angles_to_robot(shoulder, -elbow, 45)
         print(f"Shoulder: {shoulder}, Elbow: {elbow}")
 
 import cv2 as cv
@@ -138,7 +138,6 @@ if __name__ == "__main__":
         [0, 219]
     ]
     # Initialize the transformer with the conversion rate
-    calibration_data_path = 'calibration_data.npz'
-    transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate, calibration_data_path)
+    transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate)
 
     color_contouring(True, transformer)

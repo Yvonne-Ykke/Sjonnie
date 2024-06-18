@@ -45,7 +45,7 @@ def _on_click(event):
         # If the angles are valid, move the arm to the new position
         if (shoulder_angle is not None) and (elbow_angle is not None):
             shoulder_angle_servo = angle_calculator.convert_to_servo_angle(shoulder_angle)
-            client.send_arm_angles_to_robot(shoulder_angle_servo, -elbow_angle)
+            client.send_arm_angles_to_robot(shoulder_angle_servo, -elbow_angle, 45)
 
             # Convert angles to radians
             shoulder_angle_rad = np.radians(shoulder_angle)
