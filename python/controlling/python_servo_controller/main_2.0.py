@@ -175,9 +175,6 @@ def main():
             if webdata[RASP_ON_OFF] == 1:
                 stop_rasp(conn)
 
-            if webdata[LIGHT] == 1:
-                controls.lights()
-
             if webdata[SEND_SERVO_DATA] > 0:
                 read_and_send_servo_info(conn, webdata, speed, trans_speed)
 

@@ -11,6 +11,7 @@ import threading
 
 sys.path.append('../../computer_vision/')
 import contour
+import main
 
 #-- Constants --#              --------------------------------
 BENEDEN = 1023
@@ -34,7 +35,7 @@ SPEED_MODE = 0
 TRANSLATION_SPEED_MODE = 1
 POWER = 2
 AUTONOMOUS = 3
-LIGHT = 4
+AUTO_MODE = 4
 VERTICAL_RJOY = 5
 HORIZONTAL_RJOY = 6
 HORIZONTAL_LJOY = 7
@@ -50,35 +51,30 @@ flag = 0
 butopenclose = 0
 
 def whack_a_mole(serial_connection, webdata):
-    #TODO: Whack a mole maken
-    #TODO: Whack a mole maken
-    SUPER_SPEED = 512
+    WHACK_SPEED = 512
     WHACK_HIGH = 110
     WHACK_LOW = 0
     global flag
     global butopenclose
-
     if int(webdata[GRIP]) == 1:
         if butopenclose == 0:
             if flag == 1:
-                serial_connection.goto(TRANS, WHACK_LOW, SUPER_SPEED, degrees=False)
+                serial_connection.goto(TRANS, WHACK_LOW, WHACK_SPEED, degrees=False)
                 wait(0.1)
-                serial_connection.goto(TRANS, WHACK_HIGH, SUPER_SPEED, degrees=False)
+                serial_connection.goto(TRANS, WHACK_HIGH, WHACK_SPEED, degrees=False)
                 flag = 0
             elif flag == 0:
-                serial_connection.goto(TRANS, WHACK_LOW, SUPER_SPEED, degrees=False)
+                serial_connection.goto(TRANS, WHACK_LOW, WHACK_SPEED, degrees=False)
                 wait(0.1)
-                serial_connection.goto(TRANS, WHACK_HIGH, SUPER_SPEED, degrees=False)
+                serial_connection.goto(TRANS, WHACK_HIGH, WHACK_SPEED, degrees=False)
                 flag = 1
             butopenclose += 1
     if int(webdata[GRIP]) == 0:
         butopenclose = 0
 
 def kilo_grip(serial_connection, conn, webdata):
-    #TODO: Een stand maken waarij je weet dat je de kilo gripper hebt
     global butopenclose
     global flag
-
     if int(webdata[GRIP]) == 1:
         if butopenclose == 0:
             if flag == 1:
@@ -92,10 +88,8 @@ def kilo_grip(serial_connection, conn, webdata):
         butopenclose = 0
 
 def scissors_grip(serial_connection, webdata):
-    #TODO: This
     global flag
     global butopenclose
-
     if int(webdata[GRIP]) == 1:
         if butopenclose == 0:
             if flag == 1:
@@ -107,40 +101,19 @@ def scissors_grip(serial_connection, webdata):
             butopenclose += 1
     if int(webdata[GRIP]) == 0:
         butopenclose = 0
-    
-
-def lights():
-    #TODO: GPIO PIN HIGH AND OR LOW
-    GPIO.setup(20,GPIO.OUT)
-    GPIO.output(20,GPIO.HIGH)
-
-    print('lights on off')
-
 
 def pinch_grip(serial_connection, conn, webdata):
     if webdata[GRIPPER_HEAD_TYPE] == MARKER:
-        whack_a_mole(serial_connecion, webdata)
+        whack_a_mole(serial_connection, webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
         kilo_grip(serial_connection, conn, webdata)
     elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
         scissors_grip(serial_connection, webdata)
-    else:
-        scissors_grip(webdata)
-
-
-def handheld_control(serial_connection, conn, webdata, speed, trans_speed, pwr):
-    #TODO: Check of het standje pen is of niet(zo wel dan zijn er maar 3 motors en anders 5)
-    if webdata[GRIPPER_HEAD_TYPE] == MARKER:
-        pen_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr)
-    else:
-        all_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr)
-
 
 def all_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr):
     pos = 0
     try:
         pinch_grip(serial_connection, conn, webdata)
-
         for value in webdata[VERTICAL_RJOY:VERTICAL_LJOY + 1]:
             if pos == 2:
                 speed *= SPEED_ROTATION
@@ -164,9 +137,8 @@ def all_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr
             print("Motor: " + str(MOTORS[pos]) + " not connected.")
             print("Suggestion: Selcect different gripperhead in: Settings - Gripper.")
         else:
-            print("Controls.Handheld_Control_Error: " + str(ex) + " Motor: " + str(MOTORS[pos]))
+            print("A_M_Controls.Handheld_Control_Error: " + str(ex) + " Motor: " + str(MOTORS[pos]))
         conn.close()
-
 
 def pen_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr):
     pos = 0
@@ -185,28 +157,41 @@ def pen_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr
             pos += 1
 
     except (Exception) as ex:
-        print("Handheld_Control_Error: " + str(ex) + " Motor: " + str(PEN_MOTORS[pos]))
-        #conn.send("Handheld_Control_Error".encode())
+        print("PEN_M_Controls.Handheld_Control_Error: " + str(ex) + " Motor: " + str(PEN_MOTORS[pos]))
         conn.close()
-
 
 def autonomous_control(serial_connection, conn, webdata, speed, trans_speed, pwr, img):
-    #TODO: This
-
     color_mode = webdata[COLOR]
     contour_mode = webdata[GRIPPER_HEAD_TYPE]
-    if webdata[GRIPPER_HEAD_TYPE] == MARKER:
-        #TODO: whack a mole autonoom maken
-        whack_a_mole(serial_connection, webdata)
-    elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
-        #TODO: kilo grip autonoom maken
-        kilo_grip(serial_connection, conn, webdata)
-    elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
-        contour.color_contouring(False, 'scissors', color_mode, img)
+    #TODO = alleen contouring gebruiken ipv color wnr kan
+    if webdata[AUTO_MODE]:
+        #Dynamic mode
+        print('Dynamic mode')
+        if webdata[GRIPPER_HEAD_TYPE] == MARKER:
+            #TODO: een autonoom script aanroepen en wanneer er een stip moet komen de whack a mole functie aanroepen.
+            whack_a_mole(serial_connection, webdata)
+        elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
+            print('Autonomous error: Wrong gripper selected. Reccomended: "Pen" or "Tools"')
+        elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
+            #TODO: in contouring het goed opvangen (standen: statisch contour, dynamisch contour of individuele kleur, whackamole)
+            contour.color_contouring(False, 'scissors', color_mode, img, True)
+            #TODO: daadwerkelijk bewegen
+            #contour.contour_main(False, 'scissors', color_mode, img)
+            #TODO: wanneer knijpen moet, roep pinch grip of scissors
+    else:
+        #Static mode
+        print('Static mode')
+        color_mode = 0
+        contour.color_contouring(False, 'scissors', color_mode, img, False)
 
-    try:
-        contour.color_contouring(False, contour_mode, color_mode, img)
-    except (Exception) as ex:
-        print("Autonomous_Control_Error: " + str(ex))
-        #conn.send("Autonomous_Control_Error".encode())
-        conn.close()
+
+
+def handheld_control(serial_connection, conn, webdata, speed, trans_speed, pwr):
+    if webdata[GRIPPER_HEAD_TYPE] == MARKER:
+        pen_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr)
+    else:
+        all_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr)
+
+
+
+
