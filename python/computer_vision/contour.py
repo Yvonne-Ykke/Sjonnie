@@ -207,7 +207,7 @@ def color_contouring(serial_connection, developing, detection, color, img, dynam
         if not dynamic:
             #TODO: Implement movement
             if cx != 0 and cy != 0 and angle != 0:
-                move_robot(cx, cy, angle, shape)
+                move_robot(serial_connection, cx, cy, angle, shape)
                 time.sleep(20)
             print("movement to be implemented")
 
