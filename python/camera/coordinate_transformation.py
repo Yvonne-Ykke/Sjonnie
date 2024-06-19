@@ -11,7 +11,7 @@ class CoordinateTransformer:
         self.convertion_rate = convertion_rate
         
         # Load camera calibration data
-        calibration_data = np.load('calibration_data.npz')
+        calibration_data = np.load('python\\camera\\calibration_data.npz')
         self.mtx = calibration_data['mtx']
         self.dist = calibration_data['dist']
     
