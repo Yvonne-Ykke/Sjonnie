@@ -51,7 +51,7 @@ if __name__ == "__main__":
     send_command_to_robot(RobotAction.GRIPPER_CLOSE)
     send_command_to_robot(RobotAction.GRIPPER_UP)
     
-    POS_2_X, POS_2_Y = 0, 400
+    POS_2_X, POS_2_Y = 300, 100
     shoulder_angle, elbow_angle = ac.main(POS_2_X, POS_2_Y)
     WRIST_ANGLE_2 = 90
 
