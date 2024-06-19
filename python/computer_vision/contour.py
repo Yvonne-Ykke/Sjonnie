@@ -11,6 +11,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import the modules from the movement directory
 import movement.robot_arm_parameters as robot_arm_parameters
+from movement.robot_arm import RobotArm
 import movement.angle_calculator as angle_calculator
 import movement.client as client
 
@@ -102,14 +103,14 @@ def move_robot(serial_connection, x, y, object_angle, shape):
     shoulder, elbow = angle_calculator.main(real_coords[0], real_coords[1])
     if shoulder is not None and elbow is not None:
         wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, object_angle)
-        client.send_arm_angles_to_robot(shoulder, -elbow, wrist_angle)
+        RobotArm.move_to_position(shoulder, -elbow, wrist_angle)
         time.sleep(10)
         controls.auto_grab('closed', serial_connection, spd=20)
         if shape == "straight":
             shoulder2, elbow2 = angle_calculator.main(290,-110)
         else:
             shoulder2, elbow2 = angle_calculator.main(-390,-60)
-        client.send_arm_angles_to_robot(shoulder2, -elbow2, wrist_angle)
+        RobotArm.move_to_position(shoulder2, -elbow2, wrist_angle)
         time.sleep(10)
         controls.auto_grab('open', serial_connection, spd=20)
         
