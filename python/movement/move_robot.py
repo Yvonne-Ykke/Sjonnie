@@ -1,7 +1,9 @@
 from enum import Enum
-from robot_arm import RobotArm
+from robot_arm import RobotArmpie
 import angle_calculator as ac
 import time
+
+RobotArm = RobotArmpie()
 
 class RobotAction(Enum):
     MOVE = "move"
