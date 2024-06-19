@@ -61,7 +61,17 @@ def contouring(im, developing):
                 elif 0.12 < factor < 0.3: #straight scissors
                     #print (area, factor, holes)
                     cv.drawContours(im, [cnt], -1, (0, 255, 255), 3)
-                    print("straight scissors")           
+                    print("straight scissors")     
+                x, y, w, h = cv.boundingRect(cnt)
+                cv.rectangle(im, (x, y), (x + w, y + h), (0, 0, 255), 2)
+
+                rect = cv.minAreaRect(cnt)
+                angle = rect[2]
+                if angle < -45:
+                    angle += 90
+
+                cv.putText(im, f'Angle: {angle:.2f}', (int(rect[0][0]), int(rect[0][1])),
+                        cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)      
 
     if developing:
         cv.imshow('thres', threshoog)
@@ -165,13 +175,12 @@ def color_contouring(developing, detection, color, img, dynamic):
         detect(color_name, img, mask, bgr, developing, detection)
             
     else:
-        # for color_name, mask, bgr in color_masks:
-            #TODO: only look at contour
-            contouring(img, developing)
-            if dynamic:
-                #TODO: Implement movement
-                print("movement to be implemented")
-    
+        #TODO: only look at contour
+        contouring(img, developing)
+        if dynamic:
+            #TODO: Implement movement
+            print("movement to be implemented")
+
     time.sleep(0.1)
         
     if developing:
