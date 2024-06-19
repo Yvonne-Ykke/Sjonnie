@@ -1,6 +1,5 @@
 import time
 from pyax12.connection import Connection
-import time
 
 SERVO_1 = 23
 SERVO_2 = 3
@@ -41,6 +40,10 @@ class RobotArm:
 
         while True:
             current_shoulder_angle, current_elbow_angle, current_wrist_angle = self.get_angles_from_arm()
+            if current_shoulder_angle is None or current_elbow_angle is None or current_wrist_angle is None:
+                print("Failed to get current angles. Retrying...")
+                time.sleep(1)
+                continue
 
             # Bereken PID-uitvoer
             shoulder_output = self.shoulder_pid.compute(shoulder_angle, current_shoulder_angle)
