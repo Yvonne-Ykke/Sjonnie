@@ -15,7 +15,11 @@ def send_command_to_robot(action, *args):
         with socket.create_connection(('141.252.29.70', 65001)) as client_socket:
             print("Connected to the server.")
 
-            command = f"{action.value},{','.join(map(str, args))}"
+            if len(args) == 1:
+                command = f"{action.value},{args[0]}"
+            else:
+                command = f"{action.value},{','.join(map(str, args))}"
+
             send_message(client_socket, command)
             print(f"Sent command: {command}")
 
