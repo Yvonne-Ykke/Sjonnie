@@ -15,15 +15,15 @@ class RobotArm:
                 return
             try:
                 print("serial_connection: ", serial_connection)
-                serial_connection.goto(SERVO_1, int(shoulder_angle), speed=20, degrees=True)
+                serial_connection.goto(SERVO_1, shoulder_angle, speed=20, degrees=True)
                 print("1")
-                time.sleep(0.1)  # Korte vertraging toevoegen
-                serial_connection.goto(SERVO_2, int(elbow_angle), speed=20, degrees=True)
+                time.sleep(0.3)  # Korte vertraging toevoegen
+                serial_connection.goto(SERVO_2, elbow_angle, speed=20, degrees=True)
                 print("2")
-                time.sleep(0.1)  # Korte vertraging toevoegen
-                serial_connection.goto(SERVO_3, int(wrist_angle), speed=20, degrees=True)
+                time.sleep(0.3)  # Korte vertraging toevoegen
+                serial_connection.goto(SERVO_3, wrist_angle, speed=20, degrees=True)
                 print("3")
-                time.sleep(0.1)  # Korte vertraging toevoegen
+                time.sleep(0.3)  # Korte vertraging toevoegen
     
                 print(f"Moving to position: Shoulder angle: {shoulder_angle}, Elbow angle: {elbow_angle}, Wrist angle: {wrist_angle}")
             except Exception as e:
