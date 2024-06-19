@@ -204,7 +204,7 @@ def color_contouring(serial_connection, developing, detection, color, img, dynam
             
     else:
         cx, cy, angle, shape = contouring(img, developing)
-        if dynamic:
+        if not dynamic:
             #TODO: Implement movement
             if cx != 0 and cy != 0 and angle != 0:
                 move_robot(cx, cy, angle, shape)
