@@ -27,8 +27,9 @@ class PIDController:
         return output
 
 class RobotArm:
-    def __init__(self, connection):
-        self.connection = connection
+    serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
+
+    def __init__(self):
         self.shoulder_pid = PIDController(Kp, Ki, Kd)
         self.elbow_pid = PIDController(Kp, Ki, Kd)
         self.wrist_pid = PIDController(Kp, Ki, Kd)
@@ -87,8 +88,7 @@ class RobotArm:
             return None, None, None
 
 # Initialiseer de verbinding en de robotarm
-serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
-robot_arm = RobotArm(serial_connection)
+robot_arm = RobotArm()
 
 # Voorbeeld van het verplaatsen naar een positie
 robot_arm.move_to_position(0, 0, 45)
