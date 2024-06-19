@@ -39,7 +39,7 @@ class RobotArm:
             return
 
         while True:
-            current_shoulder_angle, current_elbow_angle, current_wrist_angle = self.get_angles_from_arm()
+            current_shoulder_angle, current_elbow_angle, current_wrist_angle = self.get_angles_from_arm(self.connection)
             if current_shoulder_angle is None or current_elbow_angle is None or current_wrist_angle is None:
                 print("Failed to get current angles. Retrying...")
                 time.sleep(1)
@@ -73,7 +73,7 @@ class RobotArm:
             except Exception as e:
                 print(f"Error moving to position: {e}")
 
-    def get_angles_from_arm(self):
+    def get_angles_from_arm(self, connection):
         if not self.connection:
             print("Serial connection not established.")
             return None, None, None
