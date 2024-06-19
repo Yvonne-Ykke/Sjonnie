@@ -79,6 +79,7 @@ class RobotArm:
             return None, None, None
         try:
             shoulder_angle = self.connection.get_present_position(SERVO_1, degrees=True)
+            print(f"Shoulder angle: {shoulder_angle}")
             time.sleep(0.1)
             elbow_angle = self.connection.get_present_position(SERVO_2, degrees=True)
             time.sleep(0.1)
