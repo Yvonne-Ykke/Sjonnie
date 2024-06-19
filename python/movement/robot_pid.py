@@ -79,8 +79,11 @@ class RobotArm:
             return None, None, None
         try:
             shoulder_angle = self.connection.get_present_position(SERVO_1, degrees=True)
+            time.sleep(0.1)
             elbow_angle = self.connection.get_present_position(SERVO_2, degrees=True)
+            time.sleep(0.1)
             wrist_angle = self.connection.get_present_position(SERVO_3, degrees=True)
+            time.sleep(0.1)
             return shoulder_angle, elbow_angle, wrist_angle
         except Exception as e:
             print(f"Error getting angles: {e}")
