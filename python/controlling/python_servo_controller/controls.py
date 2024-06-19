@@ -80,14 +80,14 @@ def auto_grab(open_or_closed, serial_connection, spd=None):
     pos = CLOSED
     if open_or_closed == 'open':
         pos = OPEN    
-    serial_connection.goto(TRANS, LOW, spd, degrees=False)
+    serial_connection.goto(TRANS, LOW, 100, degrees=False)
     if serial_connection.is_moving(TRANS):
         print('Moving to low position')
         auto_grab(open_or_closed, serial_connection, spd)
     else:
-        serial_connection.goto(GRIPPER, pos, spd, degrees=False)
+        serial_connection.goto(GRIPPER, pos, 500, degrees=False)
         time.sleep(0.2)
-        serial_connection.goto(TRANS, HIGH, spd, degrees=False)
+        serial_connection.goto(TRANS, HIGH, 100, degrees=False)
 
 
 def kilo_grip(serial_connection, conn, webdata):
