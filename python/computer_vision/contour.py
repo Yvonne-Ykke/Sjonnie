@@ -22,6 +22,22 @@ import camera.wrist_rotation as wrist_rotation
 
 convertion_rate = 1.1398
 
+def curved_or_straight(img, centroid, contour, bgr):
+    result = cv.pointPolygonTest(contour, centroid, False)
+
+    if result > 0: #straight scissors
+        #print (area, factor, holes)
+        cv.drawContours(img, [contour], -1, (0, 255, 255), 3)
+        cv.putText(img, 'straight scissors', (contour[0][0][0], contour[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
+        print("straight scissors")
+    elif result < 0: #curved scissors
+        #print (area, factor, holes)
+        cv.drawContours(img, [contour], -1, (255, 0, 0), 3)
+        cv.putText(img, 'curved scissors', (contour[0][0][0], contour[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
+        print("curved scissors")
+    else:
+        print("Schaar?") 
+
 def contouring(im, developing):
 
     imgray = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
@@ -51,17 +67,12 @@ def contouring(im, developing):
                 if M["m00"] != 0:
                     cX = int(M["m10"] / M["m00"])
                     cY = int(M["m01"] / M["m00"])
-                    cv.circle(im, (cX, cY), 5, (0, 0, 255), -1)  
+                    cv.circle(im, (cX, cY), 5, (0, 0, 255), -1) 
+                
+                centroid = (cX, cY)
 
-                if 0.05 < factor < 0.12: #curved scissors
-                    #print (area, factor, holes)
-                    cv.drawContours(im, [cnt], -1, (255, 0, 0), 3)
-                    
-                    print("curved scissors")
-                elif 0.12 < factor < 0.3: #straight scissors
-                    #print (area, factor, holes)
-                    cv.drawContours(im, [cnt], -1, (0, 255, 255), 3)
-                    print("straight scissors")     
+                curved_or_straight(im, centroid, cnt, (0, 0, 255))
+                        
                 x, y, w, h = cv.boundingRect(cnt)
                 cv.rectangle(im, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
@@ -101,17 +112,9 @@ def draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing=Non
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
             cv.circle(img, (cX, cY), 5, (0, 0, 255), -1)  
-        if 0.05 < factor < 0.12: #curved scissors
-            if developing:
-                cv.drawContours(img, [cnt], -1, bgr, 3)
-                cv.putText(img, 'curved scissors', (cnt[0][0][0], cnt[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
-            print("curved scissors " + color_name)
-        elif 0.12 < factor < 0.2: #straight scissors
-            #print (area, factor, holes)
-            if developing:
-                cv.drawContours(img, [cnt], -1, bgr, 3)
-                cv.putText(img, 'straight scissors', (cnt[0][0][0], cnt[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
-            print("straight scissors " + color_name)
+        centroid = cX, cY
+
+        curved_or_straight(img, centroid, cnt, bgr)
 
         x, y, w, h = cv.boundingRect(cnt)
         cv.rectangle(img, (x, y), (x + w, y + h), bgr, 2)
