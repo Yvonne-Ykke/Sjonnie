@@ -38,8 +38,13 @@ class RobotArm:
             print("Serial connection not established.")
             return
 
+        # Check connection with each servo using ping
+        if not self.ping_servos():
+            print("Failed to ping servos. Aborting move.")
+            return
+
         while True:
-            current_shoulder_angle, current_elbow_angle, current_wrist_angle = self.get_angles_from_arm(self.connection)
+            current_shoulder_angle, current_elbow_angle, current_wrist_angle = self.get_angles_from_arm()
             if current_shoulder_angle is None or current_elbow_angle is None or current_wrist_angle is None:
                 print("Failed to get current angles. Retrying...")
                 time.sleep(1)
@@ -73,19 +78,35 @@ class RobotArm:
             except Exception as e:
                 print(f"Error moving to position: {e}")
 
-    def get_angles_from_arm(self, connection):
+    def ping_servos(self):
+        try:
+            servo1 = self.connection.ping(SERVO_1)
+            print(f"PING SERVO_1: { servo1 }")
+
+            servo2 = self.connection.ping(SERVO_2)
+            print(f"PING SERVO_2 {servo2}")
+
+            servo3 = self.connection.ping(SERVO_3)
+            print(f"PING SERVO_3 {servo3}")
+
+            return True
+        except Exception as e:
+            print(f"Error pinging servos: {e}")
+            return False
+
+    def get_angles_from_arm(self):
         if not self.connection:
             print("Serial connection not established.")
             return None, None, None
-        shoulder_angle = self.connection.get_present_position(SERVO_1, degrees=True)
-        print(f"Shoulder angle: {shoulder_angle}")
-        time.sleep(0.1)
-        elbow_angle = self.connection.get_present_position(SERVO_2, degrees=True)
-        time.sleep(0.1)
-        wrist_angle = self.connection.get_present_position(SERVO_3, degrees=True)
-        time.sleep(0.1)
-        return shoulder_angle, elbow_angle, wrist_angle
-       
+        try:
+            shoulder_angle = self.connection.get_present_position(SERVO_1, degrees=True)
+            elbow_angle = self.connection.get_present_position(SERVO_2, degrees=True)
+            wrist_angle = self.connection.get_present_position(SERVO_3, degrees=True)
+            print(f"Current angles - Shoulder: {shoulder_angle}, Elbow: {elbow_angle}, Wrist: {wrist_angle}")
+            return shoulder_angle, elbow_angle, wrist_angle
+        except Exception as e:
+            print(f"Error getting angles: {e}")
+            return None, None, None
 
 def main():
     # Initialiseer de verbinding en de robotarm
