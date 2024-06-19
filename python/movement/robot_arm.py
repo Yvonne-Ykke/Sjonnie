@@ -1,4 +1,5 @@
 from pyax12.connection import Connection
+import pyax12 
 import time
 
 SERVO_1 = 23
@@ -13,6 +14,7 @@ class RobotArm:
                 print("Serial connection not established.")
                 return
             try:
+                print("serial_connection: ", serial_connection)
                 serial_connection.goto(SERVO_1, int(shoulder_angle), speed=20, degrees=True)
                 print("1")
                 time.sleep(0.1)  # Korte vertraging toevoegen
