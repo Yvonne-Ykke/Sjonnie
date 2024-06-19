@@ -5,10 +5,10 @@ SERVO_1 = 23
 SERVO_2 = 3
 SERVO_3 = 88
 
-serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
+#serial_connection = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.01)
 
 class RobotArm:
-    def move_to_position(shoulder_angle, elbow_angle, wrist_angle):
+    def move_to_position(shoulder_angle, elbow_angle, wrist_angle, serial_connection):
             if not serial_connection:
                 print("Serial connection not established.")
                 return
