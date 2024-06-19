@@ -2,7 +2,7 @@ import subprocess
 from pyax12.connection import Connection
 from pyax12 import *
 import time
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 import signal
 import sys
 import socket
@@ -71,6 +71,23 @@ def whack_a_mole(serial_connection, webdata):
             butopenclose += 1
     if int(webdata[GRIP]) == 0:
         butopenclose = 0
+
+def auto_grab(open_or_closed, serial_connection, spd=None):
+    HIGH = 1023
+    LOW = 100
+    OPEN = 600
+    CLOSED = 350
+    pos = CLOSED
+    if open_or_closed == 'open':
+        pos = OPEN    
+    serial_connection.goto(TRANS, LOW, spd, degrees=False)
+    if serial_connection.is_moving(TRANS):
+        auto_grab()
+    else:
+        serial_connection.goto(GRIPPER, pos, spd, degrees=False)
+        time.sleep(0.2)
+        serial_connection.goto(TRANS, HIGH, spd, degrees=False)
+
 
 def kilo_grip(serial_connection, conn, webdata):
     global butopenclose
@@ -176,7 +193,7 @@ def autonomous_control(serial_connection, conn, webdata, speed, trans_speed, pwr
                 print('Autonomous error: Wrong gripper selected. Reccomended: "Pen" or "Tools"')
             elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
                 #TODO: in contouring het goed opvangen (standen: statisch contour, dynamisch contour of individuele kleur, whackamole)
-                contour.color_contouring(False, 'scissors', color_mode, img, True)
+                contour.color_contouring(serial_connection, False, 'scissors', color_mode, img, True)
                 #TODO: daadwerkelijk bewegen
                 #contour.contour_main(False, 'scissors', color_mode, img)
                 #TODO: wanneer knijpen moet, roep pinch grip of scissors

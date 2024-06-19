@@ -20,6 +20,9 @@ from camera.coordinate_transformation import CoordinateTransformer
 from camera.coordinates_check import camera_coords, real_world_coords
 import camera.wrist_rotation as wrist_rotation
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import controlling.python_servo_controller.controls as controls
+
 convertion_rate = 1.1398
 
 def curved_or_straight(img, centroid, contour, bgr):
@@ -92,41 +95,24 @@ def contouring(im, developing):
         cv.imshow('computer_vision',im)
     return cX, cY, angle, shape
 
-def auto_grab(open_or_closed, serial_connection, spd=None):
-    HIGH = 1023
-    LOW = 100
-    OPEN = 600
-    CLOSED = 350
-    pos = CLOSED
-    if open_or_closed == 'open':
-        pos = OPEN    
-    serial_connection.goto(TRANS, LOW, spd, degrees=False)
-    if serial_connection.is_moving(TRANS):
-        auto_grab()
-    else:
-        serial_connection.goto(GRIPPER, pos, spd, degrees=False)
-        wait(0.2)
-        serial_connection.goto(TRANS, HIGH, spd, degrees=False)
 
-#Ga ergens heen
-#auto_grab('open', serial_connection, spd=SPEED)
-#ga ergans anders heen
-#auto_grab(None, serial_connection, spd=SPEED)
-
-def move_robot(x, y, object_angle):
+def move_robot(serial_connection, x, y, object_angle, shape):
     transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate)
     real_coords = transformer.convert_coordinates([(x, y)])[0]
     shoulder, elbow = angle_calculator.main(real_coords[0], real_coords[1])
     if shoulder is not None and elbow is not None:
         wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, object_angle)
         client.send_arm_angles_to_robot(shoulder, -elbow, wrist_angle)
-        time.sleep(20)
+        time.sleep(10)
+        controls.auto_grab('closed', serial_connection, spd=20)
         if shape == "straight":
             shoulder2, elbow2 = angle_calculator.main(290,-110)
         else:
             shoulder2, elbow2 = angle_calculator.main(-390,-60)
         client.send_arm_angles_to_robot(shoulder2, -elbow2, wrist_angle)
-        time.sleep(20)
+        time.sleep(10)
+        controls.auto_grab('open', serial_connection, spd=20)
+        
         print(f"Shoulder: {shoulder}, Elbow: {elbow}", f"Wrist: {wrist_angle}")
     else:
         print("Unable to calculate shoulder or elbow angle.")
@@ -206,14 +192,14 @@ def detect(color_name, img, mask, bgr, developing, detection):
     return cx, cy, angle, shape
 
 
-def color_contouring(developing, detection, color, img, dynamic):
+def color_contouring(serial_connection, developing, detection, color, img, dynamic):
 
     color_masks = color_recognition.masks(img)
     if color != 0:
         color_name, mask, bgr = color_masks[color - 1]
         cx, cy ,angle, shape = detect(color_name, img, mask, bgr, developing, detection)
         if cx != 0 and cy != 0 and angle != 0:
-            move_robot(cx, cy, angle, shape)
+            move_robot(serial_connection, cx, cy, angle, shape)
             time.sleep(20)
             
     else:
