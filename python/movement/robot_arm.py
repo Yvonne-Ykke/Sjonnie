@@ -15,6 +15,7 @@ class RobotArm:
                 return
             try:
                 print("serial_connection: ", serial_connection)
+                time.sleep(0.01)
                 serial_connection.goto(SERVO_1, shoulder_angle, speed=20, degrees=True)
                 print("1")
                 time.sleep(0.3)  # Korte vertraging toevoegen
