@@ -146,7 +146,7 @@ def start_socket():
 def main():
     start_socket()
     wait(0.01)
-    cap = cv.VideoCapture(0)
+#    cap = cv.VideoCapture(0)
     wait(0.01)
     conn, addr = s.accept()
     conn.recv(1024)
@@ -164,10 +164,12 @@ def main():
             trans_speed = int(webdata[TRANSLATION_SPEED_MODE])
             pwr = int(webdata[POWER])
 
-            ret,img = cap.read()
+#            ret,img = cap.read()
 
         #-- Functions --#
             if webdata[AUTONOMOUS] == 1:
+                cap = cv.VideoCapture(0)
+                ret,img = cap.read()
                 controls.autonomous_control(serial_connection, conn, webdata, speed, trans_speed, pwr, img)
                 start_socket()
             else:

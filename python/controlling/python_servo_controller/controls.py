@@ -80,28 +80,30 @@ def auto_grab(grab_or_drop, serial_connection, spd=None):
     if grab_or_drop == 'grab':
         try:
             time.sleep(1)
-            serial_connection.goto(GRIPPER, OPEN, 500, degrees=False)
+            serial_connection.goto(GRIPPER, OPEN + 100, 500, degrees=False)
             time.sleep(1)
             serial_connection.goto(TRANS, LOW, 100, degrees=False)
-            time.sleep(1)
+            time.sleep(5)
             serial_connection.goto(GRIPPER, CLOSED, 500, degrees=False)
             time.sleep(1)
             serial_connection.goto(TRANS, HIGH, 100, degrees=False)
 
         except Exception as ex:
-            print(ex)
+            print(str(ex) + ' grab')
+            auto_grab('grab', serial_connection)
     elif grab_or_drop == 'drop':
-        try:            
+        try:
             time.sleep(1)
-            serial_connection.goto(TRANS, LOW, 100, degrees=False)
-            time.sleep(1)
+            serial_connection.goto(TRANS, LOW + 50, 100, degrees=False)
+            time.sleep(5)
             serial_connection.goto(GRIPPER, OPEN, 500, degrees=False)
             time.sleep(1)
             serial_connection.goto(TRANS, HIGH, 100, degrees=False)
             time.sleep(1)
 
         except Exception as ex:
-            print(ex)
+            print(str(ex) + ' drop')
+            auto_grab('drop', serial_connection)
 
 def kilo_grip(serial_connection, conn, webdata):
     global butopenclose
