@@ -5,7 +5,22 @@ import color_recognition
 import time
 import os
 import pathlib
+import sys
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# Import the modules from the movement directory
+import movement.robot_arm_parameters as robot_arm_parameters
+import movement.angle_calculator as angle_calculator
+import movement.client as client
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import camera.coordinate_transformation as ct
+from camera.coordinate_transformation import CoordinateTransformer
+from camera.coordinates_check import camera_coords, real_world_coords
+import camera.wrist_rotation as wrist_rotation
+
+convertion_rate = 1.1398
 
 def contouring(im, developing):
 
@@ -46,12 +61,34 @@ def contouring(im, developing):
                 elif 0.12 < factor < 0.3: #straight scissors
                     #print (area, factor, holes)
                     cv.drawContours(im, [cnt], -1, (0, 255, 255), 3)
-                    print("straight scissors")           
+                    print("straight scissors")     
+                x, y, w, h = cv.boundingRect(cnt)
+                cv.rectangle(im, (x, y), (x + w, y + h), (0, 0, 255), 2)
+
+                rect = cv.minAreaRect(cnt)
+                angle = rect[2]
+                if angle < -45:
+                    angle += 90
+
+                cv.putText(im, f'Angle: {angle:.2f}', (int(rect[0][0]), int(rect[0][1])),
+                        cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)      
 
     if developing:
         cv.imshow('thres', threshoog)
         cv.imshow('contour_vision', imgray)
         cv.imshow('computer_vision',im)
+    return cX, cY, angle
+
+def move_robot(x, y, object_angle):
+    transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate)
+    real_coords = transformer.convert_coordinates([(x, y)])[0]
+    shoulder, elbow = angle_calculator.main(real_coords[0], real_coords[1])
+    if shoulder is not None and elbow is not None:
+        wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, object_angle)
+        client.send_arm_angles_to_robot(shoulder, -elbow, wrist_angle)
+        print(f"Shoulder: {shoulder}, Elbow: {elbow}", f"Wrist: {wrist_angle}")
+    else:
+        print("Unable to calculate shoulder or elbow angle.")
 
 def draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing=None):
     if area > 500 and area < 100000:
@@ -89,8 +126,10 @@ def draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing=Non
                 cx = int(M['m10'] / M['m00'])
                 cy = int(M['m01'] / M['m00'])
                 cv.circle(img, (cx, cy), 5, (0, 255, 255), -1)
+                return cx, cy, angle
 
 def detect(color_name, img, mask, bgr, developing, detection):
+    cx,cy,angle = 0,0,0
     res = cv.bitwise_and(img,img, mask= mask)
     imgray2 = cv.cvtColor(res, cv.COLOR_HSV2BGR)
     imgray = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
@@ -116,7 +155,7 @@ def detect(color_name, img, mask, bgr, developing, detection):
             #print (child)
             if area > 500 and area < 100000:
                 if detection == "scissors":
-                    draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing)
+                    cx, cy, angle = draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing)
 
                 elif detection == "colors":
                     if 0.4 < factor < 0.7:
@@ -126,25 +165,29 @@ def detect(color_name, img, mask, bgr, developing, detection):
                         cv.putText(img, color_name, (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
                 elif detection == "target":
                     print("not yet implemented")
-
     if developing:
         cv.imshow(color_name, res)
+    if cx == 0 or cy == 0 or angle == 0:
+        print("No object detected")
+
+    return cx, cy, angle
+
 
 def color_contouring(developing, detection, color, img, dynamic):
 
     color_masks = color_recognition.masks(img)
     if color != 0:
         color_name, mask, bgr = color_masks[color - 1]
-        #FIXME: not entirely accurate
-        detect(color_name, img, mask, bgr, developing, detection)
+        cx, cy ,angle = detect(color_name, img, mask, bgr, developing, detection)
+        if cx != 0 and cy != 0 and angle != 0:
+            move_robot(cx, cy, angle)
+            time.sleep(20)
             
     else:
-        # for color_name, mask, bgr in color_masks:
-            #TODO: only look at contour
-            contouring(img, developing)
-            if dynamic:
-                #TODO: Implement movement
-                print("movement to be implemented")
+        contouring(img, developing)
+        if dynamic:
+            #TODO: Implement movement
+            print("movement to be implemented")
 
     time.sleep(0.1)
         
