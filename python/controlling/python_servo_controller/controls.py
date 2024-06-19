@@ -83,6 +83,7 @@ def auto_grab(open_or_closed, serial_connection, spd=None):
     serial_connection.goto(TRANS, LOW, 100, degrees=False)
     if serial_connection.is_moving(TRANS):
         print('Moving to low position')
+        time.sleep(0.3)
         auto_grab(open_or_closed, serial_connection, spd)
     else:
         serial_connection.goto(GRIPPER, pos, 500, degrees=False)
