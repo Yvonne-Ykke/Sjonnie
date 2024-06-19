@@ -5,7 +5,22 @@ import color_recognition
 import time
 import os
 import pathlib
+import sys
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# Import the modules from the movement directory
+import movement.robot_arm_parameters as robot_arm_parameters
+import movement.angle_calculator as angle_calculator
+import movement.client as client
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import camera.coordinate_transformation as ct
+from camera.coordinate_transformation import CoordinateTransformer
+from camera.coordinates_check import camera_coords, real_world_coords
+import camera.wrist_rotation as wrist_rotation
+
+convertion_rate = 1.1398
 
 def contouring(im, developing):
 
@@ -52,6 +67,17 @@ def contouring(im, developing):
         cv.imshow('thres', threshoog)
         cv.imshow('contour_vision', imgray)
         cv.imshow('computer_vision',im)
+
+def move_robot(x, y, object_angle):
+    transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate)
+    real_coords = transformer.convert_coordinates([(x, y)])[0]
+    shoulder, elbow = angle_calculator.main(real_coords[0], real_coords[1])
+    if shoulder is not None and elbow is not None:
+        wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, object_angle)
+        client.send_arm_angles_to_robot(shoulder, -elbow, wrist_angle)
+        print(f"Shoulder: {shoulder}, Elbow: {elbow}", f"Wrist: {wrist_angle}")
+    else:
+        print("Unable to calculate shoulder or elbow angle.")
 
 def draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing=None):
     if area > 500 and area < 100000:
@@ -145,7 +171,7 @@ def color_contouring(developing, detection, color, img, dynamic):
             if dynamic:
                 #TODO: Implement movement
                 print("movement to be implemented")
-
+    
     time.sleep(0.1)
         
     if developing:
