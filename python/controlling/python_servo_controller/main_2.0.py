@@ -145,8 +145,9 @@ def start_socket():
 
 def main():
     start_socket()
-
+    wait(0.01)
     cap = cv.VideoCapture(0)
+    wait(0.01)
     conn, addr = s.accept()
     conn.recv(1024)
     flag = 0
