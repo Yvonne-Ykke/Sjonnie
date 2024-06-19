@@ -110,6 +110,7 @@ def move_robot(serial_connection, x, y, object_angle, shape):
             shoulder2, elbow2 = angle_calculator.main(290,-110)
         else:
             shoulder2, elbow2 = angle_calculator.main(-390,-60)
+        time.sleep(10)
         RobotArm.move_to_position(shoulder2, -elbow2, wrist_angle, serial_connection)
         time.sleep(5)
         controls.auto_grab('drop', serial_connection, spd=20)      
