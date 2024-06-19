@@ -116,5 +116,8 @@ def main():
     # Voorbeeld van het verplaatsen naar een positie
     robot_arm.move_to_position(0, 0, 45)
 
+    serial_connection.close()
+    print("Connection closed.")
+
 if __name__ == "__main__":
     main()
