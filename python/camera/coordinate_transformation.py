@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import os
+import sys
 
 class CoordinateTransformer:
     def __init__(self, camera_coords, real_world_coords, convertion_rate):
@@ -9,6 +11,7 @@ class CoordinateTransformer:
         self.convertion_rate = convertion_rate
         
         # Load camera calibration data
+        sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
         calibration_data = np.load('calibration_data.npz')
         self.mtx = calibration_data['mtx']
         self.dist = calibration_data['dist']
