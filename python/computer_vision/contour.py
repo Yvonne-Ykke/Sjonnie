@@ -86,6 +86,10 @@ def move_robot(x, y, object_angle):
     if shoulder is not None and elbow is not None:
         wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, object_angle)
         client.send_arm_angles_to_robot(shoulder, -elbow, wrist_angle)
+        time.sleep(20)
+        shoulder2, elbow2 = angle_calculator.main(290,-110)
+        client.send_arm_angles_to_robot(shoulder2, -elbow2, wrist_angle)
+        time.sleep(20)
         print(f"Shoulder: {shoulder}, Elbow: {elbow}", f"Wrist: {wrist_angle}")
     else:
         print("Unable to calculate shoulder or elbow angle.")
