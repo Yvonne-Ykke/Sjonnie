@@ -15,7 +15,7 @@ import movement.robot_arm_parameters as robot_arm_parameters
 import movement.angle_calculator as angle_calculator
 import movement.client as client
 convertion_rate = 1.1398
-convertion_rate = 1.2
+#convertion_rate = 1.2
 
 # Callback function for trackbars
 def nothing(x):
@@ -90,7 +90,10 @@ def color_contouring(developing, transformer):
                         rect = cv.minAreaRect(cnt)
                         box = cv.boxPoints(rect)
                         box = np.int0(box)
-                        angle = rect[2]
+                        objectAngle = rect[2]
+                        width, height = rect[1]
+                        if width < height:
+                            objectAngle = objectAngle + 90  # Adjust the angle
                         # print(f"Angle: {angle} degrees")
 
                         # Draw the contour, centroid, and angle
@@ -98,7 +101,7 @@ def color_contouring(developing, transformer):
                         cv.circle(img, (cX, cY), 5, (0, 0, 255), -1)  # Draw centroid in red
                         cv.drawContours(img, [box], 0, (255, 0, 0), 2)  # Draw rectangle in blue
                         cv.putText(img, f"{real_world_coords[0][0]:.2f}, {real_world_coords[0][1]:.2f}", (cX, cY), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv.LINE_AA)
-                        cv.putText(img, f"Angle: {angle:.2f}", (cX + 50, cY), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1, cv.LINE_AA)
+                        cv.putText(img, f"Angle: {objectAngle:.2f}", (cX + 50, cY), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1, cv.LINE_AA)
 
                         # Check if the 's' key is pressed
                         key = cv.waitKey(1)
@@ -106,7 +109,7 @@ def color_contouring(developing, transformer):
                             # Send the robot arm coordinates
                             shoulder, elbow = angle_calculator.main(real_world_coords[0][0], real_world_coords[0][1])
                             if elbow is not None:
-                                wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, angle)
+                                wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, objectAngle)
                                 client.send_arm_angles_to_robot(shoulder, -elbow, wrist_angle)
                                 # print(f"Shoulder: {shoulder}, Elbow: {elbow}, wrist_angle: {wrist_angle}")
                                 time.sleep(1)  # Delay for one second
