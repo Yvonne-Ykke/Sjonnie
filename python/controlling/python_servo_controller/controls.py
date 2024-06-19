@@ -72,32 +72,33 @@ def whack_a_mole(serial_connection, webdata):
     if int(webdata[GRIP]) == 0:
         butopenclose = 0
 
-def auto_grab(open_or_close, serial_connection, spd=None):
+def auto_grab(grab_or_drop, serial_connection, spd=None):
     HIGH = 1023
     LOW = 100
     OPEN = 600
     CLOSED = 350
-    if open_or_close == 'open':
+    if grab_or_drop == 'grab':
         try:
-            time.sleep(0.01)
-            serial_connection.goto(TRANS, LOW, 100, degrees=False)
-            time.sleep(1.5)
+            time.sleep(1)
             serial_connection.goto(GRIPPER, OPEN, 500, degrees=False)
-            time.sleep(0.01)
+            time.sleep(1)
+            serial_connection.goto(TRANS, LOW, 100, degrees=False)
+            time.sleep(1)
+            serial_connection.goto(GRIPPER, CLOSED, 500, degrees=False)
+            time.sleep(1)
             serial_connection.goto(TRANS, HIGH, 100, degrees=False)
 
         except Exception as ex:
             print(ex)
-    elif open_or_close == 'close':
-        try:
-            time.sleep(0.01)
-            serial_connection.goto(GRIPPER, OPEN, 500, degrees=False)
-            time.sleep(0.01)
+    elif grab_or_drop == 'drop':
+        try:            
+            time.sleep(1)
             serial_connection.goto(TRANS, LOW, 100, degrees=False)
-            time.sleep(1.5)
-            serial_connection.goto(GRIPPER, CLOSE, 500, degrees=False)
-            time.sleep(0.01)
+            time.sleep(1)
+            serial_connection.goto(GRIPPER, OPEN, 500, degrees=False)
+            time.sleep(1)
             serial_connection.goto(TRANS, HIGH, 100, degrees=False)
+            time.sleep(1)
 
         except Exception as ex:
             print(ex)
@@ -206,11 +207,7 @@ def autonomous_control(serial_connection, conn, webdata, speed, trans_speed, pwr
             elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
                 print('Autonomous error: Wrong gripper selected. Reccomended: "Pen" or "Tools"')
             elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
-                #TODO: in contouring het goed opvangen (standen: statisch contour, dynamisch contour of individuele kleur, whackamole)
                 contour.color_contouring(serial_connection, False, 'scissors', color_mode, img, True)
-                #TODO: daadwerkelijk bewegen
-                #contour.contour_main(False, 'scissors', color_mode, img)
-                #TODO: wanneer knijpen moet, roep pinch grip of scissors
         else:
             #Static mode
             print('Static mode')

@@ -104,17 +104,17 @@ def move_robot(serial_connection, x, y, object_angle, shape):
     if shoulder is not None and elbow is not None:
         wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, object_angle)
         RobotArm.move_to_position(shoulder, -elbow, wrist_angle, serial_connection)
-        time.sleep(10)
-        controls.auto_grab('closed', serial_connection, spd=20)
+        time.sleep(5)
+        controls.auto_grab('grab', serial_connection, spd=20)
         if shape == "straight":
             shoulder2, elbow2 = angle_calculator.main(290,-110)
         else:
             shoulder2, elbow2 = angle_calculator.main(-390,-60)
         RobotArm.move_to_position(shoulder2, -elbow2, wrist_angle, serial_connection)
-        time.sleep(10)
-        controls.auto_grab('open', serial_connection, spd=20)
-        
+        time.sleep(5)
+        controls.auto_grab('drop', serial_connection, spd=20)      
         print(f"Shoulder: {shoulder}, Elbow: {elbow}", f"Wrist: {wrist_angle}")
+        time.sleep(5)
     else:
         print("Unable to calculate shoulder or elbow angle.")
 
@@ -201,7 +201,7 @@ def color_contouring(serial_connection, developing, detection, color, img, dynam
         cx, cy ,angle, shape = detect(color_name, img, mask, bgr, developing, detection)
         if cx != 0 and cy != 0 and angle != 0:
             move_robot(serial_connection, cx, cy, angle, shape)
-            time.sleep(20)
+            time.sleep(2)
             
     else:
         cx, cy, angle, shape = contouring(img, developing)
@@ -209,7 +209,7 @@ def color_contouring(serial_connection, developing, detection, color, img, dynam
             #TODO: Implement movement
             if cx != 0 and cy != 0 and angle != 0:
                 move_robot(serial_connection, cx, cy, angle, shape)
-                time.sleep(20)
+                time.sleep(2)
             print("movement to be implemented")
 
     time.sleep(0.1)

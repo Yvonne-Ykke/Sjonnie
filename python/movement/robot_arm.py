@@ -15,35 +15,35 @@ class RobotArm:
                 return
             try:
                 print("serial_connection: ", serial_connection)
-                time.sleep(0.3)
-                serial_connection.goto(SERVO_1, shoulder_angle, speed=20, degrees=True)
+                time.sleep(1)
+                serial_connection.goto(SERVO_1, shoulder_angle, speed=25, degrees=True)
                 print("1")
-                time.sleep(0.3)  # Korte vertraging toevoegen
-                serial_connection.goto(SERVO_2, elbow_angle, speed=20, degrees=True)
+                time.sleep(1)  
+                serial_connection.goto(SERVO_2, elbow_angle, speed=25, degrees=True)
                 print("2")
-                time.sleep(0.3)  # Korte vertraging toevoegen
-                serial_connection.goto(SERVO_3, wrist_angle, speed=20, degrees=True)
+                time.sleep(1)  
+                serial_connection.goto(SERVO_3, wrist_angle, speed=25, degrees=True)
                 print("3")
-                time.sleep(0.3)  # Korte vertraging toevoegen
+                time.sleep(1)
     
                 print(f"Moving to position: Shoulder angle: {shoulder_angle}, Elbow angle: {elbow_angle}, Wrist angle: {wrist_angle}")
             except Exception as e:
                 print(f"Error moving to position: {e}")
 
-    def get_angles_from_arm():
-        if not serial_connection:
-            print("Serial connection not established.")
-            return None, None
-        try:
-            shoulder_angle = serial_connection.get_present_position(SERVO_1, degrees=True)
-            elbow_angle = serial_connection.get_present_position(SERVO_2, degrees=True)
-            wrist_angle = serial_connection.get_present_position(SERVO_3, degrees=True)
-            return shoulder_angle, elbow_angle, wrist_angle
-        except Exception as e:
-            print(f"Error getting angles: {e}")
-            return None, None
+    # def get_angles_from_arm():
+    #     if not serial_connection:
+    #         print("Serial connection not established.")
+    #         return None, None
+    #     try:
+    #         shoulder_angle = serial_connection.get_present_position(SERVO_1, degrees=True)
+    #         elbow_angle = serial_connection.get_present_position(SERVO_2, degrees=True)
+    #         wrist_angle = serial_connection.get_present_position(SERVO_3, degrees=True)
+    #         return shoulder_angle, elbow_angle, wrist_angle
+    #     except Exception as e:
+    #         print(f"Error getting angles: {e}")
+    #         return None, None
 
-    def close_connection():
-        if serial_connection:
-            serial_connection.close()
-            print("Serial connection closed.")
+    # def close_connection():
+    #     if serial_connection:
+    #         serial_connection.close()
+    #         print("Serial connection closed.")
