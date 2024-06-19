@@ -72,24 +72,35 @@ def whack_a_mole(serial_connection, webdata):
     if int(webdata[GRIP]) == 0:
         butopenclose = 0
 
-def auto_grab(open_or_closed, serial_connection, spd=None):
+def auto_grab(open_or_close, serial_connection, spd=None):
     HIGH = 1023
     LOW = 100
     OPEN = 600
     CLOSED = 350
-    pos = CLOSED
-    if open_or_closed == 'open':
-        pos = OPEN    
-    serial_connection.goto(TRANS, LOW, 100, degrees=False)
-    if serial_connection.is_moving(TRANS):
-        print('Moving to low position')
-        time.sleep(0.3)
-        auto_grab(open_or_closed, serial_connection, spd)
-    else:
-        serial_connection.goto(GRIPPER, pos, 500, degrees=False)
-        time.sleep(0.2)
-        serial_connection.goto(TRANS, HIGH, 100, degrees=False)
+    if open_or_close == 'open':
+        try:
+            time.sleep(0.01)
+            serial_connection.goto(TRANS, LOW, 100, degrees=False)
+            time.sleep(1.5)
+            serial_connection.goto(GRIPPER, OPEN, 500, degrees=False)
+            time.sleep(0.01)
+            serial_connection.goto(TRANS, HIGH, 100, degrees=False)
 
+        except Exception as ex:
+            print(ex)
+    elif open_or_close == 'close':
+        try:
+            time.sleep(0.01)
+            serial_connection.goto(GRIPPER, OPEN, 500, degrees=False)
+            time.sleep(0.01)
+            serial_connection.goto(TRANS, LOW, 100, degrees=False)
+            time.sleep(1.5)
+            serial_connection.goto(GRIPPER, CLOSE, 500, degrees=False)
+            time.sleep(0.01)
+            serial_connection.goto(TRANS, HIGH, 100, degrees=False)
+
+        except Exception as ex:
+            print(ex)
 
 def kilo_grip(serial_connection, conn, webdata):
     global butopenclose
@@ -184,7 +195,8 @@ def autonomous_control(serial_connection, conn, webdata, speed, trans_speed, pwr
 
         color_mode = webdata[COLOR]
         contour_mode = webdata[GRIPPER_HEAD_TYPE]
-        #TODO = alleen contouring gebruiken ipv color wnr kan
+        time.sleep(0.01)
+        serial_connection.goto(TRANS, 1023, 100, degrees=False)
         if webdata[AUTO_MODE]:
             #Dynamic mode
             print('Dynamic mode')
