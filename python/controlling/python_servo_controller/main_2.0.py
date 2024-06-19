@@ -10,9 +10,9 @@ import cv2 as cv
 import threading
 import controls
 import struct
-import fcntl
+#import fcntl
 
-sys.path.append('../../computer_vision/')
+sys.path.append('/home/sjonnie/git/Sjonnie/python/computer_vision')
 import contour
 
 GPIO.setwarnings(False)
@@ -178,6 +178,10 @@ def main():
 
             if webdata[SEND_SERVO_DATA] > 0:
                 read_and_send_servo_info(conn, webdata, speed, trans_speed)
+
+            if webdata[POWER] == 150:
+                print('"Gripper Force = Power" terwijl er geen force modus is dus programma sluit af.')
+                raise('Programma sluit af')
 
 
 if __name__ == "__main__":

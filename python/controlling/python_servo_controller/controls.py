@@ -9,7 +9,7 @@ import socket
 import cv2 as cv
 import threading
 
-sys.path.append('../../computer_vision/')
+sys.path.append('/home/sjonnie/git/Sjonnie/python/computer_vision')
 import contour
 import main
 
@@ -161,30 +161,33 @@ def pen_motors_control(serial_connection, conn, webdata, speed, trans_speed, pwr
         conn.close()
 
 def autonomous_control(serial_connection, conn, webdata, speed, trans_speed, pwr, img):
-    color_mode = webdata[COLOR]
-    contour_mode = webdata[GRIPPER_HEAD_TYPE]
-    #TODO = alleen contouring gebruiken ipv color wnr kan
-    if webdata[AUTO_MODE]:
-        #Dynamic mode
-        print('Dynamic mode')
-        if webdata[GRIPPER_HEAD_TYPE] == MARKER:
-            #TODO: een autonoom script aanroepen en wanneer er een stip moet komen de whack a mole functie aanroepen.
-            whack_a_mole(serial_connection, webdata)
-        elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
-            print('Autonomous error: Wrong gripper selected. Reccomended: "Pen" or "Tools"')
-        elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
-            #TODO: in contouring het goed opvangen (standen: statisch contour, dynamisch contour of individuele kleur, whackamole)
-            contour.color_contouring(False, 'scissors', color_mode, img, True)
-            #TODO: daadwerkelijk bewegen
-            #contour.contour_main(False, 'scissors', color_mode, img)
-            #TODO: wanneer knijpen moet, roep pinch grip of scissors
+    if img is not None:
+
+        color_mode = webdata[COLOR]
+        contour_mode = webdata[GRIPPER_HEAD_TYPE]
+        #TODO = alleen contouring gebruiken ipv color wnr kan
+        if webdata[AUTO_MODE]:
+            #Dynamic mode
+            print('Dynamic mode')
+            if webdata[GRIPPER_HEAD_TYPE] == MARKER:
+                #TODO: een autonoom script aanroepen en wanneer er een stip moet komen de whack a mole functie aanroepen.
+                whack_a_mole(serial_connection, webdata)
+            elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
+                print('Autonomous error: Wrong gripper selected. Reccomended: "Pen" or "Tools"')
+            elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
+                #TODO: in contouring het goed opvangen (standen: statisch contour, dynamisch contour of individuele kleur, whackamole)
+                contour.color_contouring(False, 'scissors', color_mode, img, True)
+                #TODO: daadwerkelijk bewegen
+                #contour.contour_main(False, 'scissors', color_mode, img)
+                #TODO: wanneer knijpen moet, roep pinch grip of scissors
+        else:
+            #Static mode
+            print('Static mode')
+            color_mode = 0
+            contour.color_contouring(False, 'scissors', color_mode, img, False)
     else:
-        #Static mode
-        print('Static mode')
-        color_mode = 0
-        contour.color_contouring(False, 'scissors', color_mode, img, False)
-
-
+        print('Autonomous_mode error: Image is none')
+        raise('Image_None Error')
 
 def handheld_control(serial_connection, conn, webdata, speed, trans_speed, pwr):
     if webdata[GRIPPER_HEAD_TYPE] == MARKER:

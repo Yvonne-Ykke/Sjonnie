@@ -92,7 +92,28 @@ def contouring(im, developing):
         cv.imshow('computer_vision',im)
     return cX, cY, angle, shape
 
-def move_robot(x, y, object_angle, shape):
+def auto_grab(open_or_closed, serial_connection, spd=None):
+    HIGH = 1023
+    LOW = 100
+    OPEN = 600
+    CLOSED = 350
+    pos = CLOSED
+    if open_or_closed == 'open':
+        pos = OPEN    
+    serial_connection.goto(TRANS, LOW, spd, degrees=False)
+    if serial_connection.is_moving(TRANS):
+        auto_grab()
+    else:
+        serial_connection.goto(GRIPPER, pos, spd, degrees=False)
+        wait(0.2)
+        serial_connection.goto(TRANS, HIGH, spd, degrees=False)
+
+#Ga ergens heen
+#auto_grab('open', serial_connection, spd=SPEED)
+#ga ergans anders heen
+#auto_grab(None, serial_connection, spd=SPEED)
+
+def move_robot(x, y, object_angle):
     transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate)
     real_coords = transformer.convert_coordinates([(x, y)])[0]
     shoulder, elbow = angle_calculator.main(real_coords[0], real_coords[1])
