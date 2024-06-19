@@ -49,7 +49,7 @@ def detect_color_rectangle(frame, color, min_area=500):
     return None, None
 
 # Initialize video capture
-cap = cv2.VideoCapture(0)
+#cap = cv2.VideoCapture(0)
 
 prev_center = None
 direction = ""
