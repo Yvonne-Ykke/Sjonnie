@@ -77,6 +77,7 @@ def contouring(im, developing):
         cv.imshow('thres', threshoog)
         cv.imshow('contour_vision', imgray)
         cv.imshow('computer_vision',im)
+    return cX, cY, angle
 
 def move_robot(x, y, object_angle):
     transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate)
@@ -125,8 +126,10 @@ def draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing=Non
                 cx = int(M['m10'] / M['m00'])
                 cy = int(M['m01'] / M['m00'])
                 cv.circle(img, (cx, cy), 5, (0, 255, 255), -1)
+                return cx, cy, angle
 
 def detect(color_name, img, mask, bgr, developing, detection):
+    cx,cy,angle = 0,0,0
     res = cv.bitwise_and(img,img, mask= mask)
     imgray2 = cv.cvtColor(res, cv.COLOR_HSV2BGR)
     imgray = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
@@ -152,7 +155,7 @@ def detect(color_name, img, mask, bgr, developing, detection):
             #print (child)
             if area > 500 and area < 100000:
                 if detection == "scissors":
-                    draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing)
+                    cx, cy, angle = draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing)
 
                 elif detection == "colors":
                     if 0.4 < factor < 0.7:
@@ -162,20 +165,25 @@ def detect(color_name, img, mask, bgr, developing, detection):
                         cv.putText(img, color_name, (x+w, y+h), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
                 elif detection == "target":
                     print("not yet implemented")
-
     if developing:
         cv.imshow(color_name, res)
+    if cx == 0 or cy == 0 or angle == 0:
+        print("No object detected")
+
+    return cx, cy, angle
+
 
 def color_contouring(developing, detection, color, img, dynamic):
 
     color_masks = color_recognition.masks(img)
     if color != 0:
         color_name, mask, bgr = color_masks[color - 1]
-        #FIXME: not entirely accurate
-        detect(color_name, img, mask, bgr, developing, detection)
+        cx, cy ,angle = detect(color_name, img, mask, bgr, developing, detection)
+        if cx != 0 and cy != 0 and angle != 0:
+            move_robot(cx, cy, angle)
+            time.sleep(20)
             
     else:
-        #TODO: only look at contour
         contouring(img, developing)
         if dynamic:
             #TODO: Implement movement

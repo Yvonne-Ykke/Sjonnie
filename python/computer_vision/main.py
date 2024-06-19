@@ -25,7 +25,7 @@ def main():
             print("Error: Could not read frame")
             break
 
-        contour.color_contouring(DEVELOPING, SCISSORS, 0, img, False)
+        contour.color_contouring(DEVELOPING, SCISSORS, 3, img, False)
 
 
 

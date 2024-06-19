@@ -1,7 +1,9 @@
 # main.py
-
-import coordinate_transformation as ct
-
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from camera.coordinate_transformation import CoordinateTransformer as ct
+convertion_rate = 1.1398
 # Define camera coordinates (x, y) and corresponding real-world coordinates (X, Y)
 camera_coords = [
         [313, 223],
@@ -28,7 +30,7 @@ real_world_coords = [
 ]
 
 # Initialize the transformer
-transformer = ct(camera_coords, real_world_coords)
+transformer = ct(camera_coords, real_world_coords, convertion_rate)
 
 # Get real-world coordinates from the camera
 try:
