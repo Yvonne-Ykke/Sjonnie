@@ -201,7 +201,7 @@ def autonomous_control(serial_connection, conn, webdata, speed, trans_speed, pwr
             #Static mode
             print('Static mode')
             color_mode = 0
-            contour.color_contouring(False, 'scissors', color_mode, img, False)
+            contour.color_contouring(serial_connection, False, 'scissors', color_mode, img, False)
     else:
         print('Autonomous_mode error: Image is none')
         raise('Image_None Error')
