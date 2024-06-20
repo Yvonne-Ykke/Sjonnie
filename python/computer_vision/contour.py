@@ -121,14 +121,19 @@ def contouring(im, developing):
 def move_robot(serial_connection, x, y, object_angle, shape, nx = None, ny = None):
     transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate)
     real_coords = transformer.convert_coordinates([(x, y)])[0]
-    grab_coords = transformer.convert_coordinates([nx, ny])[0]
     shoulder, elbow = angle_calculator.main(real_coords[0], real_coords[1])
-    gshoulder, gelbow = angle_calculator.main(grab_coords[0], grab_coords[1])
+    gshoulder = None
+    gelbow = None
+    if shape == "curved":
+        grab_coords = transformer.convert_coordinates([nx, ny])[0]
+        gshoulder, gelbow = angle_calculator.main(grab_coords[0], grab_coords[1])
+    
+    
     if shoulder is not None and elbow is not None:
         wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, object_angle)
         if shape == "straight":
             RobotArm.move_to_position(shoulder, -elbow, wrist_angle, serial_connection)
-        else :
+        elif shape == "curved":
             RobotArm.move_to_position(gshoulder, -gelbow, wrist_angle, serial_connection)
         time.sleep(5)
         controls.auto_grab('grab', serial_connection, spd=20)
