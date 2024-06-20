@@ -119,7 +119,7 @@ def move_robot(serial_connection, x, y, object_angle, shape):
     shoulder, elbow = angle_calculator.main(real_coords[0], real_coords[1])
     if shoulder is not None and elbow is not None:
         wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, object_angle)
-        time.sleep(10)
+        time.sleep(2)
         RobotArm.move_to_position(shoulder, -elbow, wrist_angle, serial_connection)
         time.sleep(8)
         controls.auto_grab('grab', serial_connection, spd=20)
@@ -129,12 +129,12 @@ def move_robot(serial_connection, x, y, object_angle, shape):
         else:
             shoulder2, elbow2 = angle_calculator.main(-390,-60)
             wrist_angle = 104
-        time.sleep(10)
+        time.sleep(5)
         RobotArm.move_to_position(shoulder2, -elbow2, wrist_angle, serial_connection)
         time.sleep(10)
         controls.auto_grab('drop', serial_connection, spd=20)      
         print(f"Shoulder: {shoulder}, Elbow: {elbow}", f"Wrist: {wrist_angle}")
-        time.sleep(10)
+        time.sleep(3)
     else:
         print("Unable to calculate shoulder or elbow angle.")
 

@@ -2,6 +2,7 @@ from pyax12.connection import Connection
 import pyax12 
 import time
 
+
 SERVO_1 = 23
 SERVO_2 = 3
 SERVO_3 = 88
@@ -30,7 +31,7 @@ class RobotArm:
             except Exception as e:
                 print(f"Error moving to position: {e}")
                 time.sleep(1)
-                move_to_position(shoulder_angle, elbow_angle, wrist_angle, serial_connection)
+                RobotArm.move_to_position(shoulder_angle, elbow_angle, wrist_angle, serial_connection)
 
     # def get_angles_from_arm():
     #     if not serial_connection:
