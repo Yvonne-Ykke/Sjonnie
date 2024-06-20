@@ -61,7 +61,7 @@ def curved_or_straight(img, centroid, contour, bgr):
         print("Schaar?") 
 
 def contouring(im, developing):
-    cx,cy,angle, shape = 0,0,0,None
+    cx, cy, angle, shape, ncx, ncy = 0, 0, 0, None, 0, 0
     imgray = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
     blur = cv.GaussianBlur(imgray,(3,3),0)
 
@@ -110,16 +110,26 @@ def contouring(im, developing):
         cv.imshow('thres', threshoog)
         cv.imshow('contour_vision', imgray)
         cv.imshow('computer_vision',im)
-    return cX, cY, angle, shape
+
+    if shape == "curved":
+        ncx, ncy = adjust_centroid_to_contour(centroid, cnt)
+        return cx, cy, angle, shape, ncx, ncy
+    
+    return cX, cY, angle, shape, 0, 0
 
 
-def move_robot(serial_connection, x, y, object_angle, shape):
+def move_robot(serial_connection, x, y, object_angle, shape, nx = None, ny = None):
     transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate)
     real_coords = transformer.convert_coordinates([(x, y)])[0]
+    grab_coords = transformer.convert_coordinates([nx, ny])[0]
     shoulder, elbow = angle_calculator.main(real_coords[0], real_coords[1])
+    gshoulder, gelbow = angle_calculator.main(grab_coords[0], grab_coords[1])
     if shoulder is not None and elbow is not None:
         wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, object_angle)
-        RobotArm.move_to_position(shoulder, -elbow, wrist_angle, serial_connection)
+        if shape == "straight":
+            RobotArm.move_to_position(shoulder, -elbow, wrist_angle, serial_connection)
+        else :
+            RobotArm.move_to_position(gshoulder, -gelbow, wrist_angle, serial_connection)
         time.sleep(5)
         controls.auto_grab('grab', serial_connection, spd=20)
         if shape == "straight":
@@ -164,8 +174,9 @@ def draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing=Non
                 cy = int(M['m01'] / M['m00'])
                 cv.circle(img, (cx, cy), 5, (0, 255, 255), -1)
                 if shape == "curved":
-                    cx, cy = adjust_centroid_to_contour(centroid, cnt)
-                return cx, cy, angle, shape
+                    ncx, ncy = adjust_centroid_to_contour(centroid, cnt)
+                    return cx, cy, angle, shape, ncx, ncy
+                return cx, cy, angle, shape, 0, 0
 
 def detect(color_name, img, mask, bgr, developing, detection):
     cx,cy,angle, shape = 0,0,0,None
@@ -194,7 +205,7 @@ def detect(color_name, img, mask, bgr, developing, detection):
             #print (child)
             if area > 500 and area < 100000:
                 if detection == "scissors":
-                    cx, cy, angle, shape = draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing)
+                    cx, cy, angle, shape, ncx, ncy = draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing)
 
                 elif detection == "colors":
                     if 0.4 < factor < 0.7:
@@ -209,7 +220,7 @@ def detect(color_name, img, mask, bgr, developing, detection):
     if cx == 0 or cy == 0 or angle == 0:
         print("No object detected")
 
-    return cx, cy, angle, shape
+    return cx, cy, angle, shape, ncx, ncy
 
 
 def color_contouring(serial_connection, developing, detection, color, img, dynamic):
@@ -217,17 +228,17 @@ def color_contouring(serial_connection, developing, detection, color, img, dynam
     color_masks = color_recognition.masks(img)
     if color != 0:
         color_name, mask, bgr = color_masks[color - 1]
-        cx, cy ,angle, shape = detect(color_name, img, mask, bgr, developing, detection)
+        cx, cy ,angle, shape, ncx, ncy = detect(color_name, img, mask, bgr, developing, detection)
         if cx != 0 and cy != 0 and angle != 0:
-            move_robot(serial_connection, cx, cy, angle, shape)
+            move_robot(serial_connection, cx, cy, angle, shape, ncx, ncy)
             time.sleep(2)
             
     else:
-        cx, cy, angle, shape = contouring(img, developing)
+        cx, cy, angle, shape, ncx, ncy = contouring(img, developing)
         if not dynamic:
             #TODO: Implement movement
             if cx != 0 and cy != 0 and angle != 0:
-                move_robot(serial_connection, cx, cy, angle, shape)
+                move_robot(serial_connection, cx, cy, angle, shape, ncx, ncy)
                 time.sleep(2)
             print("movement to be implemented")
 
