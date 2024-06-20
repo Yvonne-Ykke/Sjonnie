@@ -108,7 +108,7 @@ def read_and_send_servo_info(conn, webdata, spd, trns):
 
         result = ",".join(data)
         print(result)
-        conn.send(result.encode())
+        conn.sendall(result.encode())
 
     # Error handling
     except (Exception) as ex:

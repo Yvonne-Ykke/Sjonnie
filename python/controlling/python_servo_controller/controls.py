@@ -60,12 +60,12 @@ def whack_a_mole(serial_connection, webdata):
         if butopenclose == 0:
             if flag == 1:
                 serial_connection.goto(TRANS, WHACK_LOW, WHACK_SPEED, degrees=False)
-                wait(0.1)
+                time.sleep(0.1)
                 serial_connection.goto(TRANS, WHACK_HIGH, WHACK_SPEED, degrees=False)
                 flag = 0
             elif flag == 0:
                 serial_connection.goto(TRANS, WHACK_LOW, WHACK_SPEED, degrees=False)
-                wait(0.1)
+                time.sleep(0.1)
                 serial_connection.goto(TRANS, WHACK_HIGH, WHACK_SPEED, degrees=False)
                 flag = 1
             butopenclose += 1
