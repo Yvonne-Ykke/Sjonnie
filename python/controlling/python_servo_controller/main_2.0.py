@@ -188,6 +188,7 @@ def main():
                 print('"Gripper Force = Power" terwijl er geen force modus is dus programma sluit af.')
                 raise('Programma sluit af')
 
+#Hi
 
 if __name__ == "__main__":
     main()
