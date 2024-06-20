@@ -2,7 +2,7 @@ import subprocess
 from pyax12.connection import Connection
 from pyax12 import *
 import time
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 import signal
 import sys
 import socket
@@ -72,6 +72,39 @@ def whack_a_mole(serial_connection, webdata):
     if int(webdata[GRIP]) == 0:
         butopenclose = 0
 
+def auto_grab(grab_or_drop, serial_connection, spd=None):
+    HIGH = 1023
+    LOW = 100
+    OPEN = 600
+    CLOSED = 350
+    if grab_or_drop == 'grab':
+        try:
+            time.sleep(1)
+            serial_connection.goto(GRIPPER, OPEN + 100, 500, degrees=False)
+            time.sleep(1)
+            serial_connection.goto(TRANS, LOW, 100, degrees=False)
+            time.sleep(5)
+            serial_connection.goto(GRIPPER, CLOSED, 500, degrees=False)
+            time.sleep(1)
+            serial_connection.goto(TRANS, HIGH, 100, degrees=False)
+
+        except Exception as ex:
+            print(str(ex) + ' grab')
+            auto_grab('grab', serial_connection)
+    elif grab_or_drop == 'drop':
+        try:
+            time.sleep(1)
+            serial_connection.goto(TRANS, LOW + 50, 100, degrees=False)
+            time.sleep(5)
+            serial_connection.goto(GRIPPER, OPEN, 500, degrees=False)
+            time.sleep(1)
+            serial_connection.goto(TRANS, HIGH, 100, degrees=False)
+            time.sleep(1)
+
+        except Exception as ex:
+            print(str(ex) + ' drop')
+            auto_grab('drop', serial_connection)
+
 def kilo_grip(serial_connection, conn, webdata):
     global butopenclose
     global flag
@@ -96,7 +129,7 @@ def scissors_grip(serial_connection, webdata):
                 serial_connection.goto(GRIPPER, 583, SPEED_GRIPPER, degrees=False)
                 flag = 0
             elif flag == 0:
-                serial_connection.goto(GRIPPER, 350, SPEED_GRIPPER, degrees=False)
+                serial_connection.goto(GRIPPER, 380, SPEED_GRIPPER, degrees=False)
                 flag = 1
             butopenclose += 1
     if int(webdata[GRIP]) == 0:
@@ -165,7 +198,8 @@ def autonomous_control(serial_connection, conn, webdata, speed, trans_speed, pwr
 
         color_mode = webdata[COLOR]
         contour_mode = webdata[GRIPPER_HEAD_TYPE]
-        #TODO = alleen contouring gebruiken ipv color wnr kan
+        time.sleep(0.01)
+        serial_connection.goto(TRANS, 1023, 100, degrees=False)
         if webdata[AUTO_MODE]:
             #Dynamic mode
             print('Dynamic mode')
@@ -175,16 +209,12 @@ def autonomous_control(serial_connection, conn, webdata, speed, trans_speed, pwr
             elif webdata[GRIPPER_HEAD_TYPE] == CYLINDER:
                 print('Autonomous error: Wrong gripper selected. Reccomended: "Pen" or "Tools"')
             elif webdata[GRIPPER_HEAD_TYPE] == TOOLS:
-                #TODO: in contouring het goed opvangen (standen: statisch contour, dynamisch contour of individuele kleur, whackamole)
-                contour.color_contouring(False, 'scissors', color_mode, img, True)
-                #TODO: daadwerkelijk bewegen
-                #contour.contour_main(False, 'scissors', color_mode, img)
-                #TODO: wanneer knijpen moet, roep pinch grip of scissors
+                contour.color_contouring(serial_connection, False, 'scissors', color_mode, img, True)
         else:
             #Static mode
             print('Static mode')
             color_mode = 0
-            contour.color_contouring(False, 'scissors', color_mode, img, False)
+            contour.color_contouring(serial_connection, False, 'scissors', color_mode, img, False)
     else:
         print('Autonomous_mode error: Image is none')
         raise('Image_None Error')
