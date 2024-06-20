@@ -25,10 +25,12 @@ class RobotArm:
                 serial_connection.goto(SERVO_3, wrist_angle, speed=25, degrees=True)
                 print("3")
                 time.sleep(1)
-    
+
                 print(f"Moving to position: Shoulder angle: {shoulder_angle}, Elbow angle: {elbow_angle}, Wrist angle: {wrist_angle}")
             except Exception as e:
                 print(f"Error moving to position: {e}")
+                time.sleep(1)
+                move_to_position(shoulder_angle, elbow_angle, wrist_angle, serial_connection)
 
     # def get_angles_from_arm():
     #     if not serial_connection:
