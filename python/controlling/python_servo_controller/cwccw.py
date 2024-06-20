@@ -9,7 +9,7 @@ margin = True
 slope = False
 
 dyn = 88
-params = 5
+params = 3
 
 if slope:
     sc.write_data(dyn, pk.CW_COMPLIENCE_SLOPE, params)

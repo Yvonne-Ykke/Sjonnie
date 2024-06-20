@@ -11,6 +11,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import the modules from the movement directory
 import movement.robot_arm_parameters as robot_arm_parameters
+from movement.robot_arm import RobotArm
 import movement.angle_calculator as angle_calculator
 import movement.client as client
 
@@ -20,10 +21,47 @@ from camera.coordinate_transformation import CoordinateTransformer
 from camera.coordinates_check import camera_coords, real_world_coords
 import camera.wrist_rotation as wrist_rotation
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import controlling.python_servo_controller.controls as controls
+
 convertion_rate = 1.1398
 
-def contouring(im, developing):
+def adjust_centroid_to_contour(centroid, contour):
+    # Find the nearest point on the contour to the centroid
+    nearest_point = None
+    min_distance = float('inf')
+    for point in contour:
+        distance = np.linalg.norm(np.array(point[0]) - np.array(centroid))
+        if distance < min_distance:
+            min_distance = distance
+            nearest_point = point[0]
 
+    # Move the centroid towards the nearest point by a small step
+    direction_vector = np.array(nearest_point) - np.array(centroid)
+    new_centroid = np.array(centroid) + direction_vector * 0.1  # Move 10% of the distance
+
+    return new_centroid[0], new_centroid[1]
+
+def curved_or_straight(img, centroid, contour, bgr):
+    result = cv.pointPolygonTest(contour, centroid, False)
+
+    if result > 0: #straight scissors
+        #print (area, factor, holes)
+        cv.drawContours(img, [contour], -1, (0, 255, 255), 3)
+        cv.putText(img, 'straight scissors', (contour[0][0][0], contour[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
+        print("straight scissors")
+        return "straight"
+    elif result < 0: #curved scissors
+        #print (area, factor, holes)
+        cv.drawContours(img, [contour], -1, (255, 0, 0), 3)
+        cv.putText(img, 'curved scissors', (contour[0][0][0], contour[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
+        print("curved scissors")
+        return "curved"
+    else:
+        print("Schaar?") 
+
+def contouring(im, developing):
+    cx,cy,angle, shape = 0,0,0,None
     imgray = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
     blur = cv.GaussianBlur(imgray,(3,3),0)
 
@@ -51,17 +89,12 @@ def contouring(im, developing):
                 if M["m00"] != 0:
                     cX = int(M["m10"] / M["m00"])
                     cY = int(M["m01"] / M["m00"])
-                    cv.circle(im, (cX, cY), 5, (0, 0, 255), -1)  
+                    cv.circle(im, (cX, cY), 5, (0, 0, 255), -1) 
+                
+                centroid = (cX, cY)
 
-                if 0.05 < factor < 0.12: #curved scissors
-                    #print (area, factor, holes)
-                    cv.drawContours(im, [cnt], -1, (255, 0, 0), 3)
-                    
-                    print("curved scissors")
-                elif 0.12 < factor < 0.3: #straight scissors
-                    #print (area, factor, holes)
-                    cv.drawContours(im, [cnt], -1, (0, 255, 255), 3)
-                    print("straight scissors")     
+                shape = curved_or_straight(im, centroid, cnt, (0, 0, 255))
+                        
                 x, y, w, h = cv.boundingRect(cnt)
                 cv.rectangle(im, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
@@ -77,16 +110,31 @@ def contouring(im, developing):
         cv.imshow('thres', threshoog)
         cv.imshow('contour_vision', imgray)
         cv.imshow('computer_vision',im)
-    return cX, cY, angle
+    return cX, cY, angle, shape
 
-def move_robot(x, y, object_angle):
+
+def move_robot(serial_connection, x, y, object_angle, shape):
     transformer = CoordinateTransformer(camera_coords, real_world_coords, convertion_rate)
     real_coords = transformer.convert_coordinates([(x, y)])[0]
     shoulder, elbow = angle_calculator.main(real_coords[0], real_coords[1])
     if shoulder is not None and elbow is not None:
         wrist_angle = wrist_rotation.calculate_wrist_rotation(shoulder, -elbow, object_angle)
-        client.send_arm_angles_to_robot(shoulder, -elbow, wrist_angle)
+        time.sleep(10)
+        RobotArm.move_to_position(shoulder, -elbow, wrist_angle, serial_connection)
+        time.sleep(8)
+        controls.auto_grab('grab', serial_connection, spd=20)
+        if shape == "straight":
+            shoulder2, elbow2 = angle_calculator.main(290,-110)
+            wrist_angle = -34
+        else:
+            shoulder2, elbow2 = angle_calculator.main(-390,-60)
+            wrist_angle = 104
+        time.sleep(10)
+        RobotArm.move_to_position(shoulder2, -elbow2, wrist_angle, serial_connection)
+        time.sleep(10)
+        controls.auto_grab('drop', serial_connection, spd=20)      
         print(f"Shoulder: {shoulder}, Elbow: {elbow}", f"Wrist: {wrist_angle}")
+        time.sleep(10)
     else:
         print("Unable to calculate shoulder or elbow angle.")
 
@@ -97,17 +145,9 @@ def draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing=Non
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
             cv.circle(img, (cX, cY), 5, (0, 0, 255), -1)  
-        if 0.05 < factor < 0.12: #curved scissors
-            if developing:
-                cv.drawContours(img, [cnt], -1, bgr, 3)
-                cv.putText(img, 'curved scissors', (cnt[0][0][0], cnt[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
-            print("curved scissors " + color_name)
-        elif 0.12 < factor < 0.2: #straight scissors
-            #print (area, factor, holes)
-            if developing:
-                cv.drawContours(img, [cnt], -1, bgr, 3)
-                cv.putText(img, 'straight scissors', (cnt[0][0][0], cnt[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 0.65, bgr, 2)
-            print("straight scissors " + color_name)
+        centroid = cX, cY
+
+        shape = curved_or_straight(img, centroid, cnt, bgr)
 
         x, y, w, h = cv.boundingRect(cnt)
         cv.rectangle(img, (x, y), (x + w, y + h), bgr, 2)
@@ -126,10 +166,12 @@ def draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing=Non
                 cx = int(M['m10'] / M['m00'])
                 cy = int(M['m01'] / M['m00'])
                 cv.circle(img, (cx, cy), 5, (0, 255, 255), -1)
-                return cx, cy, angle
+                if shape == "curved":
+                    cx, cy = adjust_centroid_to_contour(centroid, cnt)
+                return cx, cy, angle, shape
 
 def detect(color_name, img, mask, bgr, developing, detection):
-    cx,cy,angle = 0,0,0
+    cx,cy,angle, shape = 0,0,0,None
     res = cv.bitwise_and(img,img, mask= mask)
     imgray2 = cv.cvtColor(res, cv.COLOR_HSV2BGR)
     imgray = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
@@ -155,7 +197,7 @@ def detect(color_name, img, mask, bgr, developing, detection):
             #print (child)
             if area > 500 and area < 100000:
                 if detection == "scissors":
-                    cx, cy, angle = draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing)
+                    cx, cy, angle, shape = draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing)
 
                 elif detection == "colors":
                     if 0.4 < factor < 0.7:
@@ -170,23 +212,26 @@ def detect(color_name, img, mask, bgr, developing, detection):
     if cx == 0 or cy == 0 or angle == 0:
         print("No object detected")
 
-    return cx, cy, angle
+    return cx, cy, angle, shape
 
 
-def color_contouring(developing, detection, color, img, dynamic):
+def color_contouring(serial_connection, developing, detection, color, img, dynamic):
 
     color_masks = color_recognition.masks(img)
     if color != 0:
         color_name, mask, bgr = color_masks[color - 1]
-        cx, cy ,angle = detect(color_name, img, mask, bgr, developing, detection)
+        cx, cy ,angle, shape = detect(color_name, img, mask, bgr, developing, detection)
         if cx != 0 and cy != 0 and angle != 0:
-            move_robot(cx, cy, angle)
-            time.sleep(20)
+            move_robot(serial_connection, cx, cy, angle, shape)
+            time.sleep(2)
             
     else:
-        contouring(img, developing)
-        if dynamic:
+        cx, cy, angle, shape = contouring(img, developing)
+        if not dynamic:
             #TODO: Implement movement
+            if cx != 0 and cy != 0 and angle != 0:
+                move_robot(serial_connection, cx, cy, angle, shape)
+                time.sleep(2)
             print("movement to be implemented")
 
     time.sleep(0.1)

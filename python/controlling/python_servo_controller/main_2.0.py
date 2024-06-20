@@ -1,6 +1,7 @@
 import subprocess
 from pyax12.connection import Connection
 from pyax12 import *
+import pyax12.packet as pk
 import time
 import RPi.GPIO as GPIO
 import signal
@@ -10,9 +11,9 @@ import cv2 as cv
 import threading
 import controls
 import struct
-import fcntl
+#import fcntl
 
-sys.path.append('../../computer_vision/')
+sys.path.append('/home/sjonnie/git/Sjonnie/python/computer_vision')
 import contour
 
 GPIO.setwarnings(False)
@@ -146,8 +147,10 @@ def start_socket():
 def main():
     start_socket()
     wait(0.01)
-    cap = cv.VideoCapture(0)
+#    cap = cv.VideoCapture(0)
     wait(0.01)
+    serial_connection.write_data(88, pk.CW_COMPLIENCE_SLOPE, 3)
+    serial_connection.write_data(88, pk.CCW_COMPLIENCE_SLOPE, 3)
     conn, addr = s.accept()
     conn.recv(1024)
     flag = 0
@@ -164,10 +167,12 @@ def main():
             trans_speed = int(webdata[TRANSLATION_SPEED_MODE])
             pwr = int(webdata[POWER])
 
-            ret,img = cap.read()
+#            ret,img = cap.read()
 
         #-- Functions --#
             if webdata[AUTONOMOUS] == 1:
+                cap = cv.VideoCapture(0)
+                ret,img = cap.read()
                 controls.autonomous_control(serial_connection, conn, webdata, speed, trans_speed, pwr, img)
                 start_socket()
             else:
@@ -178,6 +183,10 @@ def main():
 
             if webdata[SEND_SERVO_DATA] > 0:
                 read_and_send_servo_info(conn, webdata, speed, trans_speed)
+
+            if webdata[POWER] == 150:
+                print('"Gripper Force = Power" terwijl er geen force modus is dus programma sluit af.')
+                raise('Programma sluit af')
 
 
 if __name__ == "__main__":
