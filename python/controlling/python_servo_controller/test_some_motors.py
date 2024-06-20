@@ -18,21 +18,21 @@ while(True):
     time.sleep(0.01)
     #serial_connection.goto(dynamixel_id3, 0, speed=512, degrees=False)
     print("ga naar 0")
-    time.sleep(10)    # Wait 1 second
+    time.sleep(3)    # Wait 1 second
 
 #voor de motors moet de timing op 0.00010 en voor uitlezen 0.00005 in de library
 
 # Go to -45° (45° CW)
-print("send2")
-serial_connection.goto(dynamixel_id1, 512, speed=512, degrees=False)
-time.sleep(0.01)
-print("2")
-serial_connection.goto(dynamixel_id2, 512, speed=512, degrees=False)
+    print("send2")
+    serial_connection.goto(dynamixel_id1, 512, speed=512, degrees=False)
+    time.sleep(0.01)
+    print("2")
+    serial_connection.goto(dynamixel_id2, 512, speed=512, degrees=False)
 time.sleep(0.01)
 print("3")
 serial_connection.goto(dynamixel_id3, 512, speed=512, degrees=False)
 print("ga naar -149")
-time.sleep(5)    # Wait 1 second
+time.sleep(3)    # Wait 1 second
 
 # Go to -90° (90° CW)
 print("149")

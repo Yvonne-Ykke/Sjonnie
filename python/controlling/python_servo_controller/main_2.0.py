@@ -147,10 +147,10 @@ def start_socket():
 def main():
     start_socket()
     wait(0.01)
-#    cap = cv.VideoCapture(0)
+    cap = cv.VideoCapture(0)
     wait(0.01)
-    serial_connection.write_data(88, pk.CW_COMPLIENCE_SLOPE, 3)
-    serial_connection.write_data(88, pk.CCW_COMPLIENCE_SLOPE, 3)
+    serial_connection.write_data(88, pk.CW_COMPLIENCE_SLOPE, 8)
+    serial_connection.write_data(88, pk.CCW_COMPLIENCE_SLOPE, 8)
     conn, addr = s.accept()
     conn.recv(1024)
     flag = 0
@@ -167,7 +167,7 @@ def main():
             trans_speed = int(webdata[TRANSLATION_SPEED_MODE])
             pwr = int(webdata[POWER])
 
-#            ret,img = cap.read()
+            ret,img = cap.read()
 
         #-- Functions --#
             if webdata[AUTONOMOUS] == 1:

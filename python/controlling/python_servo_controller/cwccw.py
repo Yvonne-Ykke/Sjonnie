@@ -5,18 +5,15 @@ import time
 
 sc = Connection(port="/dev/ttyS0", baudrate=1000000, rpi_gpio=True, timeout=0.5, waiting_time=0.1)
 
-margin = True
-slope = False
+margin = False
+slope = True
 
 dyn = 88
-params = 3
-
-if slope:
-    sc.write_data(dyn, pk.CW_COMPLIENCE_SLOPE, params)
-    sc.write_data(dyn, pk.CCW_COMPLIENCE_SLOPE, params)
+params = 150
 
 
-if margin:
-    sc.write_data(dyn, pk.CW_COMPLIENCE_MARGIN, params)
-    sc.write_data(dyn, pk.CCW_COMPLIENCE_MARGIN, params)
+sc.set_cw_angle_limit(dyn, 0)
+sc.set_ccw_angle_limit(dyn, 1023)
+
+
 sc.close()
