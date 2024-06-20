@@ -1,6 +1,7 @@
 import subprocess
 from pyax12.connection import Connection
 from pyax12 import *
+import pyax12.packet as pk
 import time
 import RPi.GPIO as GPIO
 import signal
@@ -148,6 +149,8 @@ def main():
     wait(0.01)
 #    cap = cv.VideoCapture(0)
     wait(0.01)
+    serial_connection.write_data(88, pk.CW_COMPLIENCE_SLOPE, 3)
+    serial_connection.write_data(88, pk.CCW_COMPLIENCE_SLOPE, 3)
     conn, addr = s.accept()
     conn.recv(1024)
     flag = 0

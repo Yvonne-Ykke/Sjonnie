@@ -129,7 +129,7 @@ def scissors_grip(serial_connection, webdata):
                 serial_connection.goto(GRIPPER, 583, SPEED_GRIPPER, degrees=False)
                 flag = 0
             elif flag == 0:
-                serial_connection.goto(GRIPPER, 350, SPEED_GRIPPER, degrees=False)
+                serial_connection.goto(GRIPPER, 380, SPEED_GRIPPER, degrees=False)
                 flag = 1
             butopenclose += 1
     if int(webdata[GRIP]) == 0:
