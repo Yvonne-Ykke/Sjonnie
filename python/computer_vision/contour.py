@@ -26,6 +26,22 @@ import controlling.python_servo_controller.controls as controls
 
 convertion_rate = 1.1398
 
+def adjust_centroid_to_contour(centroid, contour):
+    # Find the nearest point on the contour to the centroid
+    nearest_point = None
+    min_distance = float('inf')
+    for point in contour:
+        distance = np.linalg.norm(np.array(point[0]) - np.array(centroid))
+        if distance < min_distance:
+            min_distance = distance
+            nearest_point = point[0]
+
+    # Move the centroid towards the nearest point by a small step
+    direction_vector = np.array(nearest_point) - np.array(centroid)
+    new_centroid = np.array(centroid) + direction_vector * 0.1  # Move 10% of the distance
+
+    return new_centroid[0], new_centroid[1]
+
 def curved_or_straight(img, centroid, contour, bgr):
     result = cv.pointPolygonTest(contour, centroid, False)
 
@@ -150,6 +166,8 @@ def draw_scissors(area, factor, img, cnt, child, color_name, bgr, developing=Non
                 cx = int(M['m10'] / M['m00'])
                 cy = int(M['m01'] / M['m00'])
                 cv.circle(img, (cx, cy), 5, (0, 255, 255), -1)
+                if shape == "curved":
+                    cx, cy = adjust_centroid_to_contour(centroid, cnt)
                 return cx, cy, angle, shape
 
 def detect(color_name, img, mask, bgr, developing, detection):
