@@ -18,13 +18,13 @@ class RobotArm:
             try:
                 print("serial_connection: ", serial_connection)
                 time.sleep(1)
-                serial_connection.goto(SERVO_1, shoulder_angle, speed=25, degrees=True)
+                serial_connection.goto(SHOULDER_SERVO, shoulder_angle, speed=25, degrees=True)
                 print("1")
                 time.sleep(1)  
-                serial_connection.goto(SERVO_2, elbow_angle, speed=25, degrees=True)
+                serial_connection.goto(ELBOW_SERVO, elbow_angle, speed=25, degrees=True)
                 print("2")
                 time.sleep(1)  
-                serial_connection.goto(SERVO_3, wrist_angle, speed=25, degrees=True)
+                serial_connection.goto(WRIST_SERVO, wrist_angle, speed=25, degrees=True)
                 print("3")
                 time.sleep(1)
 
@@ -32,7 +32,7 @@ class RobotArm:
             except Exception as e:
                 print(f"Error moving to position: {e}")
                 time.sleep(1)
-                move_to_position(shoulder_angle, elbow_angle, wrist_angle, serial_connection)
+                RobotArm.move_to_position(shoulder_angle, elbow_angle, wrist_angle, serial_connection)
 
     # def get_angles_from_arm():
     #     if not serial_connection:
